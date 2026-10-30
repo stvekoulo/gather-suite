@@ -13,14 +13,20 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Cloner ou mettre a jour le depot
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         run: |
           if [ -d "/home/ubuntu/gather-suite" ]; then
-            cd /home/ubuntu/gather-suite && git fetch origin && git checkout main && git pull origin main
+            cd /home/ubuntu/gather-suite
+            git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git
+            git fetch origin && git checkout main && git pull origin main
           else
-            git clone https://github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
+            git clone https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
             cd /home/ubuntu/gather-suite
           fi
       - name: Compilation et publication des releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         run: |
           cd /home/ubuntu/gather-suite
           npm ci || npm install
