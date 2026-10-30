@@ -38,4 +38,5 @@ jobs:
             gather-builder
           rm -rf /home/ubuntu/gather-suite/src-tauri/target/release/bundle
           rm -rf /home/ubuntu/gather-suite/src-tauri/target/x86_64-pc-windows-msvc/release/bundle
+          rm -rf /home/ubuntu/gather-suite/src-tauri/target/aarch64-apple-darwin/release/bundle
           docker image prune -f --filter "until=24h" || true

@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lld \
     llvm \
     nsis \
+    genisoimage \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,11 +32,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Installation de Rust stable et des cibles Linux / Windows
+# Installation de Rust stable et des cibles Linux, Windows et macOS
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
     && rustup target add x86_64-unknown-linux-gnu \
     && rustup target add x86_64-pc-windows-msvc \
-    && cargo install --locked cargo-xwin
+    && rustup target add x86_64-apple-darwin \
+    && rustup target add aarch64-apple-darwin
+
+# Installation des binaires precompiles cargo-xwin, cargo-zigbuild et zig pour Windows & macOS
+RUN curl -fsSL https://github.com/rust-cross/cargo-xwin/releases/download/v0.23.1/cargo-xwin-v0.23.1.x86_64-unknown-linux-musl.tar.gz | tar -xz -C /usr/local/cargo/bin \
+    && curl -fsSL https://github.com/rust-cross/cargo-zigbuild/releases/download/v0.24.0/cargo-zigbuild-x86_64-unknown-linux-musl.tar.xz | tar -xJ -C /usr/local/cargo/bin \
+    && curl -fsSL https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz | tar -xJ -C /usr/local/bin --strip-components=1
 
 # Installation du CLI GitHub officiel pour la publication des releases
 RUN mkdir -p -m 755 /etc/apt/keyrings \

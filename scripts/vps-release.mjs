@@ -44,21 +44,38 @@ async function main() {
   const hasXwin = existsSync("/usr/bin/nsis") || existsSync("/usr/bin/makensis") || process.platform === "win32";
   if (hasXwin) {
     try {
-      console.log("\n[3/4] Cross-compilation de l'installeur Windows (.exe via cargo-xwin)...");
+      console.log("\n[3/5] Cross-compilation de l'installeur Windows (.exe via cargo-xwin)...");
       run("npm run tauri:build -- --runner cargo-xwin --target x86_64-pc-windows-msvc");
     } catch (err) {
       console.warn("\x1b[33m⚠ Cross-compilation Windows ignorée ou échouée :\x1b[0m", err.message);
     }
   } else {
-    console.log("\n[3/4] makensis introuvable : installeur Windows ignoré sur cet hôte.");
+    console.log("\n[3/5] makensis introuvable : installeur Windows ignoré sur cet hôte.");
   }
 
-  // 4. Collecte des artefacts générés
+  // 4. Cross-compilation macOS (.dmg / .app) via cargo-zigbuild et genisoimage
+  const hasZig = existsSync("/usr/local/bin/zig") || existsSync("/usr/bin/zig");
+  if (hasZig) {
+    try {
+      console.log("\n[4/5] Cross-compilation de l'application macOS (.app & .dmg)...");
+      run("npm run tauri:build -- --runner cargo-zigbuild --target aarch64-apple-darwin --bundles app");
+      const appDir = join("src-tauri", "target", "aarch64-apple-darwin", "release", "bundle", "macos");
+      if (existsSync(appDir)) {
+        const dmgPath = join(appDir, `GatherSuite-macOS-aarch64-${version}.dmg`);
+        run(`genisoimage -V "Gather Suite" -D -R -apple -no-pad -o "${dmgPath}" "${appDir}"`);
+        console.log(`\x1b[32m✔ DMG macOS généré : ${dmgPath}\x1b[0m`);
+      }
+    } catch (err) {
+      console.warn("\x1b[33m⚠ Cross-compilation macOS ignorée ou échouée :\x1b[0m", err.message);
+    }
+  }
+
+  // 5. Collecte des artefacts générés
   const targetDir = join("src-tauri", "target");
   const targetExtensions = [".deb", ".appimage", ".exe", ".msi", ".dmg"];
   const bundles = findBundles(targetDir, targetExtensions);
 
-  console.log(`\n[4/4] ${bundles.length} artefact(s) d'installation trouvé(s) :`);
+  console.log(`\n[5/5] ${bundles.length} artefact(s) d'installation trouvé(s) :`);
   bundles.forEach((b) => console.log(`  - ${b}`));
 
   if (bundles.length === 0) {
