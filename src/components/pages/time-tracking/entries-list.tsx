@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/beui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatShort, formatWeekday } from "@/lib/dates";
 import type { TimeEntry } from "@/lib/types";
@@ -162,7 +162,6 @@ export function EntriesSection({
                     </td>
                     <td className="px-2">
                       <Switch
-                        size="sm"
                         checked={e.billable}
                         aria-label={`Facturable : ${e.task}`}
                         onCheckedChange={(v) => onSaveEntry({ ...e, billable: v })}

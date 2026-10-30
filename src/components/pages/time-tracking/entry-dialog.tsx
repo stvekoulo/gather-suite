@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/beui/switch";
 import type { TimeEntry } from "@/lib/types";
 import { useAppStore } from "@/stores/app-store";
 import { toast } from "sonner";

@@ -6,7 +6,7 @@ import { useMemo, useSyncExternalStore } from "react";
 import { CheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/beui/switch";
 import { formatTime } from "@/lib/dates";
 import { computeLeaveStats, formatDays } from "@/lib/leave";
 import type { Settings } from "@/lib/types";

@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/beui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { EVENT_COLORS } from "@/components/calendar/event-colors";
 import { parseTime, timeInputValue } from "@/lib/dates";
@@ -217,7 +217,7 @@ function EventForm({
 
         <div className="flex items-center justify-between gap-3 pt-1">
           <div className="flex items-center gap-2.5">
-            <Switch id="ev-allday" checked={draft.allDay} onCheckedChange={(v) => set("allDay", v)} />
+            <Switch id="ev-allday" checked={draft.allDay ?? false} onCheckedChange={(v) => set("allDay", v)} />
             <label htmlFor="ev-allday" className="cursor-pointer text-xs font-medium text-fg select-none">
               {tr("Journée entière")}
             </label>

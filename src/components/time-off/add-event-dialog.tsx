@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { WheelDatePicker } from "@/components/beui/wheel-date-picker";
 import { WheelTimePicker } from "@/components/beui/wheel-time-picker";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/beui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslate } from "@/lib/i18n/ui-text";
 import { useAppStore } from "@/stores/app-store";
