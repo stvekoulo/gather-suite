@@ -15,7 +15,8 @@
     "predev": "node scripts/prepare-assets.mjs",
     "prebuild": "node scripts/prepare-assets.mjs",
     "test:e2e": "playwright test",
-    "postbuild": "node scripts/fix-static-export.mjs"
+    "postbuild": "node scripts/fix-static-export.mjs",
+    "release:vps": "node scripts/vps-release.mjs"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.1",
