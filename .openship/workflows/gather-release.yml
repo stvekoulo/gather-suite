@@ -16,6 +16,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         run: |
+          mkdir -p /home/ubuntu/.cargo/registry /home/ubuntu/.cargo/git /home/ubuntu/gather-suite/src-tauri/target
           if [ -d "/home/ubuntu/gather-suite/.git" ]; then
             cd /home/ubuntu/gather-suite
             git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git
@@ -33,6 +34,8 @@ jobs:
           cd /home/ubuntu/gather-suite
           docker build -t gather-builder -f Dockerfile.builder .
           docker run --rm \
+            -v /home/ubuntu/.cargo/registry:/usr/local/cargo/registry \
+            -v /home/ubuntu/.cargo/git:/usr/local/cargo/git \
             -v /home/ubuntu/gather-suite/src-tauri/target:/app/src-tauri/target \
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
             gather-builder

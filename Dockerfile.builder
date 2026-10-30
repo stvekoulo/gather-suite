@@ -1,4 +1,4 @@
-# Image de compilation multi-plateformes Gather Suite pour VPS / OpenShift
+# Image de compilation multi-plateformes Gather Suite pour VPS / OpenShip
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6,7 +6,7 @@ ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:/usr/local/bin:$PATH
 
-# Installation des dépendances système Linux et outils de compilation
+# Installation des dependances systeme Linux et outils de compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -39,7 +39,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --de
     && rustup target add x86_64-apple-darwin \
     && rustup target add aarch64-apple-darwin
 
-# Installation des binaires precompiles cargo-xwin, cargo-zigbuild et zig pour Windows & macOS
+# Installation des binaires precompiles cargo-xwin, cargo-zigbuild et zig
 RUN curl -fsSL https://github.com/rust-cross/cargo-xwin/releases/download/v0.23.1/cargo-xwin-v0.23.1.x86_64-unknown-linux-musl.tar.gz | tar -xz -C /usr/local/cargo/bin \
     && curl -fsSL https://github.com/rust-cross/cargo-zigbuild/releases/download/v0.24.0/cargo-zigbuild-x86_64-unknown-linux-musl.tar.xz | tar -xJ -C /usr/local/cargo/bin \
     && curl -fsSL https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz | tar -xJ -C /usr/local/bin --strip-components=1
@@ -52,11 +52,16 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
     && apt-get update && apt-get install -y gh \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-COPY . .
+# Configuration git pour eviter l'erreur de repertoire douteux
+RUN git config --global --add safe.directory /app
 
-# Installation des dépendances du projet
+WORKDIR /app
+
+# Optimisation du cache Docker pour npm
+COPY package*.json ./
 RUN npm ci
 
-# Commande par défaut : compilation et publication automatique
+COPY . .
+
+# Commande par defaut : compilation et publication automatique
 CMD ["node", "scripts/vps-release.mjs"]

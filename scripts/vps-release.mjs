@@ -2,13 +2,13 @@ import { execSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-// Exécute une commande shell en affichant la sortie directement dans le terminal
+// Execute une commande shell en affichant la sortie directement dans le terminal
 function run(cmd, env = {}) {
   console.log(`\n\x1b[36m▶ ${cmd}\x1b[0m`);
   execSync(cmd, { stdio: "inherit", env: { ...process.env, ...env } });
 }
 
-// Recherche récursive des paquets d'installation générés par Tauri
+// Recherche recursive des paquets d'installation generes par Tauri
 function findBundles(dir, extList) {
   const results = [];
   if (!existsSync(dir)) return results;
@@ -23,14 +23,15 @@ function findBundles(dir, extList) {
   return results;
 }
 
-// Pipeline de compilation native VPS et publication automatique sur GitHub Releases
+// Pipeline de compilation VPS et publication automatique sur GitHub Releases
 async function main() {
   const pkg = JSON.parse(readFileSync("package.json", "utf-8"));
   const version = pkg.version || "0.2.0";
   const tag = `v${version}`;
   const ghToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  const repo = "stvekoulo/gather-suite";
 
-  console.log(`\x1b[32m=== Démarrage du pipeline de Release Gather Suite (${tag}) ===\x1b[0m`);
+  console.log(`\x1b[32m=== Demarrage du pipeline de Release Gather Suite (${tag}) ===\x1b[0m`);
 
   // 1. Export statique Next.js
   console.log("\n[1/4] Compilation du frontend Next.js...");
@@ -47,10 +48,10 @@ async function main() {
       console.log("\n[3/5] Cross-compilation de l'installeur Windows (.exe via cargo-xwin)...");
       run("npm run tauri:build -- --runner cargo-xwin --target x86_64-pc-windows-msvc");
     } catch (err) {
-      console.warn("\x1b[33m⚠ Cross-compilation Windows ignorée ou échouée :\x1b[0m", err.message);
+      console.warn("\x1b[33m! Cross-compilation Windows ignoree ou echouee :\x1b[0m", err.message);
     }
   } else {
-    console.log("\n[3/5] makensis introuvable : installeur Windows ignoré sur cet hôte.");
+    console.log("\n[3/5] makensis introuvable : installeur Windows ignore sur cet hote.");
   }
 
   // 4. Cross-compilation macOS (.dmg / .app) via cargo-zigbuild et genisoimage
@@ -63,49 +64,53 @@ async function main() {
       if (existsSync(appDir)) {
         const dmgPath = join(appDir, `GatherSuite-macOS-aarch64-${version}.dmg`);
         run(`genisoimage -V "Gather Suite" -D -R -apple -no-pad -o "${dmgPath}" "${appDir}"`);
-        console.log(`\x1b[32m✔ DMG macOS généré : ${dmgPath}\x1b[0m`);
+        console.log(`\x1b[32m✔ DMG macOS genere : ${dmgPath}\x1b[0m`);
       }
     } catch (err) {
-      console.warn("\x1b[33m⚠ Cross-compilation macOS ignorée ou échouée :\x1b[0m", err.message);
+      console.warn("\x1b[33m! Cross-compilation macOS ignoree ou echouee :\x1b[0m", err.message);
     }
   }
 
-  // 5. Collecte des artefacts générés
+  // 5. Collecte des artefacts generes
   const targetDir = join("src-tauri", "target");
   const targetExtensions = [".deb", ".appimage", ".exe", ".msi", ".dmg"];
   const bundles = findBundles(targetDir, targetExtensions);
 
-  console.log(`\n[5/5] ${bundles.length} artefact(s) d'installation trouvé(s) :`);
+  console.log(`\n[5/5] ${bundles.length} artefact(s) d'installation trouve(s) :`);
   bundles.forEach((b) => console.log(`  - ${b}`));
 
   if (bundles.length === 0) {
-    throw new Error("Aucun artefact d'installation généré dans src-tauri/target.");
+    throw new Error("Aucun artefact d'installation genere dans src-tauri/target.");
   }
 
-  // 5. Publication de la Release et du tag sur GitHub
+  // 6. Publication de la Release et du tag sur GitHub
   if (!ghToken) {
-    console.log("\n\x1b[33mVariable GITHUB_TOKEN absente. Les artefacts sont prêts localement mais la release GitHub est ignorée.\x1b[0m");
+    console.log("\n\x1b[33mVariable GITHUB_TOKEN absente. Televersement GitHub ignore.\x1b[0m");
     return;
   }
 
-  console.log(`\n\x1b[32mPublication de la Release ${tag} sur GitHub...\x1b[0m`);
+  console.log(`\n\x1b[32mPublication de la Release ${tag} sur GitHub (${repo})...\x1b[0m`);
   const filesArgs = bundles.map((p) => `"${p}"`).join(" ");
 
-  // Création ou mise à jour de la release avec les binaires attachés
-  run(`gh release create ${tag} ${filesArgs} --title "Gather Suite ${tag}" --notes "Version autonome officielle de Gather Suite." --target main`);
-  console.log(`\n\x1b[32m✔ Release ${tag} et installeurs publiés avec succès sur GitHub !\x1b[0m`);
+  try {
+    run(`gh release create ${tag} ${filesArgs} --repo ${repo} --title "Gather Suite ${tag}" --notes "Version autonome officielle de Gather Suite." --target main`);
+  } catch {
+    console.log("Release existante detectee. Televersement et remplacement des fichiers...");
+    run(`gh release upload ${tag} ${filesArgs} --repo ${repo} --clobber`);
+  }
+  console.log(`\n\x1b[32m✔ Release ${tag} et installeurs publies avec succes sur GitHub !\x1b[0m`);
 
-  // 6. Nettoyage automatique des artefacts générés (les caches de compilation restent)
-  console.log("\n[5/5] Nettoyage des binaires uploadés pour libérer l'espace disque VPS...");
+  // 7. Nettoyage automatique des binaires pour liberer l'espace disque du VPS
+  console.log("\nNettoyage des binaires uploades pour preserver l'espace disque VPS...");
   for (const bundle of bundles) {
     try {
       rmSync(bundle, { force: true });
-      console.log(`  - Supprimé : ${bundle}`);
+      console.log(`  - Supprime : ${bundle}`);
     } catch {}
   }
   rmSync("out", { recursive: true, force: true });
   rmSync(".next", { recursive: true, force: true });
-  console.log("\x1b[32m✔ Espace libéré. Caches de compilation Rust et Docker préservés.\x1b[0m");
+  console.log("\x1b[32m✔ Espace libere. Caches de compilation Rust et Docker preserves.\x1b[0m");
 }
 
 main().catch((error) => {
