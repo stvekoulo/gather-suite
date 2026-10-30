@@ -31,5 +31,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         run: |
           cd /home/ubuntu/gather-suite
-          npm ci || npm install
-          node scripts/vps-release.mjs
+          docker build -t gather-builder -f Dockerfile.builder .
+          docker run --rm \
+            -v /home/ubuntu/gather-suite/src-tauri/target:/app/src-tauri/target \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            gather-builder
