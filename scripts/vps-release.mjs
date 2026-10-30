@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 // Exécute une commande shell en affichant la sortie directement dans le terminal
@@ -77,6 +77,18 @@ async function main() {
   // Création ou mise à jour de la release avec les binaires attachés
   run(`gh release create ${tag} ${filesArgs} --title "Gather Suite ${tag}" --notes "Version autonome officielle de Gather Suite." --target main`);
   console.log(`\n\x1b[32m✔ Release ${tag} et installeurs publiés avec succès sur GitHub !\x1b[0m`);
+
+  // 6. Nettoyage automatique des artefacts générés (les caches de compilation restent)
+  console.log("\n[5/5] Nettoyage des binaires uploadés pour libérer l'espace disque VPS...");
+  for (const bundle of bundles) {
+    try {
+      rmSync(bundle, { force: true });
+      console.log(`  - Supprimé : ${bundle}`);
+    } catch {}
+  }
+  rmSync("out", { recursive: true, force: true });
+  rmSync(".next", { recursive: true, force: true });
+  console.log("\x1b[32m✔ Espace libéré. Caches de compilation Rust et Docker préservés.\x1b[0m");
 }
 
 main().catch((error) => {

@@ -36,3 +36,6 @@ jobs:
             -v /home/ubuntu/gather-suite/src-tauri/target:/app/src-tauri/target \
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
             gather-builder
+          rm -rf /home/ubuntu/gather-suite/src-tauri/target/release/bundle
+          rm -rf /home/ubuntu/gather-suite/src-tauri/target/x86_64-pc-windows-msvc/release/bundle
+          docker image prune -f --filter "until=24h" || true
