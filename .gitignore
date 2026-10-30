@@ -54,4 +54,5 @@ next-env.d.ts
 /public/ocr/
 /.audit-dependencies.json
 
-/landing/
+landing-gather/node_modules/
+landing-gather/.next/
