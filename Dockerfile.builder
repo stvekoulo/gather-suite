@@ -4,6 +4,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
+ENV CARGO_BUILD_JOBS=2
 ENV PATH=/usr/local/cargo/bin:/usr/local/bin:$PATH
 
 # Installation des dependances systeme Linux et outils de compilation
