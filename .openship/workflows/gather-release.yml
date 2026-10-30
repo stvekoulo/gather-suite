@@ -16,12 +16,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         run: |
-          if [ -d "/home/ubuntu/gather-suite" ]; then
+          if [ -d "/home/ubuntu/gather-suite/.git" ]; then
             cd /home/ubuntu/gather-suite
             git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git
-            git fetch origin && git checkout main && git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
           else
-            git clone https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
+            rm -rf /home/ubuntu/gather-suite
+            git clone --branch main https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
             cd /home/ubuntu/gather-suite
           fi
       - name: Compilation et publication des releases
