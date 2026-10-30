@@ -2,6 +2,20 @@
 // drifts across time zones or between server and client renders.
 
 export const MONTHS = [
+  "Janvier",
+  "Février",
+  "Mars",
+  "Avril",
+  "Mai",
+  "Juin",
+  "Juillet",
+  "Août",
+  "Septembre",
+  "Octobre",
+  "Novembre",
+  "Décembre",
+];
+export const MONTHS_EN = [
   "January",
   "February",
   "March",
@@ -15,9 +29,9 @@ export const MONTHS = [
   "November",
   "December",
 ];
-export const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
-export const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-export const WEEKDAYS_SHORT = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+export const MONTHS_SHORT = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Dec"];
+export const WEEKDAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+export const WEEKDAYS_SHORT = ["DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"];
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -61,30 +75,14 @@ export function weekDays(key: string, weekStartsOn: 0 | 1 = 0): string[] {
   return Array.from({ length: 7 }, (_, i) => addDays(start, i));
 }
 
-export function startOfMonth(key: string): string {
-  return key.slice(0, 8) + "01";
-}
-
-export function daysInMonth(key: string): number {
-  const d = fromKey(key);
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-}
-
-/** 6×7 grid of days covering the month of `key`. */
-export function monthGrid(key: string, weekStartsOn: 0 | 1 = 0): string[] {
-  const first = startOfWeek(startOfMonth(key), weekStartsOn);
-  return Array.from({ length: 42 }, (_, i) => addDays(first, i));
-}
-
-/** ISO-8601 week number of the given day. */
 export function isoWeek(key: string): number {
   const d = fromKey(key);
-  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const dayNr = (target.getDay() + 6) % 7;
-  target.setDate(target.getDate() - dayNr + 3);
-  const firstThursday = new Date(target.getFullYear(), 0, 4);
-  const diff = (target.getTime() - firstThursday.getTime()) / 86400000;
-  return 1 + Math.round((diff - 3 + ((firstThursday.getDay() + 6) % 7)) / 7);
+  const day = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - day + 3);
+  const firstThursday = d.getTime();
+  d.setMonth(0, 1);
+  if (d.getDay() !== 4) d.setMonth(0, 1 + ((4 - d.getDay() + 7) % 7));
+  return 1 + Math.ceil((firstThursday - d.getTime()) / 604800000);
 }
 
 export function diffDays(a: string, b: string): number {
@@ -92,9 +90,26 @@ export function diffDays(a: string, b: string): number {
 }
 
 export function rangeKeys(from: string, to: string): string[] {
+  const out: string[] = [];
   const n = diffDays(from, to);
-  if (n < 0) return [];
-  return Array.from({ length: n + 1 }, (_, i) => addDays(from, i));
+  for (let i = 0; i <= n; i++) out.push(addDays(from, i));
+  return out;
+}
+
+export function startOfMonth(key: string): string {
+  const d = fromKey(key);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-01`;
+}
+
+export function daysInMonth(key: string): number {
+  const d = fromKey(key);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
+
+export function monthGrid(key: string, weekStartsOn: 0 | 1 = 0): string[] {
+  const first = startOfMonth(key);
+  const start = startOfWeek(first, weekStartsOn);
+  return Array.from({ length: 42 }, (_, i) => addDays(start, i));
 }
 
 export function isWeekend(key: string): boolean {
@@ -108,7 +123,7 @@ export function monthName(key: string): string {
 
 export function formatLong(key: string): string {
   const d = fromKey(key);
-  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  return `${d.getDate()} ${MONTHS[d.getMonth()].toLowerCase()} ${d.getFullYear()}`;
 }
 
 export function formatShort(key: string): string {
@@ -165,12 +180,12 @@ export function formatDuration(minutes: number): string {
 export function relativeTime(iso: string, now: number): string {
   const diff = Math.max(0, now - new Date(iso).getTime());
   const min = Math.floor(diff / 60000);
-  if (min < 1) return "Just now";
-  if (min < 60) return `${min}m ago`;
+  if (min < 1) return "À l'instant";
+  if (min < 60) return `Il y a ${min} min`;
   const h = Math.floor(min / 60);
-  if (h < 24) return `${h}h ago`;
+  if (h < 24) return `Il y a ${h} h`;
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d ago`;
+  if (d < 7) return `Il y a ${d} j`;
   const date = new Date(iso);
-  return `${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}`;
+  return `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`;
 }

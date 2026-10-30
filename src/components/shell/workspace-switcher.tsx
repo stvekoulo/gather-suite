@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { CheckIcon, PlusIcon } from "lucide-react";
@@ -24,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { selectWorkspaceName, useAppStore } from "@/stores/app-store";
+import { APP_CONFIG } from "@/config/app-config";
 
 export function Brand({ className }: { className?: string }) {
   const name = useAppStore(selectWorkspaceName);
@@ -35,17 +37,21 @@ export function Brand({ className }: { className?: string }) {
   const [draft, setDraft] = useState("");
 
   return (
-    <div className={cn("flex h-full w-60 shrink-0 items-center gap-2 overflow-hidden border-r border-hairline px-3", className)}>
-      <span className="salt truncate text-[16px] leading-none font-semibold tracking-[-0.48px] text-fg">{name}</span>
+    <div className={cn("flex h-full w-60 shrink-0 items-center gap-2.5 overflow-hidden border-r border-hairline px-3", className)}>
+      <img src="/logo.png" alt="Gather Logo" className="size-7 rounded-lg object-contain select-none shrink-0" />
+      <span className="salt flex min-w-0 flex-col gap-0.5 truncate text-[15px] leading-none font-semibold tracking-[-0.48px] text-fg">
+        <span>{APP_CONFIG.name}</span>
+        <small className="truncate text-[10px] font-normal text-fg-2">{name}</small>
+      </span>
       <span className="h-px min-w-px flex-1" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" aria-label="Switch workspace">
+          <Button size="icon" aria-label={translate("Switch workspace")}>
             <Icon name="workspace-switcher" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" sideOffset={6} className="w-56">
-          <DropdownMenuLabel className="t-12 text-fg-2">Workspaces</DropdownMenuLabel>
+          <DropdownMenuLabel className="t-12 text-fg-2">{translate("Workspaces")}</DropdownMenuLabel>
           {workspaces.map((w) => (
             <DropdownMenuItem key={w.id} onSelect={() => switchWorkspace(w.id)}>
               <span className="flex size-5 items-center justify-center rounded-md bg-brand-tint text-[11px] font-semibold text-brand">
@@ -57,7 +63,7 @@ export function Brand({ className }: { className?: string }) {
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setCreating(true)}>
-            <PlusIcon /> Create workspace
+            <PlusIcon />{translate("Create workspace")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -81,21 +87,18 @@ export function Brand({ className }: { className?: string }) {
             }}
           >
             <DialogHeader>
-              <DialogTitle className="t-16">Create workspace</DialogTitle>
-              <DialogDescription className="t-14">Workspaces keep calendars and requests for a team together.</DialogDescription>
+              <DialogTitle className="t-16">{translate("Create workspace")}</DialogTitle>
+              <DialogDescription className="t-14">Chaque espace possède ses propres notes, documents, calendrier, présentations, dessins et tableurs.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-2">
-              <Label htmlFor="ws-name" className="t-12 text-fg-2">
-                Name
+              <Label htmlFor="ws-name" className="t-12 text-fg-2">{translate("Name")}
               </Label>
-              <Input id="ws-name" autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. Design team" />
+              <Input id="ws-name" autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={translate("e.g. Design team")} />
             </div>
             <DialogFooter>
-              <Button type="button" onClick={() => setCreating(false)}>
-                Cancel
+              <Button type="button" onClick={() => setCreating(false)}>{translate("Cancel")}
               </Button>
-              <Button type="submit" variant="brand" disabled={!draft.trim()}>
-                Create
+              <Button type="submit" variant="brand" disabled={!draft.trim()}>{translate("Create")}
               </Button>
             </DialogFooter>
           </form>

@@ -1,32 +1,36 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "cn"
-import { Switch as SwitchPrimitive } from "radix-ui"
+import * as React from "react";
+import { Switch as BeuiSwitch, type SwitchProps } from "@/components/beui/switch";
 
+// Ré-export du composant Switch beUI avec prise en charge des props UI
 function Switch({
+  checked = false,
+  onCheckedChange,
   className,
-  size = "default",
-  ...props
-}: React.ComponentProps<typeof SwitchPrimitive.Root> & {
-  size?: "sm" | "default"
+  disabled,
+  id,
+  "aria-label": ariaLabel,
+}: {
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  className?: string;
+  disabled?: boolean;
+  id?: string;
+  "aria-label"?: string;
+  size?: "sm" | "default";
 }) {
   return (
-    <SwitchPrimitive.Root
-      data-slot="switch"
-      data-size={size}
-      className={cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-[background-color,border-color] duration-200 ease-(--ease-out) outline-none group-has-[:focus-visible]/field-label:border-transparent group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-5 data-[size=default]:w-8 data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-brand data-unchecked:border-[0.4px] data-unchecked:border-[var(--toggle-stroke)] data-unchecked:bg-[var(--toggle-track)] dark:data-unchecked:bg-[#2a2a2a] dark:data-unchecked:border-[#3a3a3a] data-disabled:cursor-not-allowed data-disabled:opacity-50",
-        className
-      )}
-      {...props}
-    >
-      <SwitchPrimitive.Thumb
-        data-slot="switch-thumb"
-        className="pointer-events-none block rounded-full bg-white shadow-[0_1px_2px_rgba(35,40,32,0.12)] ring-0 transition-transform duration-200 ease-(--ease-out) group-data-[size=default]/switch:size-[18px] group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[12px] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=default]/switch:data-unchecked:translate-x-px group-data-[size=sm]/switch:data-unchecked:translate-x-0"
-      />
-    </SwitchPrimitive.Root>
-  )
+    <BeuiSwitch
+      checked={!!checked}
+      onCheckedChange={(c) => onCheckedChange?.(c)}
+      className={className}
+      disabled={disabled}
+      id={id}
+      aria-label={ariaLabel}
+    />
+  );
 }
 
-export { Switch }
+export { Switch };
+export type { SwitchProps };

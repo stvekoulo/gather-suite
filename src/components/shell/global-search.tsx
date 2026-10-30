@@ -1,9 +1,10 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDaysIcon, CalendarPlusIcon, FileTextIcon, MoonIcon, PlaneIcon, ReceiptIcon, SunIcon } from "lucide-react";
+import { CalendarDaysIcon, CalendarPlusIcon, FileTextIcon, MoonIcon, ReceiptIcon, SunIcon } from "lucide-react";
 import { Icon } from "@/components/icon";
 import {
   Command,
@@ -30,7 +31,7 @@ export function GlobalSearchTrigger() {
       type="button"
       onClick={() => openOverlay({ kind: "search" })}
       className="press flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-lg border border-control bg-surface text-left outline-none transition-[border-color,box-shadow] duration-150 hover-fine:border-segment focus-visible:ring-3 focus-visible:ring-brand/15 md:w-48 md:justify-start md:px-2.5 xl:w-60"
-      aria-label="Search"
+      aria-label={translate("Search")}
       aria-keyshortcuts="Meta+K"
     >
       <Icon name="search" />
@@ -51,7 +52,6 @@ export function GlobalSearch() {
   }
   const close = useOverlayStore((s) => s.close);
   const events = useAppStore((s) => s.events);
-  const requests = useAppStore((s) => s.requests);
   const documents = useAppStore((s) => s.documents);
   const invoices = useAppStore((s) => s.invoices);
   const timeFormat = useAppStore((s) => s.settings.timeFormat);
@@ -90,7 +90,7 @@ export function GlobalSearch() {
     <CommandDialog
       open={open}
       onOpenChange={(v) => !v && close()}
-      title="Search"
+      title={translate("Search")}
       description="Search pages, events, requests and documents"
       className="data-open:animate-none data-closed:animate-none sm:max-w-[560px] max-sm:top-2 max-sm:bottom-auto max-sm:left-2 max-sm:w-[calc(100%-1rem)] max-sm:max-h-[70dvh] max-sm:rounded-2xl max-sm:pb-0"
     >
@@ -100,11 +100,8 @@ export function GlobalSearch() {
         <CommandList className="max-h-[380px]">
           <CommandEmpty className="t-14 text-fg-2">No results found.</CommandEmpty>
           <CommandGroup heading="Actions">
-            <CommandItem onSelect={() => run(() => openOverlay({ kind: "request" }))}>
-              <PlaneIcon /> Request time-off
-            </CommandItem>
             <CommandItem onSelect={() => run(() => openOverlay({ kind: "event", date: today }))}>
-              <CalendarPlusIcon /> New event
+              <CalendarPlusIcon />{translate("New event")}
               <CommandShortcut>N</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => run(() => showInCalendar(today))}>
@@ -119,7 +116,7 @@ export function GlobalSearch() {
           <CommandGroup heading="Pages">
             {ALL_PAGES.map((p) => (
               <CommandItem key={p.href} value={`page ${p.label}`} onSelect={() => run(() => router.push(p.href))}>
-                <Icon name={p.icon} /> {p.label}
+                <Icon name={p.icon} /> {translate(p.label)}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -137,22 +134,6 @@ export function GlobalSearch() {
                   {formatShort(e.date)}
                   {!e.allDay && ` · ${formatTimeRange(e.start, e.end, timeFormat)}`}
                 </CommandShortcut>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Leave requests">
-            {requests.map((r) => (
-              <CommandItem
-                key={r.id}
-                value={`request ${r.type} ${r.status} ${r.notes} ${formatLong(r.from)} ${r.id}`}
-                onSelect={() => run(() => openOverlay({ kind: "request-details", requestId: r.id }))}
-              >
-                <PlaneIcon />
-                <span className="min-w-0 flex-1 truncate">
-                  {r.type} · {r.notes}
-                </span>
-                <CommandShortcut className="tracking-normal capitalize">{r.status}</CommandShortcut>
               </CommandItem>
             ))}
           </CommandGroup>

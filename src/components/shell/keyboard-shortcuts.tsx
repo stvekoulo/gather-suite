@@ -4,10 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { deleteCalendarEvent } from "@/components/calendar/delete-event";
-import { redo, undo } from "@/stores/app-store";
+import { redo, undo, useAppStore } from "@/stores/app-store";
 import { useToday } from "@/hooks/use-today";
 import { useCalendarStore } from "@/stores/calendar-store";
 import { openOverlay, useOverlayStore } from "@/stores/overlay-store";
+import { translate, useTranslate } from "@/lib/i18n/ui-text";
 
 export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["⌘", "K"], label: "Search" },
@@ -15,7 +16,6 @@ export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["⇧", "⌘", "Z"], label: "Redo" },
   { keys: ["⌫"], label: "Delete selected event" },
   { keys: ["N"], label: "New event" },
-  { keys: ["R"], label: "Request time-off" },
   { keys: ["T"], label: "Go to today" },
   { keys: ["←"], label: "Previous period" },
   { keys: ["→"], label: "Next period" },
@@ -32,6 +32,7 @@ function isTyping(target: EventTarget | null) {
 
 /** Single-key shortcuts. These act instantly — keyboard actions never animate. */
 export function KeyboardShortcuts() {
+  const tr = useTranslate();
   const router = useRouter();
   const pathname = usePathname();
   const today = useToday();
@@ -47,13 +48,14 @@ export function KeyboardShortcuts() {
         e.preventDefault();
         const isRedo = k === "y" || e.shiftKey;
         const label = isRedo ? redo() : undo();
+        const lang = useAppStore.getState().settings.language || "fr";
         if (label) {
-          toast(isRedo ? "Redone" : "Undone", {
+          toast(translate(isRedo ? "Redone" : "Undone", lang), {
             description: label,
-            action: { label: isRedo ? "Undo" : "Redo", onClick: () => void (isRedo ? undo() : redo()) },
+            action: { label: translate(isRedo ? "Undo" : "Redo", lang), onClick: () => void (isRedo ? undo() : redo()) },
           });
         } else {
-          toast(isRedo ? "Nothing to redo" : "Nothing to undo");
+          toast(translate(isRedo ? "Nothing to redo" : "Nothing to undo", lang));
         }
         return;
       }
@@ -80,7 +82,6 @@ export function KeyboardShortcuts() {
 
       if (key === "?") openOverlay({ kind: "shortcuts" });
       else if (key === "n" || key === "N") openOverlay({ kind: "event", date: cal.date });
-      else if (key === "r" || key === "R") openOverlay({ kind: "request" });
       else if (key === "t" || key === "T") {
         cal.setDate(today);
         if (!onCalendar) router.push("/time-off");

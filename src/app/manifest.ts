@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Kargul Workspace",
-    short_name: "Kargul",
+    name: "Gather",
+    short_name: "Gather",
     description: "Plan time off, track leave requests and manage your work calendar.",
     start_url: "/time-off",
     display: "standalone",

@@ -2,20 +2,25 @@ import { AlertCircleIcon, Clock3Icon, PencilLineIcon } from "lucide-react";
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
 import type { InvoiceStatus } from "@/lib/types";
+import { translate } from "@/lib/i18n/ui-text";
 
-const STYLES: Record<InvoiceStatus, { label: string; tone: string }> = {
-  draft: { label: "Draft", tone: "neutral" },
-  sent: { label: "Sent", tone: "warning" },
-  paid: { label: "Paid", tone: "success" },
-  overdue: { label: "Overdue", tone: "danger" },
+const STYLES: Record<InvoiceStatus, { labelKey: string; tone: string }> = {
+  draft: { labelKey: "Draft", tone: "neutral" },
+  sent: { labelKey: "Sent", tone: "warning" },
+  paid: { labelKey: "Paid", tone: "success" },
+  overdue: { labelKey: "Overdue", tone: "danger" },
 };
 
-export const STATUS_LABELS = Object.fromEntries(
-  Object.entries(STYLES).map(([k, v]) => [k, v.label]),
-) as Record<InvoiceStatus, string>;
+export const STATUS_LABELS: Record<InvoiceStatus, string> = {
+  draft: translate("Draft"),
+  sent: translate("Sent"),
+  paid: translate("Paid"),
+  overdue: translate("Overdue"),
+};
 
 export function InvoiceStatusBadge({ status, className }: { status: InvoiceStatus; className?: string }) {
-  const { label, tone } = STYLES[status];
+  const { labelKey, tone } = STYLES[status];
+  const label = translate(labelKey);
   return (
     <span
       className={cn("inline-flex h-[22px] shrink-0 items-center gap-1 rounded-[6px] border pr-1.5 pl-1", className)}

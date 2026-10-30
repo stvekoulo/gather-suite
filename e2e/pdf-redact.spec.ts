@@ -1,0 +1,24 @@
+import { test, expect } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { PDFDocument } from "pdf-lib";
+import { createSeed, STATE_VERSION } from "../src/lib/seed";
+test("redaction rebuilds the PDF without its original text layer", async ({ page }) => {
+  const seed = createSeed(); seed.settings.hasCompletedOnboarding = true;
+  await page.addInitScript(({ seed, version }) => localStorage.setItem("calendar-app:state", JSON.stringify({ state: seed, version })), { seed, version: STATE_VERSION });
+  const source = await PDFDocument.create(); source.addPage([300, 200]).drawText("SECRET", { x: 35, y: 163, size: 16 });
+  await page.goto("/pdf-tools");
+  await page.getByRole("button", { name: /^Caviardage/ }).click();
+  await page.getByLabel("Fichiers PDF", { exact: true }).setInputFiles({ name: "private.pdf", mimeType: "application/pdf", buffer: Buffer.from(await source.save()) });
+  const downloading = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  const bytes = await readFile((await (await downloading).path())!);
+  expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
+  await page.getByRole("button", { name: /^Extraire le texte/ }).click();
+  await page.getByLabel("Fichiers PDF", { exact: true }).setInputFiles({ name: "redacted.pdf", mimeType: "application/pdf", buffer: bytes });
+  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Aucun texte détecté");
+  await page.getByRole("button", { name: "Lecteur PDF", exact: true }).click();
+  await page.getByLabel("Ouvrir un PDF", { exact: true }).setInputFiles({ name: "redacted.pdf", mimeType: "application/pdf", buffer: bytes });
+  const canvas = page.locator('canvas[aria-label="Page PDF"]'); await expect(canvas).toBeVisible();
+  await expect.poll(() => canvas.evaluate((el) => Array.from((el as HTMLCanvasElement).getContext("2d")!.getImageData(50, 30, 1, 1).data).slice(0, 3))).toEqual([0, 0, 0]);
+});

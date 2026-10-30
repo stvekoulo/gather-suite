@@ -1,0 +1,7 @@
+{
+  "productName": "Gather QA",
+  "identifier": "app.stevenkoulo.gather.qa",
+  "build": { "beforeBuildCommand": "" },
+  "app": { "windows": [{ "label": "main", "title": "Gather QA", "width": 1440, "height": 1000, "visible": false, "decorations": false }] },
+  "bundle": { "active": false }
+}

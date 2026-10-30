@@ -1,0 +1,27 @@
+import { test, expect } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { createSeed, STATE_VERSION } from "../src/lib/seed";
+test("note resources preserve file bytes and reminders survive reload", async ({ page }) => {
+  const seed = createSeed(); seed.settings.hasCompletedOnboarding = true;
+  await page.addInitScript(({ seed, version }) => localStorage.setItem("calendar-app:state", JSON.stringify({ state: seed, version })), { seed, version: STATE_VERSION });
+  await page.goto("/notes");
+  await page.getByPlaceholder(/idée|pensée|mind|thought|note/i).last().fill("Ressource QA #client/projet");
+  await page.getByLabel("Joindre des fichiers", { exact: true }).setInputFiles({ name: "original.txt", mimeType: "text/plain", buffer: Buffer.from("Retained attachment bytes") });
+  await expect(page.getByText(/original.txt/).first()).toBeVisible();
+  await page.getByRole("button", { name: /Enregistrer|Save Note/ }).click();
+  await page.getByText(/^Ressources : 1 fichiers/).click();
+  page.once("dialog", (dialog) => dialog.accept("renamed.txt"));
+  await page.getByRole("button", { name: "Renommer", exact: true }).click();
+  const downloading = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Télécharger", exact: true }).first().click();
+  const file = await downloading; expect(file.suggestedFilename()).toBe("renamed.txt");
+  expect(await readFile((await file.path())!, "utf8")).toBe("Retained attachment bytes");
+  await page.getByRole("button", { name: "Ouvrir la note", exact: true }).click();
+  await page.getByLabel("Rappel de la note").fill("2020-01-01T10:00");
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByText("Rappel : Note", { exact: true }).first()).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "Modifier", exact: true }).first().click();
+  await expect(page.getByLabel("Rappel de la note")).toHaveValue("2020-01-01T10:00");
+});

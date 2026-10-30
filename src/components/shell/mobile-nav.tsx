@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -21,7 +22,7 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Open navigation" className="ml-2 lg:hidden">
+        <Button variant="ghost" size="icon" aria-label={translate("Open navigation")} className="ml-2 lg:hidden">
           <MenuIcon className="size-4 text-fg" />
         </Button>
       </SheetTrigger>

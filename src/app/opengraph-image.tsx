@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-export const alt = "Kargul — calendar for your team";
+export const dynamic = "force-static";
+export const alt = "Gather Suite — Steven KOULO";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -36,7 +37,7 @@ export default function OpengraphImage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <img src={dataUri(icon)} width={44} height={44} alt="" style={{ borderRadius: 11 }} />
-          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.8 }}>Kargul</div>
+          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.8 }}>Gather</div>
           <div
             style={{
               marginLeft: 8,

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ const CHIP_HEIGHT = 28;
 const CHIP_GAP = 4;
 const ROW_PADDING = 5.5;
 
-/** The all-day lane above the time grid: holidays first, then all-day events. */
+/** Ligne des événements journée entière et jours fériés au-dessus de la grille. */
 export function AllDayRow({ days }: { days: string[] }) {
   const events = useAppStore((s) => s.events);
   const holidays = useAppStore((s) => s.holidays);
@@ -24,7 +25,7 @@ export function AllDayRow({ days }: { days: string[] }) {
       days.map((day): Chip[] => [
         ...holidays
           .filter((h) => h.date === day)
-          .map((h) => ({ kind: "holiday" as const, id: h.id, title: "National holiday", style: eventStyle("purple") })),
+          .map((h) => ({ kind: "holiday" as const, id: h.id, title: h.name || "Jour férié", style: eventStyle("purple") })),
         ...events
           .filter((e) => e.allDay && e.date === day)
           .map((e) => ({ kind: "event" as const, id: e.id, title: e.title, style: eventStyle(e.color) })),
@@ -38,13 +39,13 @@ export function AllDayRow({ days }: { days: string[] }) {
   return (
     <div className="flex w-full shrink-0 items-stretch overflow-hidden border-b border-hairline" style={{ height }}>
       <div className="sticky left-0 z-10 flex w-(--axis) shrink-0 items-center justify-end bg-surface pr-3 max-md:pr-1.5">
-        {most > 1 && <span className="t-12 text-placeholder max-md:text-[10px]">All day</span>}
+        {most > 1 && <span className="t-12 text-placeholder max-md:text-[10px]">{translate("All day")}</span>}
       </div>
       {days.map((day, i) => (
         <div
           key={day}
           role="group"
-          aria-label="All-day events"
+          aria-label="Événements de la journée"
           onClick={(e) => {
             if (e.target === e.currentTarget) openOverlay({ kind: "event", date: day, allDay: true });
           }}

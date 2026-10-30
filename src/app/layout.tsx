@@ -8,53 +8,41 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["600"] });
 
-const SITE_URL = "https://calender-app-design.vercel.app";
-const DESCRIPTION =
-  "A calm people-ops workspace: plan time off, track leave requests and balances, and manage your work calendar. A Kargul Studio design prototype.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: { default: "Time off · Kargul Workspace", template: "%s · Kargul Workspace" },
-  description: DESCRIPTION,
-  applicationName: "Kargul Workspace",
-  authors: [{ name: "Kargul Studio", url: "https://kargul.studio" }],
-  creator: "Kargul Studio",
-  publisher: "Kargul Studio",
-  keywords: ["time off", "leave management", "calendar", "HR", "people ops", "design prototype", "Kargul Studio"],
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: "Kargul Calender Design Prototype",
-    title: "Kargul Workspace — Time off & calendar",
-    description: DESCRIPTION,
-    locale: "en_US",
+  title: { default: "Gather", template: "%s · Gather" },
+  description: "Autonomous Personal Desktop Suite for Calendars, Notes, Docs, Slides, Canvas & PDF tools.",
+  applicationName: "Gather",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Kargul Workspace — Time off & calendar",
-    description: DESCRIPTION,
-  },
-  appleWebApp: { capable: true, title: "Kargul", statusBarStyle: "default" },
+  authors: [{ name: "Steven KOULO" }],
+  creator: "Steven KOULO",
+  publisher: "Steven KOULO",
+  appleWebApp: { capable: true, title: "Gather", statusBarStyle: "default" },
   formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f8f8" },
-    { media: "(prefers-color-scheme: dark)", color: "#121212" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="en"
+      lang="fr"
       data-theme="light"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full`}
     >
-      <body className="h-full overflow-hidden">
+      <body className="h-full overflow-hidden select-none">
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

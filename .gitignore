@@ -42,3 +42,14 @@ next-env.d.ts
 
 # local tooling
 .claude/
+/.reference/
+/test-results/
+/playwright-report/
+/public/pdf.worker.min.mjs
+/public/pdf-cmaps/
+/public/pdf-fonts/
+/public/excalidraw/
+/public/fonts/Geist-Medium.ttf
+/.qa/
+/public/ocr/
+/.audit-dependencies.json

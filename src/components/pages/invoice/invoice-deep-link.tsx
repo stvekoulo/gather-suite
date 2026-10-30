@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { translate } from "@/lib/i18n/ui-text";
 import { useAppStore } from "@/stores/app-store";
 import { useInvoiceUi } from "./invoice-ui-store";
 
@@ -18,7 +19,8 @@ export function InvoiceDeepLink() {
       useInvoiceUi.getState().view(openId);
       router.replace("/invoice", { scroll: false });
     } else if (useAppStore.persist.hasHydrated()) {
-      toast.error("Invoice not found", { description: "It may have been deleted." });
+      const lang = useAppStore.getState().settings.language || "fr";
+      toast.error(translate("Invoice not found", lang), { description: translate("It may have been deleted.", lang) });
       router.replace("/invoice", { scroll: false });
     }
   }, [openId, found, router]);

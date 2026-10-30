@@ -1,4 +1,6 @@
 "use client";
+import { FilePicker } from "@/components/file-picker";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useRef, useState } from "react";
 import { PaperclipIcon, XIcon } from "lucide-react";
@@ -37,7 +39,6 @@ function ClaimForm({ benefit, onDone }: { benefit: Benefit; onDone: () => void }
   const fileRef = useRef<HTMLInputElement>(null);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  // Only the file name is kept — receipts aren't uploaded anywhere in this demo.
   const [receipt, setReceipt] = useState<string | null>(null);
 
   const remaining = Math.max(0, benefit.budget - benefit.used);
@@ -46,9 +47,9 @@ function ClaimForm({ benefit, onDone }: { benefit: Benefit; onDone: () => void }
     amount === ""
       ? null
       : !Number.isFinite(value) || value <= 0
-        ? "Enter an amount greater than zero."
+        ? "Saisissez un montant supérieur à zéro."
         : value > remaining
-          ? `You have ${formatMoney(remaining)} left on this benefit.`
+          ? `Il vous reste ${formatMoney(remaining)} sur cet avantage.`
           : null;
   const valid = amount !== "" && !error && description.trim().length > 0;
 
@@ -59,20 +60,20 @@ function ClaimForm({ benefit, onDone }: { benefit: Benefit; onDone: () => void }
         e.preventDefault();
         if (!valid) return;
         claimBenefit(benefit.id, value);
-        toast.success("Claim submitted", {
+        toast.success("Demande de remboursement envoyée", {
           description: `${formatMoney(value, true)} · ${benefit.name}`,
         });
         notify({
-          title: "Benefit claim submitted",
-          body: `${formatMoney(value, true)} from your ${benefit.name.toLowerCase()} for “${description.trim()}”.`,
+          title: "Demande de remboursement envoyée",
+          body: `${formatMoney(value, true)} pour “${description.trim()}”.`,
           href: "/benefits",
         });
         onDone();
       }}
     >
       <DialogHeader className="gap-1.5">
-        <DialogTitle className="t-16">Submit a claim</DialogTitle>
-        <DialogDescription className="t-14">Reimbursed with your next payroll run.</DialogDescription>
+        <DialogTitle className="t-16">Demander un remboursement</DialogTitle>
+        <DialogDescription className="t-14">Remboursement traité lors de la prochaine paie.</DialogDescription>
       </DialogHeader>
 
       <div className="flex items-center gap-3 rounded-lg border border-hairline bg-app px-3 py-2.5">
@@ -80,13 +81,13 @@ function ClaimForm({ benefit, onDone }: { benefit: Benefit; onDone: () => void }
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <span className="t-14 truncate text-fg">{benefit.name}</span>
           <span className="t-12 text-fg-2">
-            {formatMoney(remaining)} of {formatMoney(benefit.budget)} remaining
+            {formatMoney(remaining)} restant sur {formatMoney(benefit.budget)}
           </span>
         </div>
       </div>
 
       <div className="grid gap-4">
-        <Field label="Amount" htmlFor="claim-amount" error={error}>
+        <Field label={translate("Amount")} htmlFor="claim-amount" error={error}>
           <div className="relative">
             <span className="t-14 pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-fg-2">£</span>
             <Input
@@ -106,18 +107,18 @@ function ClaimForm({ benefit, onDone }: { benefit: Benefit; onDone: () => void }
             />
           </div>
         </Field>
-        <Field label="Description" htmlFor="claim-description">
+        <Field label={translate("Description")} htmlFor="claim-description">
           <Textarea
             id="claim-description"
             rows={2}
             required
-            placeholder="e.g. Figma Config 2026 ticket"
+            placeholder="Ex. Billet de formation, équipement ergonomique..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </Field>
-        <Field label="Receipt (optional)" hint="PDF or image. Only the file name is attached in this demo.">
-          <input
+        <Field label="Justificatif (optionnel)" hint="PDF ou image. Conservé localement.">
+          <FilePicker
             ref={fileRef}
             type="file"
             accept="image/*,application/pdf"
@@ -133,24 +134,23 @@ function ClaimForm({ benefit, onDone }: { benefit: Benefit; onDone: () => void }
             <div className="flex h-8 items-center gap-2 rounded-lg border border-control bg-surface pr-1 pl-2.5">
               <PaperclipIcon className="size-3.5 shrink-0 text-icon" />
               <span className="t-14 min-w-0 flex-1 truncate text-fg">{receipt}</span>
-              <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove receipt" onClick={() => setReceipt(null)}>
+              <Button type="button" variant="ghost" size="icon-sm" aria-label="Retirer le justificatif" onClick={() => setReceipt(null)}>
                 <XIcon />
               </Button>
             </div>
           ) : (
             <Button type="button" className="justify-self-start" onClick={() => fileRef.current?.click()}>
-              <PaperclipIcon className="text-icon" /> Attach receipt
+              <PaperclipIcon className="text-icon" /> Joindre un justificatif
             </Button>
           )}
         </Field>
       </div>
 
       <DialogFooter className="-mx-5 -mb-5 bg-app px-5 py-3 max-sm:mb-0 max-sm:pb-[max(12px,env(safe-area-inset-bottom))] max-sm:[&_button]:h-10">
-        <Button type="button" onClick={onDone}>
-          Cancel
+        <Button type="button" onClick={onDone}>{translate("Cancel")}
         </Button>
         <Button type="submit" variant="brand" disabled={!valid}>
-          Submit claim
+          Envoyer la demande
         </Button>
       </DialogFooter>
     </form>

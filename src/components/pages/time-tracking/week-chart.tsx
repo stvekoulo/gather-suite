@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatWeekday, fromKey, WEEKDAYS_SHORT } from "@/lib/dates";
@@ -76,8 +77,7 @@ export function WeekChart({
                 <TooltipContent side="top" sideOffset={4} className="flex-col items-start gap-1.5 py-2">
                   <span className="t-12 opacity-70">{formatWeekday(d.date)}</span>
                   <span className="t-12 flex items-center gap-1.5">
-                    <span className="size-2 rounded-[2px]" style={{ background: BILLABLE_COLOR }} />
-                    Billable {formatHours(d.billable)}
+                    <span className="size-2 rounded-[2px]" style={{ background: BILLABLE_COLOR }} />{translate("Billable")} {formatHours(d.billable)}
                   </span>
                   <span className="t-12 flex items-center gap-1.5">
                     <span className="size-2 rounded-[2px]" style={{ background: NON_BILLABLE_COLOR }} />
@@ -122,7 +122,7 @@ export function ChartLegend() {
   return (
     <div className="flex items-center gap-3">
       <span className="t-12 flex items-center gap-1.5 text-fg-2">
-        <span className="size-2 rounded-[2px]" style={{ background: BILLABLE_COLOR }} /> Billable
+        <span className="size-2 rounded-[2px]" style={{ background: BILLABLE_COLOR }} />{translate("Billable")}
       </span>
       <span className="t-12 flex items-center gap-1.5 text-fg-2">
         <span className="size-2 rounded-[2px]" style={{ background: NON_BILLABLE_COLOR }} /> Non-billable

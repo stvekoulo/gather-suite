@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { savedRoute } from "@/components/shell/last-route";
 
 export default function Home() {
-  redirect("/time-off");
+  const router = useRouter();
+  useEffect(() => { router.replace(savedRoute()); }, [router]);
+  return null;
 }

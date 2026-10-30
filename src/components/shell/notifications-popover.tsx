@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useRouter } from "next/navigation";
 import { BellOffIcon } from "lucide-react";
@@ -14,6 +15,7 @@ import { useAppStore } from "@/stores/app-store";
 export function NotificationsPopover() {
   const router = useRouter();
   const notifications = useAppStore((s) => s.notifications);
+  const lang = useAppStore((s) => s.settings.language);
   const markRead = useAppStore((s) => s.markNotificationRead);
   const markAll = useAppStore((s) => s.markAllNotificationsRead);
   const clear = useAppStore((s) => s.clearNotifications);
@@ -25,7 +27,17 @@ export function NotificationsPopover() {
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button size="icon" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"} className="relative">
+            <Button
+              size="icon"
+              aria-label={
+                unread
+                  ? lang === "en"
+                    ? `Notifications, ${unread} unread`
+                    : `Notifications, ${unread} non lues`
+                  : translate("Notifications", lang)
+              }
+              className="relative"
+            >
               <Icon name="bell" />
               {unread > 0 && (
                 <span className="absolute top-[5px] right-[5px] size-1.5 rounded-full bg-brand ring-2 ring-surface" />
@@ -33,27 +45,26 @@ export function NotificationsPopover() {
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent>Notifications</TooltipContent>
+        <TooltipContent>{translate("Notifications", lang)}</TooltipContent>
       </Tooltip>
       <PopoverContent align="end" sideOffset={8} className="w-[360px] gap-0 p-0">
         <div className="flex h-12 items-center gap-2 border-b border-hairline px-4">
-          <span className="t-14 flex-1 text-fg">Notifications</span>
+          <span className="t-14 flex-1 text-fg">{translate("Notifications", lang)}</span>
           {unread > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAll} className="t-12">
-              Mark all read
+            <Button variant="ghost" size="sm" onClick={markAll} className="t-12">{translate("Mark all read", lang)}
             </Button>
           )}
           {notifications.length > 0 && (
             <Button variant="ghost" size="sm" onClick={clear} className="t-12">
-              Clear
+              {translate("Clear", lang)}
             </Button>
           )}
         </div>
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
             <BellOffIcon className="size-5 text-icon" />
-            <p className="t-14 text-fg">You’re all caught up</p>
-            <p className="t-12 text-fg-2">New approvals and reminders will show up here.</p>
+            <p className="t-14 text-fg">{translate("You’re all caught up", lang)}</p>
+            <p className="t-12 text-fg-2">{translate("New approvals and reminders will show up here.", lang)}</p>
           </div>
         ) : (
           <ul className="scroll-thin max-h-[360px] overflow-y-auto p-1">

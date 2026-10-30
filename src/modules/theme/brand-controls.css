@@ -1,0 +1,2 @@
+.accent-surface, .accent-badge { background-image: none; color: var(--on-brand, #fff); }
+.bg-brand.text-white { color: var(--on-brand, #fff); }

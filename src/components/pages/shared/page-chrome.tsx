@@ -45,7 +45,7 @@ export function PageHeader({
     <div
       className={cn(
         "z-10 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-3 border-b border-hairline bg-surface px-4 py-3",
-        "md:sticky md:top-0 md:h-[68px] md:flex-nowrap md:py-0",
+        "md:sticky md:top-0 md:min-h-[68px]",
         className,
       )}
     >
@@ -56,7 +56,7 @@ export function PageHeader({
       {actions ? (
         <div
           className={cn(
-            "flex shrink-0 items-center gap-2",
+            "flex max-w-full shrink-0 flex-wrap items-center gap-2 [&>div]:flex-wrap",
             "max-md:[&_[data-slot=button]]:h-10 max-md:[&_[data-slot=button][data-size=default]]:px-3.5 max-md:[&_[data-slot=button][data-size=icon]]:w-10",
           )}
         >

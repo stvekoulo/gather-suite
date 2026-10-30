@@ -118,16 +118,10 @@ export function invoiceHtml(inv: Invoice, from: Profile): string {
 </html>`;
 }
 
-export function downloadInvoice(inv: Invoice, from: Profile) {
-  const blob = new Blob([invoiceHtml(inv, from)], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${inv.number}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+export async function downloadInvoice(inv: Invoice, from: Profile) {
+  const [{ createTextPdf }, { saveFile, safeFilename }] = await Promise.all([import("@/modules/pdf/text-pdf"), import("@/lib/files")]);
+  const lines = [from.name, from.email, "", "Client : " + inv.client, "Émission : " + inv.issueDate, "Échéance : " + inv.dueDate, "", ...inv.items.map((item) => item.description + " · " + item.quantity + " × " + formatMoney(item.rate, inv.currency) + " = " + formatMoney(lineTotal(item), inv.currency)), "", "Total : " + formatMoney(invoiceTotal(inv), inv.currency), "", inv.notes];
+  return saveFile(safeFilename(inv.number) + ".pdf", await createTextPdf(inv.number, lines.join("\n")), "application/pdf");
 }
 
 /** Prints just the invoice document through a hidden iframe, so the app chrome stays out of the printout. */

@@ -10,6 +10,10 @@ export type IconName =
   | "nav-benefits"
   | "nav-invoice"
   | "nav-withdrawal"
+  | "nav-notes"
+  | "nav-slides"
+  | "nav-canvas"
+  | "nav-pdf"
   | "workspace-switcher"
   | "search"
   | "help"
@@ -25,8 +29,7 @@ export type IconName =
   | "status-declined";
 
 /**
- * Monochrome Figma icon rendered as a CSS mask so it inherits `currentColor`
- * (defaults to the design's icon grey) and follows the theme.
+ * Monochrome Figma icon rendered as a CSS mask to inherit currentColor
  */
 export function Icon({
   name,

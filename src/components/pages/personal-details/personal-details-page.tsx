@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useMemo, useState } from "react";
 import { BriefcaseIcon, CakeIcon, MailIcon, MapPinIcon, PhoneIcon, RotateCcwIcon } from "lucide-react";
@@ -12,54 +13,14 @@ import type { Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useToday } from "@/hooks/use-today";
 import { useAppStore } from "@/stores/app-store";
-import { Card, CardHeader, PageHeader, PageRoot } from "@/components/pages/shared/page-chrome";
-
-/** Phones: 40px fields with 16px text, so iOS doesn't zoom in on focus. */
-const TOUCH_FIELD = "max-md:h-10 max-md:text-[16px]";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const BIO_MAX = 280;
-
-function initialsFrom(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "";
-  const first = parts[0][0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
-}
-
-function tenure(start: string, today: string) {
-  if (!start || start > today) return null;
-  const a = fromKey(start);
-  const b = fromKey(today);
-  let months = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
-  if (b.getDate() < a.getDate()) months -= 1;
-  const y = Math.floor(months / 12);
-  const m = months % 12;
-  if (!y && !m) return "Less than a month";
-  return [y ? `${y} ${y === 1 ? "year" : "years"}` : "", m ? `${m} ${m === 1 ? "month" : "months"}` : ""]
-    .filter(Boolean)
-    .join(" ");
-}
-
-function validate(p: Profile): Partial<Record<keyof Profile, string>> {
-  const errors: Partial<Record<keyof Profile, string>> = {};
-  if (!p.name.trim()) errors.name = "Your name is required.";
-  if (!p.email.trim()) errors.email = "An email address is required.";
-  else if (!EMAIL_RE.test(p.email.trim())) errors.email = "Enter a valid email address.";
-  if (!p.initials.trim()) errors.initials = "Add 1–3 initials.";
-  if (p.bio.length > BIO_MAX) errors.bio = `Keep it under ${BIO_MAX} characters.`;
-  if (p.startDate && p.birthday && p.birthday >= p.startDate) errors.birthday = "Birthday must be before your start date.";
-  return errors;
-}
+import { Card, PageHeader, PageRoot } from "@/components/pages/shared/page-chrome";
+import { BIO_MAX, initialsFrom, Section, SummaryRow, tenure, TOUCH_FIELD, validate } from "./profile-utils";
 
 export function PersonalDetailsPage() {
   const today = useToday();
   const profile = useAppStore((s) => s.profile);
   const updateProfile = useAppStore((s) => s.updateProfile);
 
-  // Only the fields the user touched are kept locally; everything else reads
-  // through to the store, so a late store hydration never clobbers the form.
   const [edits, setEdits] = useState<Partial<Profile>>({});
   const [showErrors, setShowErrors] = useState(false);
 
@@ -88,7 +49,7 @@ export function PersonalDetailsPage() {
     if (!dirty) return;
     if (hasErrors) {
       setShowErrors(true);
-      toast.error("Check the highlighted fields", { description: "Some details need fixing before saving." });
+      toast.error(translate("Check the highlighted fields"), { description: "Certaines informations doivent être corrigées." });
       return;
     }
     const patch: Partial<Profile> = {};
@@ -97,12 +58,11 @@ export function PersonalDetailsPage() {
     updateProfile(patch);
     setEdits({});
     setShowErrors(false);
-    toast.success("Profile saved", {
-      description: `${changed.length} ${changed.length === 1 ? "field" : "fields"} updated`,
+    toast.success(translate("Profile saved"), {
+      description: `${changed.length} ${changed.length === 1 ? "champ mis à jour" : "champs mis à jour"}`,
     });
   };
 
-  // ⌘S / Ctrl+S saves; warn before leaving with unsaved edits.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
@@ -121,7 +81,6 @@ export function PersonalDetailsPage() {
     };
   }, [dirty]);
 
-  // Errors show once a field has been edited, or for every field after a failed save.
   const err = (k: keyof Profile) => ((showErrors || k in edits) && errors[k]) || null;
   const input = (k: keyof Profile, { className, ...props }: React.ComponentProps<typeof Input> = {}) => (
     <Input
@@ -140,25 +99,24 @@ export function PersonalDetailsPage() {
   return (
     <PageRoot>
       <PageHeader
-        title="Your profile"
+        title={translate("Your profile")}
         description={
           dirty ? (
             <>
-              {changed.length} unsaved {changed.length === 1 ? "change" : "changes"}
-              <span className="max-md:hidden"> · ⌘S to save</span>
+              {changed.length} modification{changed.length > 1 ? "s" : ""} non enregistrée{changed.length > 1 ? "s" : ""}
+              <span className="max-md:hidden"> · ⌘S pour enregistrer</span>
             </>
           ) : (
-            "Shared with your manager and People Ops"
+            "Accessible uniquement par vous et l'administration"
           )
         }
         actions={
-          // Phones get a sticky save bar at the bottom instead (see below).
           <div className="hidden items-center gap-2 md:flex">
             <Button onClick={reset} disabled={!dirty}>
-              <RotateCcwIcon className="text-icon" /> Reset
+              <RotateCcwIcon className="text-icon" /> {translate("Reset")}
             </Button>
             <Button id="profile-save" type="submit" form="profile-form" variant="brand" disabled={!dirty}>
-              Save changes
+              {translate("Save changes")}
             </Button>
           </div>
         }
@@ -172,9 +130,7 @@ export function PersonalDetailsPage() {
         }}
         noValidate
       >
-        {/* Summary */}
         <Card className="lg:sticky lg:top-[84px]">
-          {/* Below lg the summary is a compact horizontal header; the sidebar card from lg. */}
           <div className="flex items-center gap-3.5 p-4 lg:flex-col lg:gap-3 lg:px-4 lg:pt-6 lg:pb-5 lg:text-center">
             <span className="flex size-14 shrink-0 items-center justify-center rounded-[16px] bg-brand-tint lg:size-16 lg:rounded-[18px]">
               <span className="font-inter text-[20px] leading-none font-semibold tracking-[-0.3px] text-brand lg:text-[22px] lg:tracking-[-0.33px]">
@@ -182,9 +138,9 @@ export function PersonalDetailsPage() {
               </span>
             </span>
             <div className="grid min-w-0 gap-2">
-              <p className="t-16 text-fg">{draft.name || "Your name"}</p>
+              <p className="t-16 text-fg">{draft.name || "Votre nom"}</p>
               <p className="t-14 text-fg-2">
-                {[draft.jobTitle, draft.department].filter(Boolean).join(" · ") || "Add a job title"}
+                {[draft.jobTitle, draft.department].filter(Boolean).join(" · ") || "Ajoutez un poste"}
               </p>
             </div>
           </div>
@@ -193,7 +149,7 @@ export function PersonalDetailsPage() {
             <SummaryRow icon={<PhoneIcon />}>{draft.phone || "—"}</SummaryRow>
             <SummaryRow icon={<MapPinIcon />}>{draft.location || "—"}</SummaryRow>
             <SummaryRow icon={<BriefcaseIcon />}>
-              {draft.startDate ? `Joined ${MONTHS[fromKey(draft.startDate).getMonth()].slice(0, 3)} ${draft.startDate.slice(0, 4)}` : "—"}
+              {draft.startDate ? `Arrivé(e) en ${MONTHS[fromKey(draft.startDate).getMonth()]} ${draft.startDate.slice(0, 4)}` : "—"}
               {t ? <span className="text-placeholder"> · {t}</span> : null}
             </SummaryRow>
             <SummaryRow icon={<CakeIcon />}>
@@ -203,12 +159,12 @@ export function PersonalDetailsPage() {
         </Card>
 
         <div className="grid min-w-0 gap-4">
-          <Section title="Basic information" description="How you appear across the workspace">
+          <Section title={translate("Basic information")} description={translate("How you appear across the workspace")}>
             <div className="grid grid-cols-[minmax(0,1fr)_88px] items-start gap-3 sm:grid-cols-[minmax(0,1fr)_120px] sm:gap-4">
-              <Field label="Full name" htmlFor="pd-name" error={err("name")}>
+              <Field label={translate("Full name")} htmlFor="pd-name" error={err("name")}>
                 {input("name", { autoComplete: "name", required: true })}
               </Field>
-              <Field label="Initials" htmlFor="pd-initials" error={err("initials")}>
+              <Field label={translate("Initials")} htmlFor="pd-initials" error={err("initials")}>
                 {input("initials", {
                   maxLength: 3,
                   className: "uppercase",
@@ -222,56 +178,56 @@ export function PersonalDetailsPage() {
                 onClick={() => set("initials", initialsFrom(draft.name))}
                 className="t-12 -mt-2 w-fit text-brand outline-none hover-fine:text-brand-strong focus-visible:underline max-md:-my-1 max-md:py-1.5"
               >
-                Use “{initialsFrom(draft.name)}” from your name
+                Utiliser « {initialsFrom(draft.name)} » selon votre nom
               </button>
             ) : null}
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-              <Field label="Email" htmlFor="pd-email" error={err("email")}>
+              <Field label={translate("Email")} htmlFor="pd-email" error={err("email")}>
                 {input("email", { type: "email", autoComplete: "email", required: true })}
               </Field>
-              <Field label="Phone" htmlFor="pd-phone">
-                {input("phone", { type: "tel", autoComplete: "tel", placeholder: "+44 20 0000 0000" })}
+              <Field label={translate("Phone")} htmlFor="pd-phone">
+                {input("phone", { type: "tel", autoComplete: "tel", placeholder: "+33 6 00 00 00 00" })}
               </Field>
             </div>
           </Section>
 
-          <Section title="Work" description="Your role and reporting line">
+          <Section title={translate("Work")} description={translate("Your role and reporting line")}>
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-              <Field label="Job title" htmlFor="pd-jobTitle">
+              <Field label={translate("Job title")} htmlFor="pd-jobTitle">
                 {input("jobTitle", { autoComplete: "organization-title" })}
               </Field>
-              <Field label="Department" htmlFor="pd-department">
+              <Field label={translate("Department")} htmlFor="pd-department">
                 {input("department")}
               </Field>
-              <Field label="Manager" htmlFor="pd-manager">
+              <Field label={translate("Manager")} htmlFor="pd-manager">
                 {input("manager")}
               </Field>
-              <Field label="Location" htmlFor="pd-location">
-                {input("location", { placeholder: "City, Country" })}
+              <Field label={translate("Location")} htmlFor="pd-location">
+                {input("location", { placeholder: "Ville, Pays" })}
               </Field>
-              <Field label="Start date" htmlFor="pd-startDate" hint={t ? `${t} at the company` : undefined}>
+              <Field label={translate("Start date")} htmlFor="pd-startDate" hint={t ? `${t} dans l'entreprise` : undefined}>
                 {input("startDate", { type: "date", max: today })}
               </Field>
             </div>
           </Section>
 
-          <Section title="Personal" description="Only visible to People Ops">
+          <Section title={translate("Personal")} description={translate("Only visible to People Ops")}>
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-              <Field label="Birthday" htmlFor="pd-birthday" error={err("birthday")}>
+              <Field label={translate("Birthday")} htmlFor="pd-birthday" error={err("birthday")}>
                 {input("birthday", { type: "date", max: today })}
               </Field>
-              <Field label="Emergency contact" htmlFor="pd-emergencyContact" hint="Name and phone number">
-                {input("emergencyContact", { placeholder: "Name · phone" })}
+              <Field label={translate("Emergency contact")} htmlFor="pd-emergencyContact" hint="Nom et numéro de téléphone">
+                {input("emergencyContact", { placeholder: "Nom · téléphone" })}
               </Field>
-              <Field label="Home address" htmlFor="pd-address" className="sm:col-span-2">
+              <Field label={translate("Home address")} htmlFor="pd-address" className="sm:col-span-2">
                 {input("address", { autoComplete: "street-address" })}
               </Field>
             </div>
           </Section>
 
-          <Section title="About" description="A short intro for your teammates">
+          <Section title={translate("About")} description={translate("A short intro for your teammates")}>
             <Field
-              label="Bio"
+              label={translate("Bio")}
               htmlFor="pd-bio"
               error={err("bio")}
               hint={
@@ -286,7 +242,7 @@ export function PersonalDetailsPage() {
                 rows={3}
                 value={draft.bio}
                 onChange={(e) => set("bio", e.target.value)}
-                placeholder="What you work on, what you love…"
+                placeholder="Vos projets, vos compétences, vos centres d'intérêt…"
                 aria-invalid={err("bio") ? true : undefined}
               />
             </Field>
@@ -294,35 +250,16 @@ export function PersonalDetailsPage() {
         </div>
       </form>
 
-      {/* Phones: unsaved edits surface a save bar pinned above the home indicator. */}
       {dirty ? (
         <div className="sticky bottom-0 z-10 mt-auto flex gap-2 border-t border-hairline bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] duration-200 ease-(--ease-out) animate-in fade-in-0 slide-in-from-bottom-4 md:hidden">
           <Button className="h-10 px-3.5" onClick={reset}>
-            <RotateCcwIcon className="text-icon" /> Reset
+            <RotateCcwIcon className="text-icon" /> {translate("Reset")}
           </Button>
           <Button type="submit" form="profile-form" variant="brand" className="h-10 flex-1">
-            Save {changed.length === 1 ? "change" : `${changed.length} changes`}
+            {translate("Save")} ({changed.length})
           </Button>
         </div>
       ) : null}
     </PageRoot>
-  );
-}
-
-function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
-  return (
-    <Card>
-      <CardHeader title={title} description={description} />
-      <div className="grid gap-4 p-4">{children}</div>
-    </Card>
-  );
-}
-
-function SummaryRow({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <li className="flex items-center gap-2.5 [&>svg]:size-3.5 [&>svg]:shrink-0 [&>svg]:text-icon">
-      {icon}
-      <span className="t-14 min-w-0 flex-1 truncate text-fg-2">{children}</span>
-    </li>
   );
 }

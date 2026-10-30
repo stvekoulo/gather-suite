@@ -1,8 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { addDays, addMonths } from "@/lib/dates";
-import { DESIGN_DATE } from "@/lib/seed";
+import { addDays, addMonths, toKey } from "@/lib/dates";
 
 export type CalendarView = "day" | "week" | "month";
 
@@ -37,7 +36,7 @@ type CalendarStore = {
 
 export const useCalendarStore = create<CalendarStore>()((set, get) => ({
   view: "week",
-  date: DESIGN_DATE,
+  date: toKey(new Date()),
   focusEventId: null,
   popover: null,
   compact: false,

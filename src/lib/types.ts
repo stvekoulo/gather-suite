@@ -11,6 +11,7 @@ export type CalEvent = {
   color: EventColor;
   note?: string;
   location?: string;
+  category?: string;
   requestId?: string;
 };
 
@@ -63,6 +64,9 @@ export type Settings = {
   emailNotifications: boolean;
   pushNotifications: boolean;
   weeklyDigest: boolean;
+  hasCompletedOnboarding?: boolean;
+  accentColor?: string;
+  language?: string;
 };
 
 export type AppNotification = {
@@ -74,7 +78,7 @@ export type AppNotification = {
   href?: string;
 };
 
-export type DocCategory = "Contract" | "Payslip" | "Policy" | "Medical" | "Tax" | "Other";
+export type DocCategory = "Contract" | "Payslip" | "Policy" | "Medical" | "Tax" | "Other" | string;
 
 export type DocumentFile = {
   id: string;
@@ -84,6 +88,8 @@ export type DocumentFile = {
   uploadedAt: string;
   /** data: URL for files uploaded in this browser (small files only) */
   dataUrl?: string;
+  editorContent?: import("@tiptap/react").JSONContent;
+  pageSetup?: import("@/modules/documents/document-layout").DocumentLayout;
   starred?: boolean;
 };
 
@@ -94,6 +100,7 @@ export type TimeEntry = {
   task: string;
   minutes: number;
   billable: boolean;
+  invoiceId?: string;
 };
 
 export type Timer = { running: boolean; startedAt: number | null; project: string; task: string };
@@ -140,6 +147,24 @@ export type Benefit = {
   renewsOn: string;
 };
 
+export type TransactionRecurrence = "none" | "monthly" | "quarterly" | "yearly";
+
+export type FinanceTransaction = {
+  id: string;
+  type: "income" | "expense";
+  title: string;
+  amount: number;
+  category: string;
+  date: string;
+  methodLabel?: string;
+  invoiceNumber?: string;
+  notes?: string;
+  status: "completed" | "pending";
+  recurrence?: TransactionRecurrence;
+  isSubscription?: boolean;
+  syncCalendar?: boolean;
+};
+
 export type Workspace = { id: string; name: string };
 
 export type AppState = {
@@ -158,4 +183,5 @@ export type AppState = {
   invoices: Invoice[];
   withdrawalMethods: WithdrawalMethod[];
   benefits: Benefit[];
+  financeTransactions: FinanceTransaction[];
 };

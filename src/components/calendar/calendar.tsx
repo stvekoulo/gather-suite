@@ -9,6 +9,7 @@ import { CalendarHeader } from "./calendar-header";
 import { EventPopover } from "./event-popover";
 import { MonthView } from "./month-view";
 import { TimeGrid } from "./time-grid";
+import { CalendarTaskTray } from "@/modules/tasks/calendar-task-tray";
 
 /** `count` consecutive days from `start`, optionally skipping weekends. */
 function daysFrom(start: string, count: number, showWeekends: boolean): string[] {
@@ -48,6 +49,7 @@ export function Calendar() {
       className="flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-surface [--axis:44px] md:[--axis:70px]"
     >
       <CalendarHeader days={days} />
+      <CalendarTaskTray />
       {view === "month" ? <MonthView /> : <TimeGrid key={view} days={days} strip={view === "day" ? week : undefined} />}
       <EventPopover />
     </section>

@@ -1,6 +1,8 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
+import { WheelDatePicker } from "@/components/beui/wheel-date-picker";
 import { Field } from "@/components/dialogs/field";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,7 +60,7 @@ function EntryForm({
 
   const total = (Number(hours) || 0) * 60 + (Number(minutes) || 0);
   const error =
-    total <= 0 ? "Log at least one minute." : total > 24 * 60 ? "An entry can't be longer than 24 hours." : null;
+    total <= 0 ? "Enregistrez au moins une minute." : total > 24 * 60 ? "Une session ne peut pas dépasser 24 heures." : null;
 
   return (
     <form
@@ -67,30 +69,31 @@ function EntryForm({
         e.preventDefault();
         if (error || !date || !project.trim() || !task.trim()) return;
         saveTimeEntry({ id: entry?.id, date, project: project.trim(), task: task.trim(), minutes: total, billable });
-        toast.success(entry ? "Entry updated" : "Time logged", {
+        toast.success(entry ? translate("Entry updated") : translate("Time logged"), {
           description: `${formatHours(total)} · ${project.trim()}`,
         });
         onDone();
       }}
     >
       <DialogHeader className="gap-1.5">
-        <DialogTitle className="t-16">{entry ? "Edit entry" : "Add time entry"}</DialogTitle>
+        <DialogTitle className="t-16">{entry ? translate("Edit entry") : translate("Add time entry")}</DialogTitle>
         <DialogDescription className="t-14">
-          {entry ? "Update the details of this entry." : "Log time you forgot to track with the timer."}
+          {entry ? "Modifiez les détails de cette session." : "Enregistrez du temps que vous n'avez pas chronométré."}
         </DialogDescription>
       </DialogHeader>
 
       <div className="grid gap-4">
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
-          <Field label="Date" htmlFor="te-date">
-            <Input id="te-date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
-          </Field>
-          <Field label="Project" htmlFor="te-project">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-fg">Date</span>
+            <WheelDatePicker id="te-date" value={date} onChange={setDate} />
+          </div>
+          <Field label={translate("Project")} htmlFor="te-project">
             <Input
               id="te-project"
               required
               list="te-projects"
-              placeholder="Project"
+              placeholder={translate("Project")}
               value={project}
               onChange={(e) => setProject(e.target.value)}
             />
@@ -101,18 +104,18 @@ function EntryForm({
             </datalist>
           </Field>
         </div>
-        <Field label="Task" htmlFor="te-task">
+        <Field label={translate("Task")} htmlFor="te-task">
           <Input
             id="te-task"
             required
             autoFocus={!entry}
-            placeholder="What did you work on?"
+            placeholder="Sur quoi avez-vous travaillé ?"
             value={task}
             onChange={(e) => setTask(e.target.value)}
           />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Hours" htmlFor="te-hours">
+          <Field label={translate("Hours")} htmlFor="te-hours">
             <Input
               id="te-hours"
               type="number"
@@ -123,7 +126,7 @@ function EntryForm({
               onChange={(e) => setHours(e.target.value)}
             />
           </Field>
-          <Field label="Minutes" htmlFor="te-minutes">
+          <Field label={translate("Minutes")} htmlFor="te-minutes">
             <Input
               id="te-minutes"
               type="number"
@@ -138,8 +141,8 @@ function EntryForm({
         </div>
         <label className="flex items-center justify-between gap-3 rounded-lg border border-control bg-app px-3 py-2.5">
           <span className="grid gap-1">
-            <span className="t-14 text-fg">Billable</span>
-            <span className="t-12 text-fg-2">Counts towards client invoices</span>
+            <span className="t-14 text-fg">{translate("Billable")}</span>
+            <span className="t-12 text-fg-2">Pris en compte dans les factures client</span>
           </span>
           <Switch checked={billable} onCheckedChange={setBillable} />
         </label>
@@ -151,11 +154,10 @@ function EntryForm({
       </div>
 
       <DialogFooter className="-mx-5 -mb-5 bg-app px-5 py-3 max-sm:mb-0 max-sm:pb-[max(12px,env(safe-area-inset-bottom))] max-sm:[&_button]:h-10">
-        <Button type="button" onClick={onDone}>
-          Cancel
+        <Button type="button" onClick={onDone}>{translate("Cancel")}
         </Button>
         <Button type="submit" variant="brand" disabled={!!error}>
-          {entry ? "Save changes" : `Log ${error ? "time" : formatHours(total)}`}
+          {entry ? translate("Save changes") : `Enregistrer ${error ? "le temps" : formatHours(total)}`}
         </Button>
       </DialogFooter>
     </form>

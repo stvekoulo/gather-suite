@@ -1,26 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { CopyIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
+import { toast } from "sonner";
+import { WheelDatePicker } from "@/components/beui/wheel-date-picker";
+import { WheelTimePicker } from "@/components/beui/wheel-time-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/beui/select";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EVENT_COLORS } from "@/components/calendar/event-colors";
 import { parseTime, timeInputValue } from "@/lib/dates";
-import { cn } from "@/lib/utils";
-import type { CalEvent, EventColor } from "@/lib/types";
+import { useTranslate } from "@/lib/i18n/ui-text";
+import type { CalEvent } from "@/lib/types";
 import { useAppStore } from "@/stores/app-store";
+import { DEFAULT_EVENT_CATEGORIES, useEventCategories } from "@/stores/event-categories-store";
 import { Field } from "./field";
+import { ColorSwatch, EventDialogFooter } from "./event-form-parts";
 
 type Props = {
   open: boolean;
@@ -33,217 +37,220 @@ type Props = {
   allDay?: boolean;
 };
 
-export function EventDialog({ open, session, onClose, ...payload }: Props) {
+// Dialogue d'édition ou création d'événement avec sélecteurs de temps beUI
+export function EventDialog({ open, session, onClose, eventId, date, start, end, allDay }: Props) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="gap-5 p-5 sm:max-w-[440px]">
-        <EventForm key={session} {...payload} onDone={onClose} />
+      <DialogContent className="max-w-md p-5">
+        <EventForm
+          key={`${session}-${eventId ?? "new"}`}
+          eventId={eventId}
+          defaultDate={date}
+          defaultStart={start}
+          defaultEnd={end}
+          defaultAllDay={allDay}
+          onDone={onClose}
+        />
       </DialogContent>
     </Dialog>
   );
 }
 
-type Draft = Omit<CalEvent, "id">;
-
 function EventForm({
   eventId,
-  date,
-  start,
-  end,
-  allDay,
+  defaultDate,
+  defaultStart,
+  defaultEnd,
+  defaultAllDay,
   onDone,
-}: Omit<Props, "open" | "session" | "onClose"> & { onDone: () => void }) {
-  const existing = useAppStore((s) => s.events.find((e) => e.id === eventId));
+}: {
+  eventId?: string;
+  defaultDate?: string;
+  defaultStart?: number;
+  defaultEnd?: number;
+  defaultAllDay?: boolean;
+  onDone: () => void;
+}) {
+  const tr = useTranslate();
   const saveEvent = useAppStore((s) => s.saveEvent);
   const deleteEvent = useAppStore((s) => s.deleteEvent);
   const duplicateEvent = useAppStore((s) => s.duplicateEvent);
+  const existing = eventId ? useAppStore((s) => s.events.find((e) => e.id === eventId)) : undefined;
 
-  const [draft, setDraft] = useState<Draft>(() =>
-    existing
-      ? { ...existing }
-      : {
-          title: "",
-          date: date ?? "",
-          start: start ?? 540,
-          end: end ?? (start ?? 540) + 60,
-          allDay: allDay ?? false,
-          color: "blue",
-          note: "",
-          location: "",
-        },
-  );
-  const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft((d) => ({ ...d, [k]: v }));
+  const customCategories = useEventCategories((s) => s.customCategories);
+  const addCategory = useEventCategories((s) => s.addCategory);
+  const categories = [...DEFAULT_EVENT_CATEGORIES, ...customCategories];
 
-  const error = !draft.allDay && draft.end <= draft.start ? "End time must be after the start time." : null;
-  const linked = Boolean(existing?.requestId);
+  const [isCreatingCat, setIsCreatingCat] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+
+  const [draft, setDraft] = useState<Partial<CalEvent>>(() => ({
+    title: "",
+    date: defaultDate ?? new Date().toISOString().slice(0, 10),
+    start: defaultStart ?? 540,
+    end: defaultEnd ?? 600,
+    color: "green",
+    allDay: defaultAllDay ?? false,
+    ...existing,
+  }));
+
+  const set = <K extends keyof CalEvent>(k: K, v: CalEvent[K]) => setDraft((d) => ({ ...d, [k]: v }));
+
+  const error = !draft.allDay && (draft.end ?? 0) <= (draft.start ?? 0) ? tr("L'heure de fin doit être postérieure.") : null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!draft.title?.trim() || error) return;
+    saveEvent({
+      id: existing?.id,
+      title: draft.title.trim(),
+      date: draft.date || new Date().toISOString().slice(0, 10),
+      start: draft.allDay ? 0 : draft.start ?? 540,
+      end: draft.allDay ? 1440 : draft.end ?? 600,
+      color: draft.color ?? "green",
+      allDay: draft.allDay ?? false,
+      location: draft.location,
+      note: draft.note,
+      category: draft.category,
+    });
+    toast.success(tr(existing ? "Événement modifié" : "Événement créé"));
+    onDone();
+  };
+
+  const handleCreateCat = () => {
+    if (!newCatName.trim()) return;
+    addCategory(newCatName.trim());
+    set("category", newCatName.trim());
+    setNewCatName("");
+    setIsCreatingCat(false);
+  };
 
   return (
-    <form
-      className="contents"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (error || !draft.title.trim() || !draft.date) return;
-        saveEvent({
-          ...draft,
-          id: existing?.id,
-          title: draft.title.trim(),
-          start: draft.allDay ? 0 : draft.start,
-          end: draft.allDay ? 1440 : draft.end,
-        });
-        onDone();
-      }}
-    >
-      <DialogHeader className="gap-1.5">
-        <DialogTitle className="t-16">{existing ? "Edit event" : "New event"}</DialogTitle>
-        <DialogDescription className="t-14">
-          {linked ? "This event belongs to a leave request." : "Add it to your calendar — only you can see it."}
-        </DialogDescription>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <DialogHeader>
+        <DialogTitle className="t-18 font-bold">{tr(existing ? "Modifier l'événement" : "Nouvel événement")}</DialogTitle>
+        <DialogDescription className="sr-only">Formulaire d&apos;événement</DialogDescription>
       </DialogHeader>
 
-      <div className="grid gap-4">
-        <Field label="Title" htmlFor="ev-title">
+      <div className="flex flex-col gap-3">
+        <Field label={tr("Titre")} htmlFor="ev-title">
           <Input
             id="ev-title"
-            autoFocus
             required
-            placeholder="e.g. Dentist appointment"
-            value={draft.title}
+            autoFocus
+            placeholder="Ex. Réunion client, Point hebdomadaire..."
+            value={draft.title ?? ""}
             onChange={(e) => set("title", e.target.value)}
           />
         </Field>
 
-        <div className="grid grid-cols-[1.4fr_1fr_1fr] items-end gap-3 max-sm:grid-cols-2 max-sm:[&>*:first-child]:col-span-2">
-          <Field label="Date" htmlFor="ev-date">
-            <Input id="ev-date" type="date" required value={draft.date} onChange={(e) => set("date", e.target.value)} />
-          </Field>
-          <Field label="Start" htmlFor="ev-start">
-            <Input
-              id="ev-start"
-              type="time"
-              step={900}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-end">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-fg">{tr("Date")}</span>
+            <WheelDatePicker value={draft.date} onChange={(d) => set("date", d)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-fg">{tr("Début")}</span>
+            <WheelTimePicker
               disabled={draft.allDay}
-              value={timeInputValue(draft.start)}
-              onChange={(e) => {
-                const next = parseTime(e.target.value);
-                const length = draft.end - draft.start;
+              value={timeInputValue(draft.start ?? 540)}
+              onChange={(v) => {
+                const next = parseTime(v);
+                const length = (draft.end ?? 600) - (draft.start ?? 540);
                 setDraft((d) => ({ ...d, start: next, end: Math.min(1440, next + Math.max(15, length)) }));
               }}
             />
-          </Field>
-          <Field label="End" htmlFor="ev-end">
-            <Input
-              id="ev-end"
-              type="time"
-              step={900}
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-fg">{tr("Fin")}</span>
+            <WheelTimePicker
               disabled={draft.allDay}
-              value={timeInputValue(draft.end)}
-              onChange={(e) => set("end", parseTime(e.target.value) || 1440)}
+              value={timeInputValue(draft.end ?? 600)}
+              onChange={(v) => set("end", parseTime(v) || 1440)}
             />
-          </Field>
+          </div>
         </div>
-        {error && (
-          <p className="t-12 -mt-2 text-danger" role="alert">
-            {error}
-          </p>
-        )}
+        {error && <p className="t-12 -mt-1 text-danger" role="alert">{error}</p>}
 
-        <div className="flex items-center justify-between gap-3">
-          <label className="flex cursor-pointer items-center gap-2.5">
-            <Switch checked={draft.allDay} onCheckedChange={(v) => set("allDay", v)} />
-            <span className="t-14 text-fg">All day</span>
-          </label>
-          <div className="flex items-center gap-1.5" role="radiogroup" aria-label="Color">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-fg">{tr("Catégorie")}</span>
+            {!isCreatingCat && (
+              <button
+                type="button"
+                onClick={() => setIsCreatingCat(true)}
+                className="flex items-center gap-1 text-[11px] text-brand hover:underline font-medium"
+              >
+                <PlusIcon className="size-3" /> {tr("Nouvelle")}
+              </button>
+            )}
+          </div>
+          {isCreatingCat ? (
+            <div className="flex items-center gap-2">
+              <Input
+                autoFocus
+                placeholder={tr("Nom")}
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                className="h-8 text-xs flex-1"
+              />
+              <Button type="button" size="sm" onClick={handleCreateCat} className="h-8 text-xs">
+                {tr("Ajouter")}
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setIsCreatingCat(false)} className="h-8 text-xs">
+                {tr("Annuler")}
+              </Button>
+            </div>
+          ) : (
+            <Select value={draft.category ?? categories[0]} onValueChange={(val: string) => set("category", val)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((c: string) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-2.5">
+            <Switch id="ev-allday" checked={draft.allDay} onCheckedChange={(v) => set("allDay", v)} />
+            <label htmlFor="ev-allday" className="cursor-pointer text-xs font-medium text-fg select-none">
+              {tr("Journée entière")}
+            </label>
+          </div>
+          <div className="flex items-center gap-1.5" role="radiogroup" aria-label={tr("Couleur")}>
             {EVENT_COLORS.map((c) => (
               <ColorSwatch key={c} color={c} selected={draft.color === c} onSelect={() => set("color", c)} />
             ))}
           </div>
         </div>
 
-        <Field label="Location" htmlFor="ev-location">
+        <Field label={tr("Lieu ou lien")} htmlFor="ev-location">
           <Input
             id="ev-location"
-            placeholder="Add a place or a link"
+            placeholder="Lieu de rendez-vous ou lien visioconférence"
             value={draft.location ?? ""}
             onChange={(e) => set("location", e.target.value)}
           />
         </Field>
 
-        <Field label="Notes" htmlFor="ev-note" hint="Short notes show on the event in the calendar.">
+        <Field label={tr("Notes")} htmlFor="ev-note" hint={tr("Aperçu dans le calendrier.")}>
           <Textarea id="ev-note" rows={2} value={draft.note ?? ""} onChange={(e) => set("note", e.target.value)} />
         </Field>
       </div>
 
-      <DialogFooter className="-mx-5 -mb-5 items-center bg-app px-5 py-3 sm:justify-between">
-        <div className="flex gap-1">
-          {existing && (
-            <>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete event"
-                    onClick={() => {
-                      deleteEvent(existing.id);
-                      onDone();
-                    }}
-                  >
-                    <Trash2Icon className="text-danger" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Delete</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Duplicate event"
-                    onClick={() => {
-                      duplicateEvent(existing.id);
-                      onDone();
-                    }}
-                  >
-                    <CopyIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Duplicate</TooltipContent>
-              </Tooltip>
-            </>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button type="button" onClick={onDone}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="brand" disabled={!!error || !draft.title.trim()}>
-            {existing ? "Save" : "Create event"}
-          </Button>
-        </div>
-      </DialogFooter>
+      <EventDialogFooter
+        existing={!!existing}
+        error={error}
+        title={draft.title || ""}
+        onDone={onDone}
+        onDelete={() => { if (existing) deleteEvent(existing.id); onDone(); }}
+        onDuplicate={() => { if (existing) duplicateEvent(existing.id); onDone(); }}
+      />
     </form>
-  );
-}
-
-function ColorSwatch({ color, selected, onSelect }: { color: EventColor; selected: boolean; onSelect: () => void }) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
-      aria-label={color}
-      onClick={onSelect}
-      className={cn(
-        "press size-5 rounded-full outline-none ring-offset-2 ring-offset-surface focus-visible:ring-2 focus-visible:ring-brand/50",
-        selected && "ring-2",
-      )}
-      style={{
-        background: `var(--event-${color}-bg)`,
-        boxShadow: `inset 0 0 0 1.5px var(--event-${color}-fg)`,
-        ...(selected ? ({ "--tw-ring-color": `var(--event-${color}-fg)` } as React.CSSProperties) : {}),
-      }}
-    />
   );
 }

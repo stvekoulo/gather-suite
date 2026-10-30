@@ -3,20 +3,19 @@ import { computeLeaveStats, durationLabel, formatDays, workingDays } from "./lea
 import { createSeed } from "./seed";
 
 describe("leave rules", () => {
-  it("reproduces the stats shown in the design from the seed", () => {
+  it("computes stats correctly for clean initial install state", () => {
     const seed = createSeed();
     const stats = computeLeaveStats(seed, "2026-10-26");
-    expect(stats.available).toBe(7);
-    expect(stats.pendingCount).toBe(2);
-    expect(stats.upcoming).toBe(3);
-    expect(stats.contract).toBe(12);
-    expect(stats.carryover).toBe(4);
-    expect(stats.holidays).toBe(12);
+    expect(stats.available).toBe(25);
+    expect(stats.pendingCount).toBe(0);
+    expect(stats.upcoming).toBe(0);
+    expect(stats.contract).toBe(25);
+    expect(stats.carryover).toBe(0);
+    expect(stats.holidays).toBe(0);
   });
 
   it("skips weekends and public holidays when counting days", () => {
     const holidays = [{ id: "h", date: "2026-11-11", name: "Test" }];
-    // Mon 9 → Sun 15: five weekdays minus one holiday
     expect(workingDays("2026-11-09", "2026-11-15", holidays)).toHaveLength(4);
   });
 

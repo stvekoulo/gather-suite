@@ -1,0 +1,27 @@
+import { test, expect } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { PDFDocument } from "pdf-lib";
+import { createSeed, STATE_VERSION } from "../src/lib/seed";
+test("rich PDF uses saved page settings and automatic pagination", async ({ page }) => {
+  const seed = createSeed(); seed.settings.hasCompletedOnboarding = true;
+  await page.addInitScript(({ seed, version }) => localStorage.setItem("calendar-app:state", JSON.stringify({ state: seed, version })), { seed, version: STATE_VERSION });
+  await page.goto("/documents"); await page.getByRole("button", { name: "Éditeur de documents" }).click();
+  await page.getByLabel("Titre du document").fill("Rapport paginé");
+  await page.getByLabel("Contenu du document").fill(Array.from({ length: 100 }, (_, n) => `Paragraphe ${n} avec contenu conservé et mise en page.`).join("\n\n"));
+  await page.getByText("Mise en page, en-tête et pagination", { exact: true }).click();
+  await page.getByLabel("Orientation", { exact: true }).selectOption("landscape");
+  await page.getByLabel("En-tête", { exact: true }).fill("Steven KOULO");
+  await page.getByRole("button", { name: /^Enregistrer/ }).click();
+  await expect(page.getByText("Document enregistré", { exact: true }).first()).toBeVisible();
+  const downloading = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Exporter PDF", exact: true }).click();
+  const pdf = await PDFDocument.load(await readFile((await (await downloading).path())!));
+  expect(pdf.getPageCount()).toBeGreaterThan(1);
+  expect(pdf.getPage(0).getWidth()).toBeGreaterThan(pdf.getPage(0).getHeight());
+  expect(pdf.getTitle()).toBe("Rapport paginé");
+  await page.keyboard.press("Escape"); await page.reload();
+  await page.getByText("Rapport paginé.docx", { exact: true }).first().dblclick();
+  await page.getByText("Mise en page, en-tête et pagination", { exact: true }).click();
+  await expect(page.getByLabel("Orientation", { exact: true })).toHaveValue("landscape");
+  await expect(page.getByLabel("En-tête", { exact: true })).toHaveValue("Steven KOULO");
+});

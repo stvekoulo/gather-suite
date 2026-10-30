@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { useOverlayStore, type Overlay } from "@/stores/overlay-store";
 import { EventDialog } from "./event-dialog";
-import { HolidaysDialog, PolicyDialog, ShortcutsDialog } from "./info-dialogs";
-import { RequestDetailsDialog } from "./request-details-dialog";
-import { RequestDialog } from "./request-dialog";
+import { ShortcutsDialog } from "./info-dialogs";
+import { AboutDialog } from "./about-dialog";
 
 type Kind = Exclude<Overlay["kind"], "none" | "search">;
 type Latest = { [K in Kind]?: Extract<Overlay, { kind: K }> };
 
 /**
- * Hosts every app-wide dialog. The last payload of each kind is kept around so
- * a dialog keeps its content while it animates out after closing.
+ * Gestionnaire central des boîtes de dialogue globales de l'application.
  */
 export function GlobalDialogs() {
   const overlay = useOverlayStore((s) => s.overlay);
@@ -21,7 +19,6 @@ export function GlobalDialogs() {
   const [session, setSession] = useState(0);
   const [prev, setPrev] = useState<Overlay>(overlay);
 
-  // Derive state during render (no effect): remember payloads and count opens.
   if (overlay !== prev) {
     setPrev(overlay);
     if (overlay.kind !== "none" && overlay.kind !== "search") {
@@ -34,13 +31,6 @@ export function GlobalDialogs() {
 
   return (
     <>
-      <RequestDialog
-        open={is("request")}
-        session={session}
-        onClose={close}
-        requestId={latest.request?.requestId}
-        from={latest.request?.from}
-      />
       <EventDialog
         open={is("event")}
         session={session}
@@ -51,14 +41,8 @@ export function GlobalDialogs() {
         end={latest.event?.end}
         allDay={latest.event?.allDay}
       />
-      <RequestDetailsDialog
-        open={is("request-details")}
-        onClose={close}
-        requestId={latest["request-details"]?.requestId}
-      />
-      <HolidaysDialog open={is("holidays")} onClose={close} />
-      <PolicyDialog open={is("policy")} onClose={close} />
       <ShortcutsDialog open={is("shortcuts")} onClose={close} />
+      <AboutDialog open={is("about")} onClose={close} />
     </>
   );
 }
