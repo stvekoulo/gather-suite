@@ -1,0 +1,27 @@
+name: Gather Suite - Build & Release (Windows & Linux)
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: gather-suite-release
+  cancel-in-progress: false
+
+jobs:
+  release-packages:
+    name: Compiler et publier les installeurs Gather Suite
+    runs-on: [self-hosted, linux, x64, sol-vps]
+    timeout-minutes: 90
+    steps:
+      - name: Cloner ou mettre a jour le depot
+        run: |
+          if [ -d "/home/ubuntu/gather-suite" ]; then
+            cd /home/ubuntu/gather-suite && git fetch origin && git checkout main && git pull origin main
+          else
+            git clone https://github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
+            cd /home/ubuntu/gather-suite
+          fi
+      - name: Compilation et publication des releases
+        run: |
+          cd /home/ubuntu/gather-suite
+          npm ci || npm install
+          node scripts/vps-release.mjs
