@@ -1,0 +1,7 @@
+node_modules
+.next
+out
+src-tauri/target
+landing-gather
+.git
+.gemini
