@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { basename, join } from "node:path";
 
 // Execute une commande shell en affichant la sortie directement dans le terminal
 function run(cmd, env = {}) {
@@ -8,11 +8,13 @@ function run(cmd, env = {}) {
   execSync(cmd, { stdio: "inherit", env: { ...process.env, ...env } });
 }
 
-// Recherche recursive des paquets d'installation generes par Tauri
+// Recherche recursive des paquets generes en ignorant les dossiers intermediaires Cargo
 function findBundles(dir, extList) {
   const results = [];
   if (!existsSync(dir)) return results;
+  const skipDirs = new Set(["deps", "build", "incremental", ".fingerprint", "examples"]);
   for (const item of readdirSync(dir)) {
+    if (skipDirs.has(item)) continue;
     const full = join(dir, item);
     if (statSync(full).isDirectory()) {
       results.push(...findBundles(full, extList));
@@ -71,10 +73,22 @@ async function main() {
     }
   }
 
-  // 5. Collecte des artefacts generes
+  // 5. Collecte et normalisation des artefacts generes
   const targetDir = join("src-tauri", "target");
   const targetExtensions = [".deb", ".appimage", ".exe", ".msi", ".dmg"];
-  const bundles = findBundles(targetDir, targetExtensions);
+  const rawBundles = findBundles(targetDir, targetExtensions);
+  const normalizedMap = new Map();
+
+  for (const bundle of rawBundles) {
+    let finalPath = bundle;
+    const name = basename(bundle);
+    if (name === "app.exe") {
+      finalPath = join(targetDir, `Gather_${version}_x64.exe`);
+      copyFileSync(bundle, finalPath);
+    }
+    normalizedMap.set(basename(finalPath), finalPath);
+  }
+  const bundles = Array.from(normalizedMap.values());
 
   console.log(`\n[5/5] ${bundles.length} artefact(s) d'installation trouve(s) :`);
   bundles.forEach((b) => console.log(`  - ${b}`));
