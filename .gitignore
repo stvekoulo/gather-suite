@@ -53,3 +53,5 @@ next-env.d.ts
 /.qa/
 /public/ocr/
 /.audit-dependencies.json
+
+/landing/
