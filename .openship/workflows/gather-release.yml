@@ -26,51 +26,55 @@ jobs:
             rm -rf /home/ubuntu/gather-suite
             git clone --branch main https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
           fi
-      - name: Liberer de la place et preparer la memoire
+      - name: Liberer de la place
         run: |
           echo "--- Etat initial"; free -m; df -h /; docker system df || true
           # Only what Gather itself left behind: other services on this server are not touched.
-          rm -rf /home/ubuntu/gather-suite/src-tauri/target/*/release/bundle /home/ubuntu/gather-suite/src-tauri/target/release/bundle
+          docker image rm gather-builder 2>/dev/null || true
           docker image prune -f
           docker builder prune -f --filter "until=72h"
+          rm -rf /home/ubuntu/gather-suite/src-tauri/target/*/release/bundle /home/ubuntu/gather-suite/src-tauri/target/release/bundle
           FREE_GB=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
-          if [ "$FREE_GB" -lt 10 ]; then echo "Peu de disque : cache Rust supprime"; rm -rf /home/ubuntu/gather-suite/src-tauri/target/*; fi
-          # Temporary swap so compiling cannot starve the services running here.
-          if [ "$(swapon --noheadings | wc -l)" = "0" ] && sudo -n true 2>/dev/null; then
-            sudo fallocate -l 3G /swapfile-gather && sudo chmod 600 /swapfile-gather && sudo mkswap /swapfile-gather && sudo swapon /swapfile-gather
-          fi
+          if [ "$FREE_GB" -lt 14 ]; then echo "Peu de disque : cache Rust supprime"; rm -rf /home/ubuntu/gather-suite/src-tauri/target/*; fi
           echo "--- Apres nettoyage"; free -m; df -h /
       - name: Compilation et publication des releases
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           RELEASE_REPO: ${{ vars.RELEASE_REPO }}
           OSXCROSS_ROOT: ${{ vars.OSXCROSS_ROOT }}
         run: |
+          set -uo pipefail
           cd /home/ubuntu/gather-suite
-          nice -n 15 docker build -t gather-builder -f Dockerfile.builder .
+          # Openship keeps 8 MB of log per job: the full output goes to a file, the job shows key lines and the end.
+          LOG=/home/ubuntu/gather-release.log
+          KEY='^(#[0-9]+ (ERROR|DONE [0-9]{2,})|---|Compiling (app|gather)|.*(▶|✖|✔|error(\[|:)|Error:|Killed|No space left|out of memory|ignoré|Finished|Publication))'
+          show_end() { echo "=== Fin du journal ==="; tail -n 150 "$LOG"; }
+          : > "$LOG"
+          if ! nice -n 15 docker build --progress=plain -t gather-builder -f Dockerfile.builder . 2>&1 | tee -a "$LOG" | grep --line-buffered -E "$KEY"; then show_end; exit 1; fi
           # The host's osxcross is mounted at the same path, because its wrappers use absolute paths.
           OSXCROSS=""
           for d in "${OSXCROSS_ROOT:-}" /opt/osxcross /home/ubuntu/osxcross /usr/local/osxcross /root/osxcross; do
             if [ -n "$d" ] && [ -d "$d/target/bin" ]; then OSXCROSS="$d"; break; fi
           done
-          [ -n "$OSXCROSS" ] || OSXCROSS="$(find /opt /home /usr/local -maxdepth 4 -type d -path '*osxcross/target/bin' 2>/dev/null | head -1 | sed 's|/target/bin$||')"
-          echo "osxcross: ${OSXCROSS:-introuvable}"
-          # Memory is capped so an out-of-memory only ever stops this build, never the server's services.
-          docker run --rm \
-            --memory=2200m --memory-swap=5g --oom-score-adj=800 --cpu-shares=256 \
+          echo "--- osxcross: ${OSXCROSS:-introuvable}"
+          # Memory and CPU are capped so an overload only ever stops this build, never the server's services.
+          if ! docker run --rm \
+            --cpus 1.8 --memory=2200m --memory-swap=5g --oom-score-adj=800 \
             -v /home/ubuntu/.cargo/registry:/usr/local/cargo/registry \
             -v /home/ubuntu/.cargo/git:/usr/local/cargo/git \
             -v /home/ubuntu/gather-suite/src-tauri/target:/app/src-tauri/target \
             ${OSXCROSS:+-v "$OSXCROSS:$OSXCROSS:ro" -e OSXCROSS_ROOT="$OSXCROSS"} \
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
-            -e TAURI_SIGNING_PRIVATE_KEY="${TAURI_SIGNING_PRIVATE_KEY}" \
+            -e TAURI_SIGNING_PRIVATE_KEY="${TAURI_SIGNING_PRIVATE_KEY:-}" \
             -e TAURI_SIGNING_PRIVATE_KEY_PASSWORD="" \
-            -e RELEASE_REPO="${RELEASE_REPO}" \
-            gather-builder
-      - name: Rendre la memoire
+            -e RELEASE_REPO="${RELEASE_REPO:-}" \
+            -e CARGO_TERM_COLOR=never -e CARGO_TERM_PROGRESS_WHEN=never -e NO_COLOR=1 \
+            gather-builder 2>&1 | tee -a "$LOG" | grep --line-buffered -E "$KEY"; then show_end; exit 1; fi
+          show_end
+      - name: Nettoyer
         if: always()
         run: |
-          if [ -f /swapfile-gather ] && sudo -n true 2>/dev/null; then sudo swapoff /swapfile-gather; sudo rm -f /swapfile-gather; fi
           docker image prune -f
           free -m; df -h /

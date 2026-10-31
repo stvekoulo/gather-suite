@@ -172,6 +172,10 @@ function main() {
 
   const failed = [];
   for (const platform of PLATFORMS) {
+    if (platform.triple && !(process.env.OSXCROSS_ROOT && existsSync(join(process.env.OSXCROSS_ROOT, "target", "bin")))) {
+      console.log(`--- ${platform.name} ignoré : osxcross n'est pas installé sur ce serveur.`);
+      continue;
+    }
     try { buildPlatform(platform); }
     catch (error) { failed.push(platform.name); console.error(`\x1b[31m✖ ${platform.name} : ${error.message}\x1b[0m`); }
   }
