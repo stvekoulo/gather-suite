@@ -54,6 +54,8 @@ jobs:
           show_end() { echo "=== Fin du journal ==="; tail -n 150 "$LOG"; }
           : > "$LOG"
           if ! nice -n 15 docker build --progress=plain -t gather-builder -f Dockerfile.builder . 2>&1 | tee -a "$LOG" | grep --line-buffered -E "$KEY"; then show_end; exit 1; fi
+          # Layers of the previous image are no longer used: they would take the room the build needs.
+          docker builder prune -f --filter "until=30m"
           # The host's osxcross is mounted at the same path, because its wrappers use absolute paths.
           OSXCROSS=""
           for d in "${OSXCROSS_ROOT:-}" /opt/osxcross /home/ubuntu/osxcross /usr/local/osxcross /root/osxcross; do
