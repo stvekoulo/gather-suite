@@ -50,6 +50,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --de
 # Installation du binaire precompile cargo-xwin
 RUN curl -fsSL https://github.com/rust-cross/cargo-xwin/releases/download/v0.23.1/cargo-xwin-v0.23.1.x86_64-unknown-linux-musl.tar.gz | tar -xz -C /usr/local/cargo/bin
 
+# Ubuntu 22.04 ships NSIS 3.08, without the header Tauri's installer script includes.
+RUN curl -fsSL https://raw.githubusercontent.com/kichik/nsis/v311/Include/Win/RestartManager.nsh -o /usr/share/nsis/Include/Win/RestartManager.nsh
+
 # Installation du CLI GitHub officiel pour la publication des releases
 RUN mkdir -p -m 755 /etc/apt/keyrings \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
