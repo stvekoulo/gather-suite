@@ -115,7 +115,7 @@ le parcours de signature numérique et les autres limites indiquées dans cet au
 1. Essayer la synchronisation réelle sur deux ordinateurs ([CLOUD.md](./CLOUD.md)).
 2. Ajouter mot de passe oublié et suppression de compte.
 3. Signer l'application et configurer les mises à jour : nécessite un certificat et une paire de clés.
-4. Réparer la CI (`startup_failure` avant le premier job), puis tester macOS et Linux.
+4. Valider le build VPS, puis tester les installateurs macOS et Linux sur de vraies machines.
 5. Publier les installateurs et corriger les liens de `landing-gather`, qui visent `/downloads/` encore vide.
 6. Synchroniser les fichiers, avec un stockage objet plutôt que Postgres.
 7. Terminer la parité suivie dans [PARITY_NON_AI.md](./PARITY_NON_AI.md) et la traduction anglaise des modules.

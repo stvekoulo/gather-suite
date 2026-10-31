@@ -1,7 +1,7 @@
 // Builds and publishes one platform at a time, so a small VPS keeps its memory and disk,
 // and a failure on one platform still publishes the others.
 import { execSync } from "node:child_process";
-import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, statfsSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statfsSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf-8"));
@@ -18,9 +18,9 @@ const tauriConfig = JSON.stringify({ build: { beforeBuildCommand: "" }, bundle: 
 const configPath = "/tmp/gather-release.conf.json";
 writeFileSync(configPath, tauriConfig);
 
-function run(cmd) {
+function run(cmd, env = {}) {
   console.log(`\n\x1b[36m▶ ${cmd}\x1b[0m`);
-  execSync(cmd, { stdio: "inherit" });
+  execSync(cmd, { stdio: "inherit", env: { ...process.env, ...env } });
 }
 const freeGb = () => { const s = statfsSync("."); return (s.bavail * s.bsize) / 1024 ** 3; };
 function report(step) {
@@ -75,9 +75,80 @@ const PLATFORMS = [
     updaterFile: (files) => files[0],
     cacheDir: join(TARGET, "x86_64-pc-windows-msvc"),
   },
+  { name: "macOS Apple Silicon", updater: "darwin-aarch64", triple: "aarch64-apple-darwin", toolPrefix: "(?:arm64|aarch64)", arch: "aarch64" },
+  { name: "macOS Intel", updater: "darwin-x86_64", triple: "x86_64-apple-darwin", toolPrefix: "x86_64", arch: "x64" },
 ];
 
+// macOS goes through osxcross: compile for the Apple target, then assemble the .app the bundler only makes on a Mac.
+function osxcrossEnv(triple, toolPrefix) {
+  const root = process.env.OSXCROSS_ROOT;
+  if (!root || !existsSync(join(root, "target", "bin"))) throw new Error("osxcross introuvable : OSXCROSS_ROOT ne pointe pas vers une installation.");
+  const bin = join(root, "target", "bin");
+  const clang = readdirSync(bin).find((f) => new RegExp(`^${toolPrefix}-apple-darwin[0-9.]+-clang$`).test(f));
+  if (!clang) throw new Error(`osxcross ne fournit pas de compilateur ${toolPrefix} dans ${bin}.`);
+  const prefix = clang.replace(/-clang$/, "");
+  const sdk = readdirSync(join(root, "target", "SDK")).find((f) => /^MacOSX.*\.sdk$/.test(f));
+  if (!sdk) throw new Error("osxcross ne contient aucun SDK macOS.");
+  const key = triple.replace(/-/g, "_");
+  return {
+    PATH: `${bin}:${process.env.PATH}`,
+    LD_LIBRARY_PATH: `${join(root, "target", "lib")}:${process.env.LD_LIBRARY_PATH ?? ""}`,
+    SDKROOT: join(root, "target", "SDK", sdk),
+    MACOSX_DEPLOYMENT_TARGET: "11.0",
+    [`CC_${key}`]: `${prefix}-clang`,
+    [`CXX_${key}`]: `${prefix}-clang++`,
+    [`AR_${key}`]: `${prefix}-ar`,
+    [`CARGO_TARGET_${key.toUpperCase()}_LINKER`]: `${prefix}-clang`,
+  };
+}
+function buildMac(platform) {
+  report(`avant ${platform.name}`);
+  const { triple, toolPrefix, arch } = platform;
+  run(`npm run tauri:build -- --no-bundle --target ${triple} --config ${configPath}`, osxcrossEnv(triple, toolPrefix));
+  const out = join(TARGET, triple, "release", "bundle-mac");
+  rmSync(out, { recursive: true, force: true });
+  const app = join(out, "stage", "Gather.app");
+  mkdirSync(join(app, "Contents", "MacOS"), { recursive: true });
+  mkdirSync(join(app, "Contents", "Resources"), { recursive: true });
+  copyFileSync(join(TARGET, triple, "release", "app"), join(app, "Contents", "MacOS", "app"));
+  execSync(`chmod +x "${join(app, "Contents", "MacOS", "app")}"`);
+  copyFileSync(join("src-tauri", "icons", "icon.icns"), join(app, "Contents", "Resources", "icon.icns"));
+  const identifier = JSON.parse(readFileSync(join("src-tauri", "tauri.conf.json"), "utf8")).identifier;
+  writeFileSync(join(app, "Contents", "Info.plist"), `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>app</string>
+<key>CFBundleIconFile</key><string>icon</string>
+<key>CFBundleIdentifier</key><string>${identifier}</string>
+<key>CFBundleName</key><string>Gather</string>
+<key>CFBundleDisplayName</key><string>Gather</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>${version}</string>
+<key>CFBundleVersion</key><string>${version}</string>
+<key>LSMinimumSystemVersion</key><string>11.0</string>
+<key>NSHighResolutionCapable</key><true/>
+</dict></plist>
+`);
+  const archive = join(out, `Gather_${version}_${arch}.app.tar.gz`);
+  run(`tar -czf "${archive}" -C "${join(out, "stage")}" Gather.app`);
+  const files = [archive];
+  if (signing) {
+    run(`npx tauri signer sign "${archive}"`);
+    files.push(`${archive}.sig`);
+  }
+  symlinkSync("/Applications", join(out, "stage", "Applications"));
+  const dmg = join(out, `Gather_${version}_${arch}.dmg`);
+  run(`genisoimage -V Gather -D -R -apple -no-pad -o "${dmg}" "${join(out, "stage")}"`);
+  files.push(dmg);
+  publish(files);
+  recordUpdater(platform.updater, archive);
+  rmSync(out, { recursive: true, force: true });
+  if (freeGb() < MIN_FREE_GB) { console.log(`Moins de ${MIN_FREE_GB} Go libres : cache ${platform.name} supprimé.`); rmSync(join(TARGET, triple), { recursive: true, force: true }); }
+  report(`après ${platform.name}`);
+}
+
 function buildPlatform(platform) {
+  if (platform.triple) { buildMac(platform); return; }
   report(`avant ${platform.name}`);
   rmSync(platform.bundleDir, { recursive: true, force: true });
   run(`npm run tauri:build -- ${platform.args} --config ${configPath}`);
@@ -95,8 +166,6 @@ function buildPlatform(platform) {
 
 function main() {
   console.log(`\x1b[32m=== Release Gather ${tag} vers ${repo} ===\x1b[0m`);
-  // macOS requires Apple's SDK and a Mac to sign and notarize: a Linux VPS cannot produce a usable app.
-  console.log("macOS n'est pas compilé ici : il faut un Mac.");
   report("départ");
   run("npm test");
   run("npm run build");

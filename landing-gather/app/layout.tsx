@@ -59,7 +59,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Gather Suite",
-    operatingSystem: "Windows, Linux",
+    operatingSystem: "Windows, macOS, Linux",
     applicationCategory: "ProductivityApplication",
     description:
       "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",

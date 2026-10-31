@@ -24,6 +24,14 @@ const packages: PlatformPackage[] = [
     arch: "x86_64",
   },
   {
+    os: "macOS",
+    badge: "Disk image",
+    filename: `Gather_${VERSION}_aarch64.dmg`,
+    downloadUrl: `${RELEASES}/Gather_${VERSION}_aarch64.dmg`,
+    requirements: "macOS 11 Big Sur or newer",
+    arch: "Apple Silicon (Intel build also available)",
+  },
+  {
     os: "Linux",
     badge: "AppImage",
     filename: `Gather_${VERSION}_amd64.AppImage`,
@@ -44,10 +52,9 @@ export function PlatformDownloads() {
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#111113] tracking-tight mt-2">
           Choose your computer.
         </h2>
-        <p className="text-sm text-[#71717a] mt-3">macOS is on the way.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
         {packages.map((pkg, i) => (
           <div
             key={i}

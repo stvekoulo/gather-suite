@@ -23,7 +23,7 @@ export function DownloadButton() {
 
   const buttonDetails: Record<Platform, { label: string; ext: string }> = {
     windows: { label: "Gather for Windows", ext: "Coming soon" },
-    mac: { label: "Gather for macOS", ext: "On the way" },
+    mac: { label: "Gather for macOS", ext: "Coming soon" },
     linux: { label: "Gather for Linux", ext: "Coming soon" },
   };
 

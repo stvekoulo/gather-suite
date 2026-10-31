@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lld \
     llvm \
     nsis \
+    genisoimage \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -39,10 +40,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Installation de Rust stable et des cibles Linux et Windows
+# Installation de Rust stable et des cibles Linux, Windows et macOS
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
     && rustup target add x86_64-unknown-linux-gnu \
-    && rustup target add x86_64-pc-windows-msvc
+    && rustup target add x86_64-pc-windows-msvc \
+    && rustup target add aarch64-apple-darwin \
+    && rustup target add x86_64-apple-darwin
 
 # Installation du binaire precompile cargo-xwin
 RUN curl -fsSL https://github.com/rust-cross/cargo-xwin/releases/download/v0.23.1/cargo-xwin-v0.23.1.x86_64-unknown-linux-musl.tar.gz | tar -xz -C /usr/local/cargo/bin

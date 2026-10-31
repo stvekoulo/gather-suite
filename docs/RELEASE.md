@@ -5,7 +5,7 @@ La release passe par le workflow Openship `.openship/workflows/gather-release.ym
 1. Monter la version dans `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` et `landing-gather/components/platform-downloads.tsx`.
 2. Pousser sur `main`, puis lancer le workflow dans Openship.
 
-Le workflow nettoie ce que Gather a laissé, ajoute 3 Go de swap temporaire si `sudo` est permis, limite le conteneur à 2,2 Go de RAM pour protéger les autres services du serveur, puis construit Linux et Windows l'un après l'autre.
+Le workflow nettoie ce que Gather a laissé, ajoute 3 Go de swap temporaire si `sudo` est permis, limite le conteneur à 2,2 Go de RAM pour protéger les autres services du serveur, puis construit Linux, Windows et macOS l'un après l'autre.
 Chaque plateforme est publiée dès qu'elle est prête, donc l'échec de l'une n'empêche pas l'autre. Les journaux affichent la mémoire et le disque à chaque étape.
 
 ## Secrets et variables Openship
@@ -21,4 +21,6 @@ La clé privée de mise à jour ne doit jamais entrer dans le dépôt, et sa per
 
 ## macOS
 
-Non compilé sur le VPS : il faut un Mac pour le SDK Apple, la signature et la notarisation.
+Le VPS construit macOS (Apple Silicon et Intel) avec `osxcross`, monté depuis l'hôte. Le workflow le cherche dans la variable `OSXCROSS_ROOT`, puis dans les emplacements habituels, et affiche le chemin retenu.
+
+Le `.app` est assemblé par `scripts/vps-release.mjs`, car le bundler de Tauri ne le fait que sur un Mac. L'application n'est ni signée avec un compte Apple Developer ni notarisée : au premier lancement, macOS la bloque comme venant d'un développeur non identifié (`xattr -cr /Applications/Gather.app` la débloque). Il faut un compte Apple Developer pour lever ce blocage.

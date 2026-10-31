@@ -1,4 +1,4 @@
-name: Gather Suite - Build & Release (Windows & Linux)
+name: Gather Suite - Build & Release (Windows, Linux & macOS)
 on:
   workflow_dispatch: {}
 
@@ -10,7 +10,7 @@ jobs:
   release-packages:
     name: Compiler et publier les installeurs Gather Suite
     runs-on: [self-hosted, linux, x64, sol-vps]
-    timeout-minutes: 150
+    timeout-minutes: 240
     steps:
       - name: Cloner ou mettre a jour le depot
         env:
@@ -30,7 +30,6 @@ jobs:
         run: |
           echo "--- Etat initial"; free -m; df -h /; docker system df || true
           # Only what Gather itself left behind: other services on this server are not touched.
-          rm -rf /home/ubuntu/gather-suite/src-tauri/target/aarch64-apple-darwin /home/ubuntu/gather-suite/src-tauri/target/x86_64-apple-darwin
           rm -rf /home/ubuntu/gather-suite/src-tauri/target/*/release/bundle /home/ubuntu/gather-suite/src-tauri/target/release/bundle
           docker image prune -f
           docker builder prune -f --filter "until=72h"
@@ -46,15 +45,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           RELEASE_REPO: ${{ vars.RELEASE_REPO }}
+          OSXCROSS_ROOT: ${{ vars.OSXCROSS_ROOT }}
         run: |
           cd /home/ubuntu/gather-suite
           nice -n 15 docker build -t gather-builder -f Dockerfile.builder .
+          # The host's osxcross is mounted at the same path, because its wrappers use absolute paths.
+          OSXCROSS=""
+          for d in "${OSXCROSS_ROOT:-}" /opt/osxcross /home/ubuntu/osxcross /usr/local/osxcross /root/osxcross; do
+            if [ -n "$d" ] && [ -d "$d/target/bin" ]; then OSXCROSS="$d"; break; fi
+          done
+          [ -n "$OSXCROSS" ] || OSXCROSS="$(find /opt /home /usr/local -maxdepth 4 -type d -path '*osxcross/target/bin' 2>/dev/null | head -1 | sed 's|/target/bin$||')"
+          echo "osxcross: ${OSXCROSS:-introuvable}"
           # Memory is capped so an out-of-memory only ever stops this build, never the server's services.
           docker run --rm \
             --memory=2200m --memory-swap=5g --oom-score-adj=800 --cpu-shares=256 \
             -v /home/ubuntu/.cargo/registry:/usr/local/cargo/registry \
             -v /home/ubuntu/.cargo/git:/usr/local/cargo/git \
             -v /home/ubuntu/gather-suite/src-tauri/target:/app/src-tauri/target \
+            ${OSXCROSS:+-v "$OSXCROSS:$OSXCROSS:ro" -e OSXCROSS_ROOT="$OSXCROSS"} \
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
             -e TAURI_SIGNING_PRIVATE_KEY="${TAURI_SIGNING_PRIVATE_KEY}" \
             -e TAURI_SIGNING_PRIVATE_KEY_PASSWORD="" \
