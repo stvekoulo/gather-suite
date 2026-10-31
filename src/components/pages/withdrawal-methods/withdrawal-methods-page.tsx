@@ -1,4 +1,7 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
+import { invoiceTotal } from "@/components/pages/invoice/invoice-utils";
+import { txRow, useMoney } from "@/lib/finance-totals";
 
 import { useMemo, useState } from "react";
 import { PlusIcon, TrendingUpIcon } from "lucide-react";
@@ -25,13 +28,14 @@ export function WithdrawalMethodsPage() {
   // Intégration automatique des factures réelles du logiciel
   const invoiceTransactions = useMemo<FinanceTransaction[]>(() => {
     return invoices.map((inv) => {
-      const amount = inv.items.reduce((sum, item) => sum + item.quantity * item.rate, 0);
+      const amount = invoiceTotal(inv);
       const isPaid = inv.status === "paid";
       return {
         id: `inv-${inv.id}`,
         type: "income",
         title: `Facture #${inv.number} · ${inv.client}`,
         amount,
+        currency: inv.currency,
         category: "Facture client",
         date: inv.dueDate || inv.issueDate || today,
         invoiceNumber: inv.number,
@@ -54,14 +58,9 @@ export function WithdrawalMethodsPage() {
     return combined.sort((a, b) => b.date.localeCompare(a.date));
   }, [storedTransactions, invoiceTransactions]);
 
-  const totalIncome = useMemo(
-    () => allTransactions.filter((t) => t.type === "income" && t.status === "completed").reduce((sum, t) => sum + t.amount, 0),
-    [allTransactions]
-  );
-  const totalExpense = useMemo(
-    () => allTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0),
-    [allTransactions]
-  );
+  const money = useMoney();
+  const totalIncome = money.value(allTransactions.filter((t) => t.type === "income" && t.status === "completed").map(txRow));
+  const totalExpense = money.value(allTransactions.filter((t) => t.type === "expense").map(txRow));
   const incomeCount = allTransactions.filter((t) => t.type === "income").length;
   const expenseCount = allTransactions.filter((t) => t.type === "expense").length;
 
@@ -74,10 +73,10 @@ export function WithdrawalMethodsPage() {
             <span className="flex size-7 items-center justify-center rounded-lg bg-brand/10 text-brand">
               <TrendingUpIcon className="size-4" />
             </span>
-            <h1 className="text-base font-bold text-fg">Revenus & Dépenses</h1>
+            <h1 className="text-base font-bold text-fg">{translate("Revenus & Dépenses")}</h1>
           </div>
           <p className="text-xs text-fg-2 mt-0.5">
-            Trésorerie réelle, abonnements synchronisés et suivi de facturation Gather
+            {translate("Trésorerie réelle, abonnements synchronisés et suivi de facturation Gather")}
           </p>
         </div>
 
@@ -88,7 +87,7 @@ export function WithdrawalMethodsPage() {
           className="gap-1.5 text-xs font-semibold"
         >
           <PlusIcon className="size-3.5 stroke-[2.5]" />
-          <span>Nouvelle écriture</span>
+          <span>{translate("Nouvelle écriture")}</span>
         </Button>
       </header>
 
@@ -110,7 +109,7 @@ export function WithdrawalMethodsPage() {
           transactions={allTransactions}
           onDeleteTransaction={(id) => {
             if (id.startsWith("inv-")) {
-              toast.error("Cette écriture provient d’une facture. Supprimez-la depuis le module Factures.");
+              toast.error(translate("Cette écriture provient d’une facture. Supprimez-la depuis le module Factures."));
             } else {
               deleteTransaction(id);
             }

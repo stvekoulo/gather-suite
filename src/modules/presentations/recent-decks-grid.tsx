@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -16,7 +17,7 @@ export function RecentDecksGrid({ decks, onOpenDeck, onDeleteDeck }: RecentDecks
   return (
     <div className="p-6">
       <h3 className="text-xs font-semibold uppercase tracking-wider text-fg-2 pb-3">
-        Présentations récentes ({decks.length})
+        {translate("Présentations récentes (")}{decks.length})
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {decks.map((d) => (
@@ -39,7 +40,7 @@ export function RecentDecksGrid({ decks, onOpenDeck, onDeleteDeck }: RecentDecks
             <div className="mt-3 flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-fg truncate group-hover:text-orange-600 transition-colors">{d.title}</p>
-                <p className="text-[11px] text-fg-2 mt-0.5">{d.slides.length} diapositives · 16:9</p>
+                <p className="text-[11px] text-fg-2 mt-0.5">{d.slides.length} {translate("diapositives · 16:9")}</p>
               </div>
               <Button
                 size="sm"
@@ -48,7 +49,7 @@ export function RecentDecksGrid({ decks, onOpenDeck, onDeleteDeck }: RecentDecks
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteDeck(d.id);
-                  toast.success("Présentation supprimée");
+                  toast.success(translate("Présentation supprimée"));
                 }}
               >
                 <Trash2Icon className="size-3.5" />

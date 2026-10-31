@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -35,36 +36,36 @@ export function FloatingTimerIsland() {
   const elapsed = timer.startedAt && now ? Math.max(0, now - timer.startedAt) : 0;
 
   return (
-    <div className="fixed top-2.5 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
+    <div className="fixed top-2.5 left-1/2 z-[60] -translate-x-1/2 pointer-events-auto">
       <DynamicIsland
         view={expanded ? "detail" : null}
         onClick={() => setExpanded(!expanded)}
         compact={
           <div className="flex items-center gap-2 text-xs font-semibold">
             <span className="size-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="font-mono tabular-nums text-white">{formatClock(elapsed)}</span>
-            <span className="text-zinc-400 font-normal truncate max-w-[80px]">
-              {timer.project || "Chrono"}
+            <span className="font-mono tabular-nums text-fg">{formatClock(elapsed)}</span>
+            <span className="text-fg-2 font-normal truncate max-w-[80px]">
+              {timer.project || translate("Chronomètre")}
             </span>
           </div>
         }
       >
         <DynamicIslandView id="detail" className="flex flex-col gap-2.5 min-w-[280px]">
-          <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[11px] text-zinc-400">
-            <span className="flex items-center gap-1.5 font-semibold text-zinc-300">
+          <div className="flex items-center justify-between border-b border-hairline pb-1.5 text-[11px] text-fg-2">
+            <span className="flex items-center gap-1.5 font-semibold text-fg-2">
               <span className="size-2 rounded-full bg-red-500 animate-pulse" />
-              Chronomètre actif
+              {translate("Chronomètre actif")}
             </span>
             <span className="font-mono tabular-nums">{formatClock(elapsed)}</span>
           </div>
 
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-white truncate">
-                {timer.project || "Général"}
+              <span className="text-xs font-semibold text-fg truncate">
+                {timer.project || translate("Général")}
               </span>
-              <span className="text-[11px] text-zinc-400 truncate">
-                {timer.task || "Session en cours"}
+              <span className="text-[11px] text-fg-2 truncate">
+                {timer.task || translate("Session en cours")}
               </span>
             </div>
 
@@ -80,7 +81,7 @@ export function FloatingTimerIsland() {
                 className="h-7 px-2.5 text-xs rounded-full gap-1"
               >
                 <SquareIcon className="size-3 fill-current" />
-                Arrêter
+                {translate("Arrêter")}
               </Button>
               <Button
                 size="sm"
@@ -89,8 +90,8 @@ export function FloatingTimerIsland() {
                   e.stopPropagation();
                   router.push("/time-tracking");
                 }}
-                className="h-7 px-2 text-zinc-300 hover:text-white"
-                title="Ouvrir le suivi du temps"
+                className="h-7 px-2 text-fg-2 hover:text-fg"
+                title={translate("Ouvrir le suivi du temps")}
               >
                 <ExternalLinkIcon className="size-3.5" />
               </Button>

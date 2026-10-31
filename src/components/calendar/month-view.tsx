@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo } from "react";
 import { WEEKDAYS_SHORT, dayOfWeek, formatTime, fromKey, isWeekend, monthGrid } from "@/lib/dates";
@@ -141,7 +142,7 @@ export function MonthView() {
                   }}
                   className="t-12 self-start rounded-md px-1.5 py-1 text-fg-2 hover-fine:bg-hover hover-fine:text-fg max-md:hidden"
                 >
-                  +{hidden} more
+                  +{hidden} {translate("more")}
                 </button>
               )}
             </div>

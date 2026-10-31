@@ -8,6 +8,7 @@ import {
   PaletteIcon,
   SlidersHorizontalIcon,
 } from "lucide-react";
+import { APP_CONFIG } from "@/config/app-config";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { PageHeader, PageRoot } from "@/components/pages/shared/page-chrome";
@@ -77,7 +78,7 @@ export function SettingsPage() {
             <img src="/logo.png" alt="Gather Suite" className="size-7 rounded-lg object-contain select-none shrink-0" />
             <div className="min-w-0 flex-1 leading-tight">
               <div className="text-[12px] font-semibold text-fg truncate">Gather Suite</div>
-              <div className="text-[10px] text-fg-3 font-mono">v0.2.0</div>
+              <div className="text-[10px] text-fg-3 font-mono">v{APP_CONFIG.version}</div>
             </div>
           </div>
         </TabsList>

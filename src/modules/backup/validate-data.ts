@@ -19,14 +19,14 @@ export function validateData(app: Row, workspace: Row, blinko: Row) {
       const layout = doc.pageSetup; requireValid(object(layout) && ["A4", "LETTER"].includes(String(layout.size)) && ["portrait", "landscape"].includes(String(layout.orientation)) && finite(layout.margin) && layout.margin >= 5 && layout.margin <= 50 && typeof layout.header === "string" && typeof layout.footer === "string" && typeof layout.pageNumbers === "boolean" && typeof layout.tableOfContents === "boolean");
     }
   }
-  for (const invoice of rows(app.invoices)) for (const item of rows(invoice.items)) requireValid(object(item) && typeof item.id === "string" && typeof item.description === "string" && finite(item.quantity) && item.quantity >= 0 && finite(item.rate) && item.rate >= 0);
+  for (const invoice of rows(app.invoices)) for (const item of rows(invoice.items)) requireValid(object(item) && typeof item.id === "string" && typeof item.description === "string" && finite(item.quantity) && item.quantity >= 0 && finite(item.rate));
   for (const note of rows(blinko.notes)) {
     for (const key of ["remindAt", "reminderFiredAt", "reviewedAt"]) if (note[key] !== undefined) requireValid(typeof note[key] === "string" && Number.isFinite(Date.parse(note[key] as string)));
     requireValid(strings(note.tags) && strings(note.references) && ["memo", "note", "todo"].includes(String(note.type)) && ["isTop", "isArchived", "isRecycle"].every((key) => typeof note[key] === "boolean"));
     for (const attachment of rows(note.attachments)) requireValid(object(attachment) && typeof attachment.id === "string" && typeof attachment.name === "string" && typeof attachment.type === "string" && finite(attachment.size) && attachment.size >= 0 && (attachment.url === undefined || typeof attachment.url === "string"));
   }
   for (const deck of rows(workspace.decks)) for (const slide of rows(deck.slides)) {
-    requireValid(["title", "split", "metrics", "quote", "bullets"].includes(String(slide.layout)));
+    requireValid(["title", "split", "metrics", "quote", "bullets", "blank"].includes(String(slide.layout)));
     if (slide.bullets !== undefined) requireValid(strings(slide.bullets));
     if (slide.elements !== undefined) {
       requireValid(Array.isArray(slide.elements));
@@ -35,7 +35,7 @@ export function validateData(app: Row, workspace: Row, blinko: Row) {
   }
   if (workspace.sheets !== undefined) {
     requireValid(Array.isArray(workspace.sheets));
-    for (const sheet of rows(workspace.sheets)) requireValid(object(sheet) && typeof sheet.id === "string" && typeof sheet.title === "string" && finite(sheet.rows) && Number.isInteger(sheet.rows) && sheet.rows >= 1 && sheet.rows <= 200 && finite(sheet.columns) && Number.isInteger(sheet.columns) && sheet.columns >= 1 && sheet.columns <= 100 && object(sheet.cells) && Object.entries(sheet.cells).every(([address, value]) => /^[A-Z]+[1-9]\d*$/.test(address) && typeof value === "string"));
+    for (const sheet of rows(workspace.sheets)) requireValid(object(sheet) && typeof sheet.id === "string" && typeof sheet.title === "string" && finite(sheet.rows) && Number.isInteger(sheet.rows) && sheet.rows >= 1 && finite(sheet.columns) && Number.isInteger(sheet.columns) && sheet.columns >= 1 && object(sheet.cells) && Object.entries(sheet.cells).every(([address, value]) => /^[A-Z]+[1-9]\d*$/.test(address) && typeof value === "string"));
   }
   if (workspace.tasks !== undefined) {
     requireValid(Array.isArray(workspace.tasks));

@@ -9,29 +9,26 @@ interface PlatformPackage {
   arch: string;
 }
 
+// Turn on once the installers are published in this public repository.
+const DOWNLOADS_LIVE = false;
+const VERSION = "0.3.0";
+const RELEASES = `https://github.com/stvekoulo/gather-releases/releases/download/v${VERSION}`;
+
 const packages: PlatformPackage[] = [
   {
     os: "Windows",
     badge: "Installer",
-    filename: "GatherSuite-Setup.exe",
-    downloadUrl: "/downloads/GatherSuite-Setup.exe",
+    filename: `Gather_${VERSION}_x64-setup.exe`,
+    downloadUrl: `${RELEASES}/Gather_${VERSION}_x64-setup.exe`,
     requirements: "Windows 10 / 11 (64-bit)",
     arch: "x86_64",
   },
   {
-    os: "macOS",
-    badge: "Universal Disk Image",
-    filename: "GatherSuite-macOS.dmg",
-    downloadUrl: "/downloads/GatherSuite-macOS.dmg",
-    requirements: "macOS 12 Monterey or newer",
-    arch: "Apple Silicon (M1+) & Intel",
-  },
-  {
     os: "Linux",
-    badge: "AppImage & Deb",
-    filename: "GatherSuite.AppImage",
-    downloadUrl: "/downloads/GatherSuite.AppImage",
-    requirements: "Ubuntu 20+, Debian 11+, Fedora 36+",
+    badge: "AppImage",
+    filename: `Gather_${VERSION}_amd64.AppImage`,
+    downloadUrl: `${RELEASES}/Gather_${VERSION}_amd64.AppImage`,
+    requirements: "Ubuntu 22.04 or newer",
     arch: "x86_64",
   },
 ];
@@ -45,11 +42,12 @@ export function PlatformDownloads() {
           Direct Downloads
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#111113] tracking-tight mt-2">
-          Download once. Keep it forever.
+          Choose your computer.
         </h2>
+        <p className="text-sm text-[#71717a] mt-3">macOS is on the way.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         {packages.map((pkg, i) => (
           <div
             key={i}
@@ -78,13 +76,13 @@ export function PlatformDownloads() {
             </div>
 
             <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-black/[0.04]">
-              <a
-                href={pkg.downloadUrl}
-                download
-                className="apple-button w-full inline-flex items-center justify-center py-3 rounded-full text-xs font-medium text-white bg-[#111113] hover:bg-black shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
-              >
-                Download for {pkg.os}
-              </a>
+              {DOWNLOADS_LIVE ? (
+                <a href={pkg.downloadUrl} download className="apple-button w-full inline-flex items-center justify-center py-3 rounded-full text-xs font-medium text-white bg-[#111113] hover:bg-black shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
+                  Download for {pkg.os}
+                </a>
+              ) : (
+                <p className="w-full py-3 text-center text-xs font-medium text-[#71717a]">Coming soon</p>
+              )}
             </div>
           </div>
         ))}

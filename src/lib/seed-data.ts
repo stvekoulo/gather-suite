@@ -1,3 +1,4 @@
+import { toKey } from "@/lib/dates";
 import type {
   AppNotification,
   Benefit,
@@ -19,7 +20,7 @@ export const SEED_PROFILE: Profile = {
   department: "",
   manager: "",
   location: "",
-  startDate: new Date().toISOString().slice(0, 10),
+  startDate: toKey(new Date()),
   birthday: "",
   address: "",
   emergencyContact: "",
@@ -40,6 +41,7 @@ export const SEED_SETTINGS: Settings = {
   hasCompletedOnboarding: false,
   accentColor: "monochrome",
   language: "fr",
+  currency: "EUR",
 };
 
 // Clean initial empty lists for standalone product

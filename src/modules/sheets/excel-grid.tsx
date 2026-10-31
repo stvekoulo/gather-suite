@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useRef, useState } from "react";
 import type { CellStyle } from "@/modules/productivity/types";
@@ -224,7 +225,7 @@ export function ExcelGrid({
                               e.stopPropagation();
                               setIsFilling(true);
                             }}
-                            title="Étendre la sélection ou les formules"
+                            title={translate("Étendre la sélection ou les formules")}
                             className="absolute -bottom-1 -right-1 size-2 rounded-xs bg-emerald-600 ring-1 ring-white cursor-crosshair hover:scale-125 transition-transform z-20"
                           />
                         )}

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useState } from "react";
 import { ChevronDownIcon, PlayIcon, SquareIcon, TimerIcon, XIcon } from "lucide-react";
@@ -26,13 +27,7 @@ function useElapsed(running: boolean, startedAt: number | null): number {
 }
 
 // Widget Dynamic Island beUI pour le suivi du temps avec morphing fluide
-export function DynamicIslandTimer({
-  projects,
-  todayMinutes,
-}: {
-  projects: string[];
-  todayMinutes: number;
-}) {
+export function DynamicIslandTimer({ todayMinutes }: { todayMinutes: number }) {
   const timer = useAppStore((s) => s.timer);
   const startTimer = useAppStore((s) => s.startTimer);
   const stopTimer = useAppStore((s) => s.stopTimer);
@@ -47,7 +42,7 @@ export function DynamicIslandTimer({
     : expanded;
 
   const handleStart = () => {
-    startTimer(timer.project.trim() || "Général", timer.task.trim());
+    startTimer(timer.project.trim() || translate("Général"), timer.task.trim());
     setExpanded("active");
   };
 
@@ -69,46 +64,46 @@ export function DynamicIslandTimer({
           timer.running ? (
             <div className="flex items-center gap-2 text-xs font-semibold">
               <span className="size-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-mono tabular-nums text-white">{formatClock(elapsed)}</span>
-              <span className="text-zinc-400 font-normal truncate max-w-[90px]">
-                {timer.project || "Chrono"}
+              <span className="font-mono tabular-nums text-fg">{formatClock(elapsed)}</span>
+              <span className="text-fg-2 font-normal truncate max-w-[90px]">
+                {timer.project || translate("Chronomètre")}
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-xs font-medium text-zinc-300">
+            <div className="flex items-center gap-2 text-xs font-medium text-fg-2">
               <TimerIcon className="size-3.5 text-brand" />
-              <span>Démarrer un chrono</span>
+              <span>{translate("Démarrer un chrono")}</span>
             </div>
           )
         }
       >
         {/* Vue quand le chrono tourne */}
         <DynamicIslandView id="active" className="flex flex-col gap-3 min-w-[320px] sm:min-w-[380px]">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+          <div className="flex items-center justify-between border-b border-hairline pb-2">
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-300">
-                Enregistrement en direct
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-fg-2">
+                {translate("Enregistrement en direct")}
               </span>
             </div>
-            <span className="text-[11px] text-zinc-400">
-              Aujourd&apos;hui · {formatHours(todayMinutes)}
+            <span className="text-[11px] text-fg-2">
+              {translate("Aujourd'hui")} · {formatHours(todayMinutes)}
             </span>
           </div>
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              <span className="font-mono text-3xl font-bold tracking-tight text-white tabular-nums">
+              <span className="font-mono text-3xl font-bold tracking-tight text-fg tabular-nums">
                 {formatClock(elapsed)}
               </span>
-              <div className="flex items-center gap-1.5 text-xs text-zinc-300 pt-0.5">
+              <div className="flex items-center gap-1.5 text-xs text-fg-2 pt-0.5">
                 <span className="font-semibold text-brand">
-                  {timer.project || "Projet général"}
+                  {timer.project || translate("Projet général")}
                 </span>
                 {timer.task && (
                   <>
-                    <span className="text-zinc-500">·</span>
-                    <span className="text-zinc-300 truncate max-w-[180px]">{timer.task}</span>
+                    <span className="text-fg-2">·</span>
+                    <span className="text-fg-2 truncate max-w-[180px]">{timer.task}</span>
                   </>
                 )}
               </div>
@@ -122,7 +117,7 @@ export function DynamicIslandTimer({
                 className="gap-1.5 px-3.5 h-9 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold"
               >
                 <SquareIcon className="size-3.5 fill-current" />
-                Arrêter
+                {translate("Arrêter")}
               </Button>
             </div>
           </div>
@@ -130,17 +125,18 @@ export function DynamicIslandTimer({
 
         {/* Vue pour configurer et lancer un chrono */}
         <DynamicIslandView id="start" className="flex flex-col gap-3 min-w-[320px] sm:min-w-[400px]">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <span className="text-xs font-semibold text-zinc-200">
-              Nouveau chronomètre
+          <div className="flex items-center justify-between border-b border-hairline pb-2">
+            <span className="text-xs font-semibold text-fg">
+              {translate("Nouveau chronomètre")}
             </span>
             <button
               type="button"
+              aria-label={translate("Fermer")}
               onClick={(e) => {
                 e.stopPropagation();
                 setExpanded(null);
               }}
-              className="text-zinc-400 hover:text-white"
+              className="text-fg-2 hover:text-fg"
             >
               <XIcon className="size-3.5" />
             </button>
@@ -148,23 +144,20 @@ export function DynamicIslandTimer({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Input
-              placeholder="Projet ou client..."
-              list="tt-island-projects"
+              aria-label={translate("Project")}
+              placeholder={translate("Projet ou client...")}
+              list="known-clients"
               value={timer.project}
               onChange={(e) => updateTimer({ project: e.target.value })}
-              className="h-8 text-xs bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+              className="h-8 text-xs"
             />
             <Input
-              placeholder="Tâche / description..."
+              aria-label={translate("Task")}
+              placeholder={translate("Tâche / description...")}
               value={timer.task}
               onChange={(e) => updateTimer({ task: e.target.value })}
-              className="h-8 text-xs bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+              className="h-8 text-xs"
             />
-            <datalist id="tt-island-projects">
-              {projects.map((p) => (
-                <option key={p} value={p} />
-              ))}
-            </datalist>
           </div>
 
           <div className="flex justify-end gap-2 pt-1">
@@ -175,7 +168,7 @@ export function DynamicIslandTimer({
               className="gap-1.5 px-4 h-8 text-xs rounded-full"
             >
               <PlayIcon className="size-3.5 fill-current" />
-              Lancer
+              {translate("Lancer")}
             </Button>
           </div>
         </DynamicIslandView>

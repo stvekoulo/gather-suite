@@ -7,20 +7,28 @@ interface QuestionItem {
 
 const items: QuestionItem[] = [
   {
-    q: "Why did you build Gather instead of using Notion or Obsidian?",
-    a: "Most note applications force you into cloud subscriptions, slow web interfaces, or complex plugin management. Gather is designed as a single cohesive native desktop app that boots in 150ms, requires zero internet access, and combines daily scheduling with markdown notes without friction.",
+    q: "What is Gather for?",
+    a: "Planning and running your personal and professional life from one app: calendar, tasks, notes, documents, time tracking, invoices, expenses and PDFs. You can keep separate spaces, for example one for work and one for home.",
   },
   {
-    q: "Where is my data stored, and who can access it?",
-    a: "Your data is stored strictly in your local user folder in an open SQLite database and standard files. Nobody—not even the creator of Gather—has access to your documents or notes.",
+    q: "Where is my data stored?",
+    a: "On your computer, in a local database. If you create an account, your notes, tasks, events, finances, invoices and preferences are also copied to your account so they can reach your other computers.",
   },
   {
-    q: "Can I use Gather completely offline?",
-    a: "Yes. Every single capability in Gather (searching notes, planning dates, signing PDFs, running OCR on images) executes directly on your CPU without ever making a network request.",
+    q: "Do my files sync too?",
+    a: "Not yet. Imported files and attachments stay on the computer where you added them. Their names and details sync, and documents you write in Gather sync in full.",
+  },
+  {
+    q: "Can I use Gather offline?",
+    a: "Yes. You only need a connection to sync, update exchange rates and import public holidays. Changes you make offline sync when you reconnect.",
+  },
+  {
+    q: "Does Gather use AI?",
+    a: "Gather has no AI built in, and nothing is sent to an AI service by default. If you want an assistant, you can connect your own through MCP and decide whether it can only read or can also make changes.",
   },
   {
     q: "How much does Gather cost?",
-    a: "Gather is completely free to download and use on Windows, macOS, and Linux. There are no surprise paywalls or feature lockouts.",
+    a: "Gather is free to download and use.",
   },
 ];
 
@@ -30,7 +38,7 @@ export function FaqSection() {
     <section id="faq" className="w-full max-w-4xl mx-auto px-6 sm:px-10 py-16 sm:py-24 border-t border-black/[0.04]">
       <div className="text-center mb-12 sm:mb-16">
         <span className="text-xs font-semibold text-[#111113] uppercase tracking-wider">
-          Transparency
+          Questions
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#111113] tracking-tight mt-2">
           Frequently asked questions

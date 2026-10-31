@@ -12,6 +12,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard", label: "Tableau de bord", icon: "nav-dashboard" },
       { href: "/analytics", label: "Analytique", icon: "nav-analytics" },
+      { href: "/clients", label: "Clients", icon: "nav-personal" },
     ],
   },
   {

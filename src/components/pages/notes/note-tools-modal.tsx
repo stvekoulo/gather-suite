@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { BookOpenIcon, DownloadIcon, ShuffleIcon, TagIcon, UploadIcon } from "lucide-react";
@@ -49,7 +50,7 @@ export function NoteToolsModal({ open, onClose, onOpenNote }: NoteToolsModalProp
     const picked = candidates[Math.floor(Math.random() * candidates.length)];
     onOpenNote(picked);
     onClose();
-    toast.info("Note ouverte pour révision");
+    toast.info(translate("Note ouverte pour révision"));
   };
 
   const handleExportJson = async () => {
@@ -57,7 +58,7 @@ export function NoteToolsModal({ open, onClose, onOpenNote }: NoteToolsModalProp
       "gather-notes.json",
       new Blob([JSON.stringify({ format: "gather-notes", version: 1, notes }, null, 2)], { type: "application/json" })
     );
-    toast.success("Notes exportées au format JSON");
+    toast.success(translate("Notes exportées au format JSON"));
   };
 
   const handleRenameTag = (e: React.FormEvent) => {
@@ -84,9 +85,9 @@ export function NoteToolsModal({ open, onClose, onOpenNote }: NoteToolsModalProp
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Outils & Gestion des notes</DialogTitle>
+          <DialogTitle>{translate("Outils & Gestion des notes")}</DialogTitle>
           <DialogDescription>
-            Journal quotidien, révision aléatoire, gestion des tags et sauvegardes
+            {translate("Journal quotidien, révision aléatoire, gestion des tags et sauvegardes")}
           </DialogDescription>
         </DialogHeader>
 
@@ -96,28 +97,28 @@ export function NoteToolsModal({ open, onClose, onOpenNote }: NoteToolsModalProp
             <Button variant="secondary" onClick={handleOpenJournal} className="h-auto p-3 flex items-start gap-2.5 text-left">
               <BookOpenIcon className="size-4 text-brand shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-semibold text-fg">Journal du jour</p>
-                <p className="text-[11px] text-fg-2">Ouvrir ou créer la note quotidienne</p>
+                <p className="text-xs font-semibold text-fg">{translate("Journal du jour")}</p>
+                <p className="text-[11px] text-fg-2">{translate("Ouvrir ou créer la note quotidienne")}</p>
               </div>
             </Button>
             <Button variant="secondary" disabled={!active.length} onClick={handleRandomReview} className="h-auto p-3 flex items-start gap-2.5 text-left">
               <ShuffleIcon className="size-4 text-brand shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-semibold text-fg">Réviser une note</p>
-                <p className="text-[11px] text-fg-2">Tirage aléatoire d’une note active</p>
+                <p className="text-xs font-semibold text-fg">{translate("Réviser une note")}</p>
+                <p className="text-[11px] text-fg-2">{translate("Tirage aléatoire d’une note active")}</p>
               </div>
             </Button>
           </div>
 
           {/* Import / Export */}
           <div className="rounded-xl border border-hairline p-4 bg-surface flex flex-col gap-3">
-            <h4 className="text-xs font-semibold text-fg">Import & Export</h4>
+            <h4 className="text-xs font-semibold text-fg">{translate("Import & Export")}</h4>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => void handleExportJson()} className="gap-1.5">
-                <DownloadIcon className="size-3.5" /> Exporter JSON
+                <DownloadIcon className="size-3.5" /> {translate("Exporter JSON")}
               </Button>
               <label className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface px-3 py-1.5 text-xs font-medium text-fg hover:bg-hover transition-colors">
-                <UploadIcon className="size-3.5 text-icon" /> Importer Markdown
+                <UploadIcon className="size-3.5 text-icon" /> {translate("Importer Markdown")}
                 <FilePicker
                   className="sr-only"
                   type="file"
@@ -142,18 +143,18 @@ export function NoteToolsModal({ open, onClose, onOpenNote }: NoteToolsModalProp
           {/* Tag management */}
           <div className="rounded-xl border border-hairline p-4 bg-surface flex flex-col gap-3">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
-              <TagIcon className="size-3.5 text-brand" /> Gestion globale des tags
+              <TagIcon className="size-3.5 text-brand" /> {translate("Gestion globale des tags")}
             </div>
             <form onSubmit={handleRenameTag} className="flex flex-col sm:flex-row gap-2">
-              <Input placeholder="Ancien tag (sans #)" value={oldTag} onChange={(e) => setOldTag(e.target.value)} className="text-xs" />
-              <Input placeholder="Nouveau tag (vide = supprimer)" value={newTag} onChange={(e) => setNewTag(e.target.value)} className="text-xs" />
-              <Button type="submit" size="sm" disabled={!oldTag.trim()}>Appliquer</Button>
+              <Input placeholder={translate("Ancien tag (sans #)")} value={oldTag} onChange={(e) => setOldTag(e.target.value)} className="text-xs" />
+              <Input placeholder={translate("Nouveau tag (vide = supprimer)")} value={newTag} onChange={(e) => setNewTag(e.target.value)} className="text-xs" />
+              <Button type="submit" size="sm" disabled={!oldTag.trim()}>{translate("Appliquer")}</Button>
             </form>
           </div>
 
           {/* Resources */}
           <div className="rounded-xl border border-hairline p-4 bg-surface flex flex-col gap-2">
-            <h4 className="text-xs font-semibold text-fg">Gestionnaire de ressources</h4>
+            <h4 className="text-xs font-semibold text-fg">{translate("Gestionnaire de ressources")}</h4>
             <NoteResources onOpen={(n) => { onOpenNote(n); onClose(); }} />
           </div>
         </div>

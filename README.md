@@ -23,6 +23,7 @@ npm run lint
 npm run build
 npm run test:e2e
 npm run tauri:build
+npm run test:native -- CHEMIN_ABSOLU_DE_L_EXE_QA
 ```
 
 `npm start` sert l'export statique sur http://127.0.0.1:3000.
@@ -35,11 +36,15 @@ Windows, macOS et Linux ; sa présence ne prouve pas leur exécution.
 
 - Application native : SQLite local, fichier `workspace.db` dans le répertoire de configuration Tauri.
 - Navigateur : IndexedDB, avec reprise des anciens enregistrements localStorage.
-- Chaque espace conserve ses propres données. Les anciens enregistrements partagés sont migrés dans l’espace précédemment actif.
-- Paramètres > Data : export et restauration incluant tous les espaces et leurs modules.
-- Les moteurs OCR et les langues français/anglais sont copiés localement par `prebuild` ; aucun téléchargement distant au moment de reconnaître le document.
-- Le compte cloud, l'authentification et la synchronisation multi-appareils ne sont pas encore déployés.
-- L'identifiant natif et les anciennes clés de stockage sont conservés pour éviter de rendre les anciennes données inaccessibles.
+- Les pièces jointes sont stockées à part du catalogue. Un instantané quotidien est conservé 7 jours, et un
+  écran de récupération s'affiche si les données ne peuvent pas s'ouvrir.
+- Chaque espace conserve ses propres données. Paramètres > Données : export et restauration de tous les espaces.
+- Les moteurs OCR et les langues français/anglais sont copiés localement par `prebuild`.
+- Compte et synchronisation multi-appareils facultatifs : voir [CLOUD.md](docs/CLOUD.md).
+- Agents IA : serveur MCP local, désactivé par défaut, voir [MCP.md](docs/MCP.md).
+- En ligne, sans clé : taux de change (open.er-api.com) et jours fériés (date.nager.at). La CSP n'autorise
+  aucune autre destination réseau, hors images insérées par URL.
+- L'identifiant natif `app.aura.workspace` est conservé : le changer rendrait les données existantes inaccessibles.
 
 ## État du produit
 

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import type { PresentationDeck, SlideItem } from "@/stores/workspace-types";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export function DeckcraftDesignTab({
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-1.5">
-        <span className="text-fg-3 text-[11px]">Thème :</span>
+        <span className="text-fg-3 text-[11px]">{translate("Thème :")}</span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs capitalize">
@@ -59,7 +60,7 @@ export function DeckcraftDesignTab({
       <div className="h-4 w-px bg-hairline" />
 
       <div className="flex items-center gap-1">
-        <span className="text-fg-3 text-[11px]">Format :</span>
+        <span className="text-fg-3 text-[11px]">{translate("Format :")}</span>
         <Button variant={deck.ratio !== "4:3" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onChangeRatio("16:9")}>
           16:9
         </Button>
@@ -71,10 +72,10 @@ export function DeckcraftDesignTab({
       <div className="h-4 w-px bg-hairline" />
 
       <label className="flex h-7 cursor-pointer items-center gap-1 rounded border border-hairline bg-app px-2 text-xs text-fg-2">
-        <span>Fond :</span>
+        <span>{translate("Fond :")}</span>
         <input
           type="color"
-          aria-label="Couleur d'arrière-plan de la diapositive"
+          aria-label={translate("Couleur d'arrière-plan de la diapositive")}
           defaultValue={currentSlide?.background || "#ffffff"}
           onChange={(e) => onChangeSlideBg(e.target.value)}
           className="size-4 cursor-pointer rounded border-0 bg-transparent p-0"
@@ -99,13 +100,13 @@ export function DeckcraftSlideshowTab({
   return (
     <div className="flex items-center gap-2">
       <Button variant="default" size="sm" onClick={onPlayFromStart} className="gap-1.5 h-7 text-xs bg-orange-600 hover:bg-orange-700">
-        <PlayIcon className="size-3.5 fill-current" /> À partir du début (F5)
+        <PlayIcon className="size-3.5 fill-current" /> {translate("À partir du début (F5)")}
       </Button>
       <Button variant="outline" size="sm" onClick={onPlayFromCurrent} className="gap-1.5 h-7 text-xs">
-        <PlayIcon className="size-3.5" /> Diapo actuelle ({activeSlideIndex + 1})
+        <PlayIcon className="size-3.5" /> {translate("Diapo actuelle (")}{activeSlideIndex + 1})
       </Button>
       <Button variant="outline" size="sm" onClick={onOpenPresenterView} className="gap-1.5 h-7 text-xs">
-        <TvIcon className="size-3.5 text-orange-600" /> Mode Présentateur double écran
+        <TvIcon className="size-3.5 text-orange-600" /> {translate("Mode Présentateur double écran")}
       </Button>
     </div>
   );
@@ -128,19 +129,19 @@ export function DeckcraftFileTab({
   return (
     <div className="flex items-center gap-2">
       <Button variant="outline" size="sm" onClick={onNewDeck} className="gap-1 h-7 text-xs">
-        <FilePlusIcon className="size-3.5" /> Nouveau
+        <FilePlusIcon className="size-3.5" /> {translate("Nouveau")}
       </Button>
       <Button variant="outline" size="sm" onClick={onTriggerImport} className="gap-1 h-7 text-xs">
-        <FileUpIcon className="size-3.5 text-orange-600" /> Importer (.pptx)
+        <FileUpIcon className="size-3.5 text-orange-600" /> {translate("Importer (.pptx)")}
       </Button>
       <Button variant="default" size="sm" onClick={onExportPptx} className="gap-1 h-7 text-xs bg-orange-600 hover:bg-orange-700">
-        <DownloadIcon className="size-3.5" /> Exporter (.pptx)
+        <DownloadIcon className="size-3.5" /> {translate("Exporter (.pptx)")}
       </Button>
       <Button variant="outline" size="sm" onClick={onExportPdf} className="gap-1 h-7 text-xs">
-        Exporter PDF
+        {translate("Exporter PDF")}
       </Button>
       <Button variant="ghost" size="sm" onClick={onPrint} className="gap-1 h-7 text-xs">
-        <PrinterIcon className="size-3.5" /> Imprimer
+        <PrinterIcon className="size-3.5" /> {translate("Imprimer")}
       </Button>
     </div>
   );

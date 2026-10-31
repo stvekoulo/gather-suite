@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { workspaceStorage } from "@/lib/storage/workspace-storage";
 
 export const DEFAULT_EVENT_CATEGORIES = [
   "Réunion",
@@ -37,7 +38,8 @@ export const useEventCategories = create<EventCategoryState>()(
     }),
     {
       name: "gather-event-categories-v1",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => workspaceStorage),
+      skipHydration: true,
     }
   )
 );

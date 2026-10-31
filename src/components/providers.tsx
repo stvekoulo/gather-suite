@@ -8,7 +8,11 @@ import { ThemePaletteProvider } from "@/components/theme-palette-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-media-query";
-import { NoteReminders } from "@/modules/notes/note-reminders";
+import { Reminders } from "@/modules/reminders/reminders";
+import { FxRefresher } from "@/lib/fx";
+import { CloudSync } from "@/modules/cloud/cloud-sync";
+import { McpBridge } from "@/modules/mcp/mcp-bridge";
+import { UpdateCheck } from "@/modules/updates/updates";
 import { LocaleBoundary } from "./locale-boundary";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -18,7 +22,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <StorageGate><LocaleBoundary><ThemePaletteProvider>
         <TooltipProvider delayDuration={400} skipDelayDuration={300}>
           <NativePersistenceGuard />
-          <NoteReminders />
+          <Reminders />
+          <FxRefresher />
+          <CloudSync />
+          <McpBridge />
+          <UpdateCheck />
           {children}
           <OnboardingWizard />
           <Toaster position={isMobile ? "top-center" : "bottom-right"} />

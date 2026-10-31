@@ -6,7 +6,7 @@ import { EventDialog } from "./event-dialog";
 import { ShortcutsDialog } from "./info-dialogs";
 import { AboutDialog } from "./about-dialog";
 
-type Kind = Exclude<Overlay["kind"], "none" | "search">;
+type Kind = Exclude<Overlay["kind"], "none" | "search" | "capture">;
 type Latest = { [K in Kind]?: Extract<Overlay, { kind: K }> };
 
 /**
@@ -21,7 +21,7 @@ export function GlobalDialogs() {
 
   if (overlay !== prev) {
     setPrev(overlay);
-    if (overlay.kind !== "none" && overlay.kind !== "search") {
+    if (overlay.kind !== "none" && overlay.kind !== "search" && overlay.kind !== "capture") {
       setLatest((l) => ({ ...l, [overlay.kind]: overlay }));
       setSession((n) => n + 1);
     }

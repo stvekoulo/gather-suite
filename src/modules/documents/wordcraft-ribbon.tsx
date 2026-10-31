@@ -1,4 +1,6 @@
 "use client";
+import { Dropdown } from "@/components/beui/dropdown";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import type { Editor } from "@tiptap/react";
@@ -133,28 +135,20 @@ export function WordcraftRibbon({
               <PenToolIcon className="size-3.5" /> {tr("Schéma tableau blanc")}
             </Button>
             {!!sheets.length && (
-              <select
+              <Dropdown
                 aria-label={tr("Insérer tableur lié")}
-                defaultValue=""
-                onChange={(e) => {
-                  if (e.target.value) {
-                    editor.chain().focus().insertContent({ type: "sheetEmbed", attrs: { sheetId: e.target.value } }).run();
-                    e.target.value = "";
-                  }
-                }}
-                className="h-7 rounded border border-hairline bg-app px-2 text-xs text-fg-2"
-              >
-                <option value="">{tr("Insérer Tableur…")}</option>
-                {sheets.map((s) => (
-                  <option key={s.id} value={s.id}>{s.title}</option>
-                ))}
-              </select>
+                className="w-40"
+                triggerClassName="h-7"
+                value=""
+                onChange={(id) => { if (id) editor.chain().focus().insertContent({ type: "sheetEmbed", attrs: { sheetId: id } }).run(); }}
+                options={[{ value: "", label: tr("Insérer Tableur…") }, ...sheets.map((s) => ({ value: s.id, label: s.title }))]}
+              />
             )}
             <Button variant="outline" size="sm" onClick={handleLink} className="gap-1.5 h-7 text-xs">
-              <Link2Icon className="size-3.5" /> Lien
+              <Link2Icon className="size-3.5" /> {translate("Lien")}
             </Button>
             <Button variant="outline" size="sm" onClick={() => editor.chain().focus().setHorizontalRule().run()} className="gap-1.5 h-7 text-xs">
-              Ligne
+              {translate("Ligne")}
             </Button>
           </div>
         )}
@@ -162,27 +156,27 @@ export function WordcraftRibbon({
         {activeTab === "layout" && (
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <span className="text-fg-2 text-[11px]">Format :</span>
+              <span className="text-fg-2 text-[11px]">{translate("Format :")}</span>
               <Button variant={layout.size === "A4" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onChangeLayout({ size: "A4" })}>
                 A4
               </Button>
               <Button variant={layout.size === "LETTER" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onChangeLayout({ size: "LETTER" })}>
-                Lettre
+                {translate("Lettre")}
               </Button>
             </div>
             <div className="h-4 w-px bg-hairline" />
             <div className="flex items-center gap-1">
-              <span className="text-fg-2 text-[11px]">Orientation :</span>
+              <span className="text-fg-2 text-[11px]">{translate("Orientation :")}</span>
               <Button variant={layout.orientation === "portrait" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onChangeLayout({ orientation: "portrait" })}>
-                Portrait
+                {translate("Portrait")}
               </Button>
               <Button variant={layout.orientation === "landscape" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onChangeLayout({ orientation: "landscape" })}>
-                Paysage
+                {translate("Paysage")}
               </Button>
             </div>
             <div className="h-4 w-px bg-hairline" />
             <div className="flex items-center gap-1">
-              <span className="text-fg-2 text-[11px]">Marges :</span>
+              <span className="text-fg-2 text-[11px]">{translate("Marges :")}</span>
               <Button variant={layout.margin === 20 ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onChangeLayout({ margin: 20 })}>
                 20 mm
               </Button>
@@ -191,7 +185,7 @@ export function WordcraftRibbon({
               </Button>
             </div>
             <Button variant="ghost" size="sm" onClick={onOpenPageSetup} className="h-7 gap-1 text-xs">
-              <SlidersIcon className="size-3" /> Options…
+              <SlidersIcon className="size-3" /> {translate("Options…")}
             </Button>
           </div>
         )}

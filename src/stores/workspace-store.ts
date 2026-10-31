@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { workspaceStorage } from "@/lib/storage/workspace-storage";
+import { blobReplacer, workspaceStorage } from "@/lib/storage/workspace-storage";
 import { INITIAL_CANVAS, INITIAL_DECKS, INITIAL_NOTES } from "./workspace-seed";
 import type { CanvasBoard, CanvasElement, NoteItem, PdfOperationJob, PresentationDeck, SlideItem } from "./workspace-types";
 import type { Task, Spreadsheet, Snippet } from "@/modules/productivity/types";
@@ -194,7 +194,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
     }),
     {
       name: "gather-workspace-store-v1",
-      storage: createJSONStorage(() => workspaceStorage),
+      storage: createJSONStorage(() => workspaceStorage, { replacer: blobReplacer }),
       skipHydration: true,
     }
   )

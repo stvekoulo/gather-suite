@@ -1,4 +1,5 @@
 "use client";
+import { Dropdown } from "@/components/beui/dropdown";
 
 import { useRef, useState } from "react";
 import {
@@ -137,15 +138,14 @@ export function ExcelRibbon({
         </div>
 
         <div className="flex items-center gap-2">
-          <select
+          <Dropdown
+            aria-label={tr("Choisir un classeur")}
+            className="w-44"
+            triggerClassName="h-7"
             value={sheet.id}
-            onChange={(e) => onSelectSheet(e.target.value)}
-            className="h-7 rounded border border-white/20 bg-white/10 px-2 text-xs font-medium text-white outline-none focus:bg-white/20"
-          >
-            {sheets.map((s) => (
-              <option key={s.id} value={s.id} className="text-fg bg-surface">{s.title}</option>
-            ))}
-          </select>
+            onChange={onSelectSheet}
+            options={sheets.map((s) => ({ value: s.id, label: s.title }))}
+          />
           <Button
             size="sm"
             onClick={() => fileInputRef.current?.click()}

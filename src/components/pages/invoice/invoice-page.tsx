@@ -64,7 +64,7 @@ export function InvoicePage() {
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <h2 className="t-16 text-fg">{translate("Invoices")}</h2>
             <p className="t-14 truncate text-fg-2">
-              {invoices.length} {invoices.length === 1 ? "facture" : "factures"} · {formatTotals(stats.outstanding)} en attente
+              {invoices.length} {invoices.length === 1 ? "facture" : "factures"} · {formatTotals(stats.outstanding)} {translate("en attente")}
             </p>
           </div>
           <Button variant="brand" size="icon" className="size-10 md:hidden" aria-label={translate("New invoice")} onClick={() => edit()}>

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import type { SlideItem } from "@/stores/workspace-types";
 import { Button } from "@/components/ui/button";
@@ -48,11 +49,11 @@ export function DeckcraftRibbonHome({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400">
-            <PlusIcon className="size-3.5" /> Nouvelle diapositive
+            <PlusIcon className="size-3.5" /> {translate("Nouvelle diapositive")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel className="text-[11px] text-fg-3">Dispositions disponibles</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-[11px] text-fg-3">{translate("Dispositions disponibles")}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {DECKCRAFT_LAYOUTS.map((lay) => (
             <DropdownMenuItem key={lay.id} onSelect={() => onAddSlide(lay.id)} className="gap-2 text-xs">
@@ -70,11 +71,11 @@ export function DeckcraftRibbonHome({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-fg-2 hover:text-fg">
-            <LayoutTemplateIcon className="size-3.5" /> Disposition
+            <LayoutTemplateIcon className="size-3.5" /> {translate("Disposition")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
-          <DropdownMenuLabel className="text-[11px] text-fg-3">Appliquer une disposition</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-[11px] text-fg-3">{translate("Appliquer une disposition")}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {DECKCRAFT_LAYOUTS.map((lay) => (
             <DropdownMenuItem key={lay.id} onSelect={() => onChangeLayout(lay.id)} className="gap-2 text-xs">
@@ -89,7 +90,7 @@ export function DeckcraftRibbonHome({
 
       {/* Gestion de diapositive */}
       <Button variant="ghost" size="sm" onClick={onDuplicateSlide} className="h-7 gap-1 text-xs text-fg-2 hover:text-fg">
-        <CopyIcon className="size-3" /> Dupliquer
+        <CopyIcon className="size-3" /> {translate("Dupliquer")}
       </Button>
 
       <Button
@@ -99,14 +100,14 @@ export function DeckcraftRibbonHome({
         disabled={!canDelete}
         className="h-7 gap-1 text-xs text-destructive hover:bg-destructive/10"
       >
-        <Trash2Icon className="size-3" /> Supprimer
+        <Trash2Icon className="size-3" /> {translate("Supprimer")}
       </Button>
 
       <div className="h-4 w-px bg-hairline" />
 
       {/* Ajout d'éléments rapides */}
       <Button variant="ghost" size="sm" onClick={() => onAddElement("text")} className="h-7 gap-1 text-xs text-fg-2 hover:text-fg">
-        <TypeIcon className="size-3.5 text-blue-500" /> Texte
+        <TypeIcon className="size-3.5 text-blue-500" /> {translate("Texte")}
       </Button>
 
       <Button variant="ghost" size="sm" onClick={onOpenImageDialog} className="h-7 gap-1 text-xs text-fg-2 hover:text-fg">
@@ -117,14 +118,14 @@ export function DeckcraftRibbonHome({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-fg-2 hover:text-fg">
-            <ShapesIcon className="size-3.5 text-amber-500" /> Formes
+            <ShapesIcon className="size-3.5 text-amber-500" /> {translate("Formes")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-40">
           <DropdownMenuItem onSelect={() => onAddElement("rectangle")}>Rectangle</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onAddElement("ellipse")}>Cercle / Ellipse</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onAddElement("arrow")}>Flèche</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onAddElement("star")}>Étoile</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAddElement("ellipse")}>{translate("Cercle / Ellipse")}</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAddElement("arrow")}>{translate("Flèche")}</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAddElement("star")}>{translate("Étoile")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

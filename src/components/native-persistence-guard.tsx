@@ -1,8 +1,10 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { isDesktop } from "@/lib/storage/database";
 import { flushStorage } from "@/lib/storage/workspace-storage";
+import { useAppStore } from "@/stores/app-store";
 
 export function NativePersistenceGuard() {
   useEffect(() => {
@@ -28,8 +30,12 @@ export function NativePersistenceGuard() {
         if (!window.dispatchEvent(new Event("gather-before-close", { cancelable: true }))) { event.preventDefault(); return; }
         closing = true;
         window.dispatchEvent(new Event("gather-flush-editors"));
-        try { await flushStorage(); }
-        catch (error) { event.preventDefault(); closing = false; toast.error("Fermeture annulée : sauvegarde impossible", { description: String(error) }); }
+        try {
+          await flushStorage();
+          // Staying alive keeps reminders and the global shortcut working; the tray menu really quits.
+          if (useAppStore.getState().settings.closeToTray !== false) { event.preventDefault(); closing = false; await appWindow.hide(); }
+        }
+        catch (error) { event.preventDefault(); closing = false; toast.error(translate("Fermeture annulée : sauvegarde impossible"), { description: String(error) }); }
       });
       if (disposed) cleanup(); else unlisten = cleanup;
     }).catch((error: unknown) => toast.error(String(error)));

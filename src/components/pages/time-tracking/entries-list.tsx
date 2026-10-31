@@ -38,7 +38,7 @@ export function EntriesSection({
   onDeleteEntry: (id: string) => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-hairline bg-surface">
+    <section className="overflow-hidden rounded-2xl border border-hairline bg-surface">
       <div className="flex h-12 items-center justify-between border-b border-hairline px-4">
         <h3 className="t-14 text-fg">{translate("Entries")}</h3>
         <span className="t-12 text-fg-2">

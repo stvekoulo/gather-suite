@@ -9,6 +9,6 @@ export interface AppConfig {
 export const APP_CONFIG: AppConfig = {
   name: "Gather",
   tagline: "Gather Suite — Think. Create. Organize.",
-  version: "0.2.0",
+  version: "0.3.0",
   author: "Steven KOULO",
 };

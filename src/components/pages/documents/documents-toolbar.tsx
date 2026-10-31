@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { BookmarkIcon, FolderPlusIcon, LayoutGridIcon, ListIcon, SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,7 @@ export function DocumentsToolbar({
       {/* Ligne 1 : Titre de section, Recherche centrale Google Docs et sélecteur de vue */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-fg">Documents récents</h2>
+          <h2 className="text-sm font-semibold text-fg">{translate("Documents récents")}</h2>
           <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-fg-2">
             {counts.all ?? 0}
           </span>
@@ -53,7 +54,7 @@ export function DocumentsToolbar({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher dans vos documents..."
+            placeholder={translate("Rechercher dans vos documents...")}
             className="h-9 w-full rounded-full border-hairline bg-surface-2/70 pl-9 pr-4 text-xs placeholder:text-fg-2/60 focus:bg-surface focus:ring-1 focus:ring-blue-600"
           />
         </div>
@@ -64,7 +65,7 @@ export function DocumentsToolbar({
             <TooltipTrigger asChild>
               <button
                 type="button"
-                aria-label="Vue grille"
+                aria-label={translate("Vue grille")}
                 onClick={() => setView("grid")}
                 className={cn(
                   "flex size-7 items-center justify-center rounded-md transition-colors",
@@ -74,14 +75,14 @@ export function DocumentsToolbar({
                 <LayoutGridIcon className="size-3.5" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>Vue grille</TooltipContent>
+            <TooltipContent>{translate("Vue grille")}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 type="button"
-                aria-label="Vue liste"
+                aria-label={translate("Vue liste")}
                 onClick={() => setView("list")}
                 className={cn(
                   "flex size-7 items-center justify-center rounded-md transition-colors",
@@ -91,7 +92,7 @@ export function DocumentsToolbar({
                 <ListIcon className="size-3.5" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>Vue liste</TooltipContent>
+            <TooltipContent>{translate("Vue liste")}</TooltipContent>
           </Tooltip>
         </div>
       </div>
@@ -108,7 +109,7 @@ export function DocumentsToolbar({
               : "bg-surface-2 text-fg-2 hover:bg-hover hover:text-fg"
           )}
         >
-          Tous les documents ({counts.all ?? 0})
+          {translate("Tous les documents (")}{counts.all ?? 0})
         </button>
 
         <button
@@ -122,7 +123,7 @@ export function DocumentsToolbar({
           )}
         >
           <BookmarkIcon className="size-3 text-warning fill-current" />
-          Favoris ({counts.starred ?? 0})
+          {translate("Favoris (")}{counts.starred ?? 0})
         </button>
 
         {categories.map((cat) => (
@@ -146,9 +147,9 @@ export function DocumentsToolbar({
           size="sm"
           onClick={onOpenCategoryDialog}
           className="h-7 shrink-0 gap-1 rounded-full px-2.5 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-500/10"
-          title="Ajouter ou gérer des catégories"
+          title={translate("Ajouter ou gérer des catégories")}
         >
-          <FolderPlusIcon className="size-3" /> + Catégorie
+          <FolderPlusIcon className="size-3" /> {translate("+ Catégorie")}
         </Button>
       </div>
     </div>

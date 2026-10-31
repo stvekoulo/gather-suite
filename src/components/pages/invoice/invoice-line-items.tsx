@@ -44,7 +44,7 @@ export function LineItems({
           >
             <Input
               aria-label={`Description ligne ${idx + 1}`}
-              placeholder="Prestation ou produit"
+              placeholder={translate("Prestation ou produit")}
               className="max-sm:col-span-2 max-sm:row-start-1"
               value={l.description}
               onChange={(e) => onChangeLine(l.id, { description: e.target.value })}

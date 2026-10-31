@@ -5,3 +5,8 @@ src-tauri/target
 landing-gather
 .git
 .gemini
+src-tauri/gen
+.qa
+.reference
+test-results
+.openship

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { WEEKDAYS_SHORT, dayOfWeek, fromKey } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -64,7 +65,7 @@ export function WeekStrip({ days }: { days: string[] }) {
     <div
       className="flex h-16 w-full shrink-0 items-center gap-1 border-b border-hairline px-2 md:hidden"
       role="tablist"
-      aria-label="Days of the week"
+      aria-label={translate("Days of the week")}
     >
       {days.map((d) => {
         const isSelected = d === selected;

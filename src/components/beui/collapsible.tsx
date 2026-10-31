@@ -151,6 +151,7 @@ export function CollapsibleTrigger({
   const child = render as ReactElement<HTMLMotionProps<"button">> | undefined;
   const childRef = child?.props.ref;
   const mergedRef = useMemo(
+    // eslint-disable-next-line react-hooks/refs -- merges ref objects, never reads .current
     () => mergeRefs(context.triggerRef, ref, childRef),
     [context.triggerRef, ref, childRef]
   );

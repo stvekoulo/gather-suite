@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { ChevronDownIcon, ChevronUpIcon, CopyIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,9 +30,9 @@ export function SlideFilmstrip({
     <aside className="w-full md:w-64 shrink-0 border-b md:border-b-0 md:border-r border-hairline bg-surface p-3 flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto scroll-thin select-none">
       <div className="hidden md:flex items-center justify-between pb-2 border-b border-hairline/60">
         <span className="text-[11px] font-bold tracking-wider text-fg-2 uppercase">
-          Diapositives ({slides.length})
+          {translate("Diapositives (")}{slides.length})
         </span>
-        <Button variant="ghost" size="icon-sm" onClick={onAddSlide} title="Ajouter une diapositive">
+        <Button variant="ghost" size="icon-sm" onClick={onAddSlide} title={translate("Ajouter une diapositive")}>
           <PlusIcon className="size-3.5 text-orange-600" />
         </Button>
       </div>
@@ -54,7 +55,7 @@ export function SlideFilmstrip({
               )}
             >
               <div className="flex items-center justify-between text-[11px] font-medium text-fg-2">
-                <span className="font-semibold text-fg">Diapo {idx + 1}</span>
+                <span className="font-semibold text-fg">{translate("Diapo")} {idx + 1}</span>
                 <span className="capitalize text-[10px] opacity-75">{slide.layout}</span>
               </div>
 
@@ -89,7 +90,7 @@ export function SlideFilmstrip({
                   <button
                     onClick={() => onMoveSlide(idx, idx - 1)}
                     className="p-1 hover:text-fg rounded"
-                    title="Monter"
+                    title={translate("Monter")}
                   >
                     <ChevronUpIcon className="size-3" />
                   </button>
@@ -98,7 +99,7 @@ export function SlideFilmstrip({
                   <button
                     onClick={() => onMoveSlide(idx, idx + 1)}
                     className="p-1 hover:text-fg rounded"
-                    title="Descendre"
+                    title={translate("Descendre")}
                   >
                     <ChevronDownIcon className="size-3" />
                   </button>
@@ -106,7 +107,7 @@ export function SlideFilmstrip({
                 <button
                   onClick={() => onDuplicateSlide(idx)}
                   className="p-1 hover:text-fg rounded"
-                  title="Dupliquer"
+                  title={translate("Dupliquer")}
                 >
                   <CopyIcon className="size-3" />
                 </button>
@@ -114,7 +115,7 @@ export function SlideFilmstrip({
                   <button
                     onClick={() => onDeleteSlide(idx)}
                     className="p-1 hover:text-red-600 rounded"
-                    title="Supprimer"
+                    title={translate("Supprimer")}
                   >
                     <Trash2Icon className="size-3" />
                   </button>

@@ -9,24 +9,24 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gather.stevenkoulo.com"),
-  title: "gather. — A desktop workspace that takes care of the small stuff",
+  title: "Gather: plan your work and your life in one place",
   description:
-    "A fast, local-first desktop app for notes, calendar, and documents. Runs offline, stores data locally on your disk, and respects your privacy.",
+    "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
   authors: [{ name: "Steven KOULO" }],
   keywords: [
-    "desktop app",
-    "local-first",
-    "note taking",
-    "calendar",
-    "pdf signer",
-    "offline notes",
-    "tauri",
-    "gather suite",
+    "planner app",
+    "personal planner",
+    "work and life planner",
+    "calendar and tasks",
+    "invoicing",
+    "expense tracking",
+    "notes",
+    "offline desktop app",
   ],
   openGraph: {
-    title: "gather. — A desktop workspace that takes care of the small stuff",
+    title: "Gather: plan your work and your life in one place",
     description:
-      "A fast, local-first desktop app for notes, calendar, and documents. Runs offline and keeps your data on your disk.",
+      "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
     url: "https://gather.stevenkoulo.com",
     siteName: "gather.",
     images: [
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "gather. — A desktop workspace that takes care of the small stuff",
+    title: "Gather: plan your work and your life in one place",
     description:
-      "A fast, local-first desktop app for notes, calendar, and documents. Runs offline on your disk.",
+      "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
     images: ["/gather-logo.png"],
   },
 };
@@ -59,10 +59,10 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Gather Suite",
-    operatingSystem: "Windows, macOS, Linux",
+    operatingSystem: "Windows, Linux",
     applicationCategory: "ProductivityApplication",
     description:
-      "A fast local-first desktop productivity suite for notes, calendar, and documents.",
+      "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
     author: {
       "@type": "Person",
       name: "Steven KOULO",

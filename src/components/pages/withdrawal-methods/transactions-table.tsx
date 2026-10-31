@@ -1,4 +1,8 @@
 "use client";
+import { Dropdown } from "@/components/beui/dropdown";
+import { translate } from "@/lib/i18n/ui-text";
+import { formatMoney } from "@/components/pages/invoice/invoice-utils";
+import { txRow, useMoney } from "@/lib/finance-totals";
 
 import { useMemo, useState } from "react";
 import { ArrowDownRightIcon, ArrowUpRightIcon, DownloadIcon, FileTextIcon, SearchIcon, Trash2Icon } from "lucide-react";
@@ -15,6 +19,7 @@ interface TransactionsTableProps {
 
 // Table interactive des écritures financières avec filtres et export CSV
 export function TransactionsTable({ transactions, onDeleteTransaction }: TransactionsTableProps) {
+  const money = useMoney();
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -41,21 +46,22 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
 
   const handleExportCsv = async () => {
     try {
-      const headers = ["ID", "Type", "Titre", "Montant (€)", "Catégorie", "Date", "Facture Liée"];
+      const headers = ["ID", "Type", "Titre", "Montant", "Devise", "Catégorie", "Date", "Facture Liée"];
       const rows = filtered.map((t) => [
         t.id,
         t.type === "income" ? "Revenu" : "Dépense",
         `"${t.title.replace(/"/g, '""')}"`,
         t.amount,
+        t.currency ?? "EUR",
         `"${t.category}"`,
         t.date,
         t.invoiceNumber || "",
       ]);
       const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
       await saveFile("grand-livre-gather.csv", new Blob([csv], { type: "text/csv;charset=utf-8" }));
-      toast.success("Grand livre exporté en CSV");
+      toast.success(translate("Grand livre exporté en CSV"));
     } catch {
-      toast.error("Échec de l'export CSV");
+      toast.error(translate("Échec de l'export CSV"));
     }
   };
 
@@ -75,7 +81,7 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
                   : "text-fg-2 hover:text-fg"
               }`}
             >
-              {type === "all" ? "Toutes les écritures" : type === "income" ? "Revenus" : "Dépenses"}
+              {type === "all" ? "Toutes les écritures" : type === "income" ? translate("Revenus") : translate("Dépenses")}
             </button>
           ))}
         </div>
@@ -87,25 +93,23 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher une écriture..."
+              placeholder={translate("Rechercher une écriture...")}
               className="h-8 w-44 sm:w-56 pl-8 text-xs bg-surface-2/30"
             />
           </div>
 
           {/* Filtre catégorie */}
-          <select
+          <Dropdown
+            aria-label={translate("Toutes les catégories")}
+            className="w-44"
+            triggerClassName="h-8"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="h-8 rounded-lg border border-hairline bg-surface-2/30 px-2 text-xs font-medium text-fg outline-none"
-          >
-            <option value="all">Toutes les catégories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+            onChange={setSelectedCategory}
+            options={[{ value: "all", label: translate("Toutes les catégories") }, ...categories.map((c) => ({ value: c, label: c }))]}
+          />
 
           <Button variant="outline" size="sm" onClick={handleExportCsv} className="h-8 gap-1.5 text-xs">
-            <DownloadIcon className="size-3.5" /> Exporter CSV
+            <DownloadIcon className="size-3.5" /> {translate("Exporter CSV")}
           </Button>
         </div>
       </div>
@@ -116,10 +120,10 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
           <thead className="border-b border-hairline bg-surface-2/30 font-semibold text-fg-2">
             <tr>
               <th className="px-4 py-2.5">Date</th>
-              <th className="px-4 py-2.5">Libellé</th>
-              <th className="px-4 py-2.5">Catégorie</th>
-              <th className="px-4 py-2.5">Compte / Référence</th>
-              <th className="px-4 py-2.5 text-right">Montant</th>
+              <th className="px-4 py-2.5">{translate("Libellé")}</th>
+              <th className="px-4 py-2.5">{translate("Catégorie")}</th>
+              <th className="px-4 py-2.5">{translate("Compte / Référence")}</th>
+              <th className="px-4 py-2.5 text-right">{translate("Montant")}</th>
               <th className="px-4 py-2.5 text-right">Action</th>
             </tr>
           </thead>
@@ -127,7 +131,7 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-12 text-center text-xs text-fg-2 italic">
-                  Aucune transaction ne correspond aux critères sélectionnés.
+                  {translate("Aucune transaction ne correspond aux critères sélectionnés.")}
                 </td>
               </tr>
             ) : (
@@ -176,7 +180,8 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
                     }`}
                   >
                     {t.type === "income" ? "+" : "-"}
-                    {t.amount.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} €
+                    {formatMoney(t.amount, t.currency ?? "EUR")}
+                    {(t.currency ?? "EUR") !== money.currency && <span className="block text-[11px] font-normal text-fg-2">≈ {money.fmt(money.value([txRow(t)]))}</span>}
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <Button
@@ -184,7 +189,7 @@ export function TransactionsTable({ transactions, onDeleteTransaction }: Transac
                       size="sm"
                       onClick={() => onDeleteTransaction(t.id)}
                       className="size-7 p-0 text-red-600 hover:bg-red-500/10"
-                      title="Supprimer la transaction"
+                      title={translate("Supprimer la transaction")}
                     >
                       <Trash2Icon className="size-3.5" />
                     </Button>

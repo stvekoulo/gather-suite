@@ -1,6 +1,10 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
+import { useHandoff } from "@/lib/handoff";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useWorkspaceUndo } from "@/modules/spaces/use-workspace-undo";
+import { cellsToText, pasteText } from "./clipboard";
 import { toast } from "sonner";
 import { FileSpreadsheetIcon } from "lucide-react";
 import { PageRoot } from "@/components/pages/shared/page-chrome";
@@ -23,6 +27,7 @@ export function SheetsPage() {
   const [activeId, setActiveId] = useState(() => {
     try { return localStorage.getItem("gather:active-sheet-id") ?? ""; } catch { return ""; }
   });
+  useHandoff("sheet", setActiveId);
   const [selectedCell, setSelectedCell] = useState("A1");
   const [selectionEnd, setSelectionEnd] = useState("A1");
   const [editingCell, setEditingCell] = useState<string | null>(null);
@@ -63,6 +68,8 @@ export function SheetsPage() {
     }
   };
 
+  useWorkspaceUndo("sheets");
+
   const selectedRange = useMemo(() => {
     return selectedCell === selectionEnd ? selectedCell : `${selectedCell}:${selectionEnd}`;
   }, [selectedCell, selectionEnd]);
@@ -82,6 +89,30 @@ export function SheetsPage() {
     setSelectedCell("A1");
     setSelectionEnd("A1");
   });
+
+  // Ctrl+B/I/U as announced on the ribbon, and copy/paste of the selected cells.
+  const shortcuts = useRef<(e: KeyboardEvent) => void>(() => {});
+  useEffect(() => {
+    shortcuts.current = (e) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      if (e.target instanceof HTMLElement && (e.target.isContentEditable || ["INPUT", "TEXTAREA"].includes(e.target.tagName))) return;
+      const k = e.key.toLowerCase();
+      const style = sheet.styles?.[selectedCell];
+      if (k === "b") { e.preventDefault(); handleApplyStyle({ bold: !style?.bold }); }
+      else if (k === "i") { e.preventDefault(); handleApplyStyle({ italic: !style?.italic }); }
+      else if (k === "u") { e.preventDefault(); handleApplyStyle({ underline: !style?.underline }); }
+      else if (k === "c") { e.preventDefault(); void navigator.clipboard.writeText(cellsToText(sheet.cells, selectedCell, selectionEnd)); }
+      else if (k === "v") {
+        e.preventDefault();
+        void navigator.clipboard.readText().then((text) => patch({ ...pasteText(sheet.cells, selectedCell, text, sheet.rows) }));
+      }
+    };
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => shortcuts.current(e);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const handleCreateTemplate = (tmpl: SheetTemplate) => {
     const id = crypto.randomUUID();
@@ -135,8 +166,8 @@ export function SheetsPage() {
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-emerald-950/85 backdrop-blur-xs text-white">
           <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-emerald-400 bg-surface/10 p-8 shadow-2xl">
             <FileSpreadsheetIcon className="size-12 text-emerald-400 animate-bounce" />
-            <p className="text-base font-semibold">Déposez votre fichier Excel (.xlsx, .csv) ici</p>
-            <p className="text-xs text-zinc-300">Gather Tableur chargera automatiquement vos feuilles et calculs</p>
+            <p className="text-base font-semibold">{translate("Déposez votre fichier Excel (.xlsx, .csv) ici")}</p>
+            <p className="text-xs text-zinc-300">{translate("Gather Tableur chargera automatiquement vos feuilles et calculs")}</p>
           </div>
         </div>
       )}
@@ -171,7 +202,7 @@ export function SheetsPage() {
         onImportFile={(f) => void handleImportFile(f)}
         isImporting={isImporting}
         onDeleteSheet={() => {
-          if (sheets.length <= 1) return toast.error("Impossible de supprimer la dernière feuille");
+          if (sheets.length <= 1) return toast.error(translate("Impossible de supprimer la dernière feuille"));
           const next = sheets.filter((s) => s.id !== sheet.id);
           setSheets(next);
           setActiveId(next[0].id);

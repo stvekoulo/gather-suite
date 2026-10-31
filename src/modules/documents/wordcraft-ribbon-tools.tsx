@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import type { Editor } from "@tiptap/react";
 import { Button } from "@/components/ui/button";
@@ -49,21 +50,21 @@ export function RibbonButton({
 export function TableContextTools({ editor }: { editor: Editor }) {
   return (
     <div className="ml-auto flex items-center gap-1 rounded bg-blue-500/10 px-2 py-0.5 text-[11px] text-blue-600 dark:text-blue-400">
-      <span className="font-semibold">Tableau :</span>
+      <span className="font-semibold">{translate("Tableau :")}</span>
       <Button variant="ghost" size="sm" className="h-5 px-1 text-[10px]" onClick={() => editor.chain().focus().addRowAfter().run()}>
-        +Ligne
+        {translate("+Ligne")}
       </Button>
       <Button variant="ghost" size="sm" className="h-5 px-1 text-[10px]" onClick={() => editor.chain().focus().addColumnAfter().run()}>
         +Col
       </Button>
       <Button variant="ghost" size="sm" className="h-5 px-1 text-[10px]" onClick={() => editor.chain().focus().deleteRow().run()}>
-        −Ligne
+        {translate("−Ligne")}
       </Button>
       <Button variant="ghost" size="sm" className="h-5 px-1 text-[10px]" onClick={() => editor.chain().focus().deleteColumn().run()}>
         −Col
       </Button>
       <Button variant="ghost" size="sm" className="h-5 px-1 text-[10px]" onClick={() => editor.chain().focus().mergeCells().run()}>
-        Fusion
+        {translate("Fusion")}
       </Button>
     </div>
   );

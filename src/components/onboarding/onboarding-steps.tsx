@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { BellIcon, CheckIcon, GlobeIcon, PaletteIcon, UserIcon } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -19,7 +20,7 @@ export function StepLanguage({
         <GlobeIcon className="size-5 text-brand" />
         <h3 className="text-base font-semibold">Langue / Language</h3>
       </div>
-      <p className="text-xs text-fg-2">Détectée automatiquement selon votre système d&apos;exploitation.</p>
+      <p className="text-xs text-fg-2">{translate("Détectée automatiquement selon votre système d'exploitation.")}</p>
       <div className="grid grid-cols-2 gap-3 pt-2">
         <button
           type="button"
@@ -31,7 +32,7 @@ export function StepLanguage({
         >
           <span className="text-2xl">🇫🇷</span>
           <span className="text-sm font-semibold text-fg">Français</span>
-          <span className="text-[11px] text-fg-2">Système en français</span>
+          <span className="text-[11px] text-fg-2">{translate("Système en français")}</span>
         </button>
         <button
           type="button"
@@ -80,7 +81,7 @@ export function StepProfile({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Steve Koulo"
+            placeholder=""
             className="mt-1 h-9 w-full rounded-xl border border-hairline bg-surface px-3 text-[13px] text-fg outline-none focus:border-brand"
           />
         </div>
@@ -90,7 +91,7 @@ export function StepProfile({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="steve@example.com"
+            placeholder="vous@exemple.com"
             className="mt-1 h-9 w-full rounded-xl border border-hairline bg-surface px-3 text-[13px] text-fg outline-none focus:border-brand"
           />
         </div>
@@ -100,7 +101,7 @@ export function StepProfile({
             type="text"
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
-            placeholder="Lead Engineer / Creator"
+            placeholder=""
             className="mt-1 h-9 w-full rounded-xl border border-hairline bg-surface px-3 text-[13px] text-fg outline-none focus:border-brand"
           />
         </div>
@@ -126,7 +127,7 @@ export function StepPalette({
         <PaletteIcon className="size-5 text-brand" />
         <h3 className="text-base font-semibold">{t.onboarding.choosePalette}</h3>
       </div>
-      <p className="text-xs text-fg-2">Monochrome noir/blanc pur par défaut, ou choisissez une couleur d&apos;accent.</p>
+      <p className="text-xs text-fg-2">{translate("Monochrome noir/blanc pur par défaut, ou choisissez une couleur d'accent.")}</p>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 pt-2">
         {paletteKeys.map((key) => {
           const pal = PALETTES[key];

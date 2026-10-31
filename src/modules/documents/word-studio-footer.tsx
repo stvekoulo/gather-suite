@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { CheckIcon, EyeIcon, FileTextIcon, SlidersIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import type { DocumentLayout } from "./document-layout";
@@ -36,10 +37,10 @@ export function WordStudioFooter({
           type="button"
           onClick={onOpenStats}
           className="flex items-center gap-1 hover:text-fg hover:underline cursor-pointer"
-          title="Afficher les statistiques complètes du document"
+          title={translate("Afficher les statistiques complètes du document")}
         >
           <FileTextIcon className="size-3 text-fg-3" />
-          <span>{wordCount.toLocaleString("fr-FR")} mots</span>
+          <span>{wordCount.toLocaleString("fr-FR")} {translate("mots")}</span>
         </button>
 
         <span>·</span>
@@ -48,11 +49,11 @@ export function WordStudioFooter({
           type="button"
           onClick={onOpenPageSetup}
           className="flex items-center gap-1 hover:text-fg hover:underline cursor-pointer"
-          title="Configurer la taille de page et les marges"
+          title={translate("Configurer la taille de page et les marges")}
         >
           <SlidersIcon className="size-3 text-fg-3" />
           <span>
-            {layout.size} ({layout.orientation === "landscape" ? "Paysage" : "Portrait"}) · Marges {layout.margin} mm
+            {layout.size} ({layout.orientation === "landscape" ? "Paysage" : "Portrait"}{translate(") · Marges")} {layout.margin} mm
           </span>
         </button>
       </div>
@@ -60,10 +61,10 @@ export function WordStudioFooter({
       {/* Côté droit : Mode de vue, Sauvegarde et Zoom */}
       <div className="flex items-center gap-4">
         {dirty ? (
-          <span className="text-warning font-medium">Modifications non enregistrées</span>
+          <span className="text-warning font-medium">{translate("Modifications non enregistrées")}</span>
         ) : (
           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-            <CheckIcon className="size-3" /> Enregistré
+            <CheckIcon className="size-3" /> {translate("Enregistré")}
           </span>
         )}
 
@@ -73,7 +74,7 @@ export function WordStudioFooter({
           type="button"
           onClick={() => onToggleViewMode(viewMode === "page" ? "web" : "page")}
           className="flex items-center gap-1 hover:text-fg text-fg-2 cursor-pointer"
-          title="Basculer entre Mode Page A4 et Mode Web continu"
+          title={translate("Basculer entre Mode Page A4 et Mode Web continu")}
         >
           <EyeIcon className="size-3" />
           <span>{viewMode === "page" ? "Mode Page" : "Mode Web"}</span>
@@ -88,7 +89,7 @@ export function WordStudioFooter({
             size="icon-sm"
             onClick={() => onChangeZoom(Math.max(50, zoom - 10))}
             disabled={zoom <= 50}
-            title="Zoom arrière"
+            title={translate("Zoom arrière")}
             className="size-5 p-0"
           >
             <ZoomOutIcon className="size-3" />
@@ -98,7 +99,7 @@ export function WordStudioFooter({
             type="button"
             onClick={() => onChangeZoom(100)}
             className="w-10 text-center font-mono hover:text-fg cursor-pointer text-[10px]"
-            title="Réinitialiser à 100%"
+            title={translate("Réinitialiser à 100%")}
           >
             {zoom}%
           </button>
@@ -108,7 +109,7 @@ export function WordStudioFooter({
             size="icon-sm"
             onClick={() => onChangeZoom(Math.min(200, zoom + 10))}
             disabled={zoom >= 200}
-            title="Zoom avant"
+            title={translate("Zoom avant")}
             className="size-5 p-0"
           >
             <ZoomInIcon className="size-3" />

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { FolderPlusIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
@@ -29,7 +30,7 @@ export function CategoryDialog({ open, onClose }: { open: boolean; onClose: () =
       toast.success(`Catégorie « ${newCat.trim()} » créée`);
       setNewCat("");
     } else {
-      toast.error("Cette catégorie existe déjà ou est invalide.");
+      toast.error(translate("Cette catégorie existe déjà ou est invalide."));
     }
   };
 
@@ -38,10 +39,10 @@ export function CategoryDialog({ open, onClose }: { open: boolean; onClose: () =
       <DialogContent className="sm:max-w-md gap-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 t-16">
-            <FolderPlusIcon className="size-4 text-brand" /> Gérer les catégories de documents
+            <FolderPlusIcon className="size-4 text-brand" /> {translate("Gérer les catégories de documents")}
           </DialogTitle>
           <DialogDescription className="t-14">
-            Créez des catégories sur-mesure pour organiser vos contrats, factures, fiches et documents.
+            {translate("Créez des catégories sur-mesure pour organiser vos contrats, factures, fiches et documents.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -49,21 +50,21 @@ export function CategoryDialog({ open, onClose }: { open: boolean; onClose: () =
           <Input
             value={newCat}
             onChange={(e) => setNewCat(e.target.value)}
-            placeholder="Ex. Rapports financiers, RH..."
+            placeholder={translate("Ex. Rapports financiers, RH...")}
             className="h-9 flex-1 text-sm"
           />
           <Button type="submit" variant="brand" size="sm" disabled={!newCat.trim()}>
-            <PlusIcon className="size-4" /> Créer
+            <PlusIcon className="size-4" /> {translate("Créer")}
           </Button>
         </form>
 
         <div className="flex flex-col gap-2 pt-3 border-t border-hairline">
           <span className="text-xs font-semibold text-fg-2 uppercase tracking-wider">
-            Vos catégories personnalisées ({customCategories.length})
+            {translate("Vos catégories personnalisées (")}{customCategories.length})
           </span>
           {customCategories.length === 0 ? (
             <p className="text-xs text-fg-2 py-2">
-              Aucune catégorie personnalisée créée pour le moment.
+              {translate("Aucune catégorie personnalisée créée pour le moment.")}
             </p>
           ) : (
             <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto scroll-thin py-1">

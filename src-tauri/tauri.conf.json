@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Gather",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "identifier": "app.aura.workspace",
   "build": {
     "frontendDist": "../out",
@@ -25,7 +25,19 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self' 'wasm-unsafe-eval'",
+        "style-src": "'self' 'unsafe-inline'",
+        "font-src": "'self' data:",
+        "img-src": "'self' data: blob: https:",
+        "media-src": "'self' data: blob:",
+        "worker-src": "'self' blob:",
+        "frame-src": "'self' data: blob:",
+        "connect-src": "'self' ipc: http://ipc.localhost data: blob: https://open.er-api.com https://date.nager.at https://ep-shiny-dew-zaqz31c1.neonauth.c-2.eu-west-2.aws.neon.tech https://ep-shiny-dew-zaqz31c1.apirest.c-2.eu-west-2.aws.neon.tech",
+        "object-src": "'none'",
+        "base-uri": "'self'"
+      }
     }
   },
   "bundle": {
@@ -40,5 +52,16 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMyQUQxNzFFQTlBM0IwMTAKUldRUXNLT3BIaGV0d3FCaXVCakRCcFprUFp4UThvbnBOdmdFTzhxT1RpYXRTYmlYcTgzaHZwbjcK",
+      "endpoints": [
+        "https://github.com/stvekoulo/gather-releases/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

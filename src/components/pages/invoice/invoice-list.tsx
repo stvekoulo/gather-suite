@@ -121,7 +121,7 @@ export function InvoicesList({
               <span className="flex w-full items-center gap-3">
                 <span className="t-12 min-w-0 flex-1 truncate text-fg-2">
                   {inv.number} ·{" "}
-                  <span className={cn(st === "overdue" && "text-danger")}>Échéance {formatShort(inv.dueDate)}</span>
+                  <span className={cn(st === "overdue" && "text-danger")}>{translate("Échéance")} {formatShort(inv.dueDate)}</span>
                 </span>
                 <InvoiceStatusBadge status={st} />
               </span>

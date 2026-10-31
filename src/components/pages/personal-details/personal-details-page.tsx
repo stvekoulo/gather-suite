@@ -85,7 +85,7 @@ export function PersonalDetailsPage() {
   const input = (k: keyof Profile, { className, ...props }: React.ComponentProps<typeof Input> = {}) => (
     <Input
       id={`pd-${k}`}
-      value={draft[k]}
+      value={draft[k] ?? ""}
       onChange={(e) => set(k, e.target.value)}
       aria-invalid={err(k) ? true : undefined}
       className={cn(TOUCH_FIELD, className)}
@@ -103,8 +103,8 @@ export function PersonalDetailsPage() {
         description={
           dirty ? (
             <>
-              {changed.length} modification{changed.length > 1 ? "s" : ""} non enregistrée{changed.length > 1 ? "s" : ""}
-              <span className="max-md:hidden"> · ⌘S pour enregistrer</span>
+              {changed.length} {translate("modification")}{changed.length > 1 ? "s" : ""} {translate("non enregistrée")}{changed.length > 1 ? "s" : ""}
+              <span className="max-md:hidden"> {translate("· ⌘S pour enregistrer")}</span>
             </>
           ) : (
             "Accessible uniquement par vous et l'administration"
@@ -178,7 +178,7 @@ export function PersonalDetailsPage() {
                 onClick={() => set("initials", initialsFrom(draft.name))}
                 className="t-12 -mt-2 w-fit text-brand outline-none hover-fine:text-brand-strong focus-visible:underline max-md:-my-1 max-md:py-1.5"
               >
-                Utiliser « {initialsFrom(draft.name)} » selon votre nom
+                {translate("Utiliser «")} {initialsFrom(draft.name)} {translate("» selon votre nom")}
               </button>
             ) : null}
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
@@ -191,32 +191,35 @@ export function PersonalDetailsPage() {
             </div>
           </Section>
 
-          <Section title={translate("Work")} description={translate("Your role and reporting line")}>
+          <Section title={translate("Activité")} description={translate("Ces informations apparaissent sur vos factures")}>
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+              <Field label={translate("Entreprise")} htmlFor="pd-company">
+                {input("company", { autoComplete: "organization" })}
+              </Field>
               <Field label={translate("Job title")} htmlFor="pd-jobTitle">
                 {input("jobTitle", { autoComplete: "organization-title" })}
               </Field>
-              <Field label={translate("Department")} htmlFor="pd-department">
-                {input("department")}
+              <Field label="SIRET" htmlFor="pd-siret">
+                {input("siret")}
               </Field>
-              <Field label={translate("Manager")} htmlFor="pd-manager">
-                {input("manager")}
+              <Field label={translate("N° de TVA")} htmlFor="pd-vatNumber" hint={translate("Laissez vide si vous êtes en franchise de TVA")}>
+                {input("vatNumber")}
               </Field>
               <Field label={translate("Location")} htmlFor="pd-location">
                 {input("location", { placeholder: "Ville, Pays" })}
               </Field>
-              <Field label={translate("Start date")} htmlFor="pd-startDate" hint={t ? `${t} dans l'entreprise` : undefined}>
-                {input("startDate", { type: "date", max: today })}
+              <Field label={translate("Mentions légales de facture")} htmlFor="pd-legalMentions" className="sm:col-span-2">
+                {input("legalMentions", { placeholder: "Pénalités de retard, conditions de paiement…" })}
               </Field>
             </div>
           </Section>
 
-          <Section title={translate("Personal")} description={translate("Only visible to People Ops")}>
+          <Section title={translate("Personal")} description={translate("Conservé uniquement sur cet appareil")}>
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
               <Field label={translate("Birthday")} htmlFor="pd-birthday" error={err("birthday")}>
                 {input("birthday", { type: "date", max: today })}
               </Field>
-              <Field label={translate("Emergency contact")} htmlFor="pd-emergencyContact" hint="Nom et numéro de téléphone">
+              <Field label={translate("Emergency contact")} htmlFor="pd-emergencyContact" hint={translate("Nom et numéro de téléphone")}>
                 {input("emergencyContact", { placeholder: "Nom · téléphone" })}
               </Field>
               <Field label={translate("Home address")} htmlFor="pd-address" className="sm:col-span-2">
@@ -225,7 +228,7 @@ export function PersonalDetailsPage() {
             </div>
           </Section>
 
-          <Section title={translate("About")} description={translate("A short intro for your teammates")}>
+          <Section title={translate("About")} description={translate("Une courte présentation de vous")}>
             <Field
               label={translate("Bio")}
               htmlFor="pd-bio"
@@ -242,7 +245,7 @@ export function PersonalDetailsPage() {
                 rows={3}
                 value={draft.bio}
                 onChange={(e) => set("bio", e.target.value)}
-                placeholder="Vos projets, vos compétences, vos centres d'intérêt…"
+                placeholder={translate("Vos projets, vos compétences, vos centres d'intérêt…")}
                 aria-invalid={err("bio") ? true : undefined}
               />
             </Field>

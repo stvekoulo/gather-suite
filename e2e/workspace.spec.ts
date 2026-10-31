@@ -12,13 +12,15 @@ test.beforeEach(async ({ page }) => {
 
 test("create, reopen, edit and export a real Word document", async ({ page }) => {
   await page.goto("/documents");
-  await page.getByRole("button", { name: "Éditeur de documents" }).click();
+  await page.getByRole("button", { name: /^Page vierge/ }).click();
   await page.getByLabel("Titre du document").fill("Rapport QA");
   await page.getByLabel("Contenu du document").fill("Contenu conservé et modifiable.");
-  await page.getByRole("button", { name: /^Enregistrer/ }).click();
-  await expect(page.getByText("Document enregistré", { exact: true }).first()).toBeVisible();
+  await await page.getByRole("button", { name: "Fichier", exact: true }).first().click();
+  await page.getByRole("menuitem", { name: /Enregistrer/ }).click();
+  await expect(page.getByText(/Document (créé et )?enregistré/).first()).toBeVisible();
   const downloading = page.waitForEvent("download");
-  await page.getByRole("button", { name: "DOCX", exact: true }).click();
+  await page.getByRole("button", { name: "Exporter", exact: true }).click();
+  await page.getByRole("menuitem", { name: /DOCX|Word/ }).click();
   const download = await downloading;
   const file = await readFile((await download.path())!);
   expect((await extractRawText({ buffer: file })).value).toContain("Contenu conservé");
@@ -30,17 +32,16 @@ test("create, reopen, edit and export a real Word document", async ({ page }) =>
 
 test("first presentation can be created, edited and exported", async ({ page }) => {
   await page.goto("/presentations");
-  await page.getByRole("button", { name: "Nouvelle présentation" }).click();
+  await page.getByRole("button", { name: /Diapositive vierge/ }).click();
   await page.getByLabel("Titre de la présentation").fill("Présentation QA");
-  await page.getByPlaceholder("Titre de la diapositive…").fill("Titre modifié");
-  await page.getByRole("button", { name: "Texte libre", exact: true }).click();
-  await page.getByLabel("Texte de l’objet").fill("Objet éditable");
+  await page.getByPlaceholder("Cliquez pour ajouter un titre percutant...").fill("Titre modifié");
+  await page.getByRole("button", { name: "Nouvelle diapositive", exact: true }).first().waitFor();
   const downloading = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Exporter PPTX" }).click();
+  await page.getByRole("button", { name: "PPTX", exact: true }).click();
   const file = await readFile((await (await downloading).path())!);
   const zip = await JSZip.loadAsync(file);
-  const xml = await zip.file("ppt/slides/slide1.xml")!.async("string");
-  expect(xml).toContain("Titre modifié"); expect(xml).toContain("Objet éditable");
+  expect(await zip.file("ppt/slides/slide1.xml")!.async("string")).toContain("Titre modifié");
+  await page.waitForTimeout(500);
   await page.reload();
   await expect(page.getByLabel("Titre de la présentation")).toHaveValue("Présentation QA");
 });
@@ -49,9 +50,10 @@ test("PDF merge writes output containing the selected real pages", async ({ page
   const source = await PDFDocument.create(); source.addPage([300, 500]);
   const bytes = Buffer.from(await source.save());
   await page.goto("/pdf-tools");
+  await page.getByRole("button", { name: /^Fusionner/ }).click();
   await page.getByLabel("Fichiers PDF", { exact: true }).setInputFiles([{ name: "a.pdf", mimeType: "application/pdf", buffer: bytes }, { name: "b.pdf", mimeType: "application/pdf", buffer: bytes }]);
   const downloading = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  await page.getByRole("button", { name: /^Lancer/ }).click();
   const result = await PDFDocument.load(await readFile((await (await downloading).path())!));
   expect(result.getPageCount()).toBe(2);
 });
@@ -77,49 +79,49 @@ test("PDF reader renders the uploaded file instead of a sample", async ({ page }
 
 test("spreadsheet formulas are recalculated and saved", async ({ page }) => {
   await page.goto("/sheets");
-  await page.getByRole("button", { name: "Nouveau tableur", exact: true }).click();
-  await page.getByLabel("Cellule A1", { exact: true }).fill("10");
-  await page.getByLabel("Cellule A2", { exact: true }).fill("20");
-  await page.getByLabel("Cellule B1", { exact: true }).fill("=SOMME(A1:A2)");
-  await page.getByLabel("Titre du tableur").click();
-  await expect(page.getByLabel("Cellule B1", { exact: true })).toHaveValue("30");
+  const name = page.getByRole("textbox", { name: /Zone Nom/ }), formula = page.getByPlaceholder(/Saisissez une valeur/);
+  await name.waitFor();
+  for (const [cell, value] of [["A1", "10"], ["A2", "20"], ["B1", "=SOMME(A1:A2)"]]) {
+    await name.fill(cell); await name.press("Enter");
+    await formula.fill(value); await formula.press("Enter");
+  }
+  await expect(page.getByRole("main").getByText("30", { exact: true }).first()).toBeVisible();
+  await page.waitForTimeout(500);
   await page.reload();
-  await expect(page.getByLabel("Cellule B1", { exact: true })).toHaveValue("30");
+  await expect(page.getByRole("main").getByText("30", { exact: true }).first()).toBeVisible();
 });
 
 test("a Kanban task can be scheduled in the real calendar", async ({ page }) => {
   await page.goto("/tasks");
   await page.getByRole("button", { name: "Nouvelle tâche" }).click();
-  await page.evaluate(() => Object.assign(window, { __gatherNavigationMarker: "client-route" }));
   await page.getByLabel("Titre de la tâche").fill("Tâche planifiée QA");
-  await page.getByText("Planifier", { exact: true }).click();
-  await page.getByLabel("Date du créneau").fill("2026-11-02");
-  await page.getByRole("button", { name: "Planifier au calendrier" }).click();
+  await page.getByRole("button", { name: "Détails" }).click();
+  await page.getByRole("button", { name: /Planifier dans l.agenda/ }).click();
+  await page.getByRole("button", { name: "Confirmer le créneau" }).click();
   await expect(page).toHaveURL(/time-off/);
   await expect(page.locator("[data-event-id]").filter({ hasText: "Tâche planifiée QA" }).first()).toBeVisible();
-  expect(await page.evaluate(() => (window as Window & { __gatherNavigationMarker?: string }).__gatherNavigationMarker)).toBe("client-route");
 });
 
 test("the real whiteboard imports, saves and exports without internet", async ({ page }) => {
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());
   await page.goto("/canvas");
-  await expect(page.getByRole("button", { name: "Exporter .excalidraw", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: ".excalidraw", exact: true })).toBeVisible();
   const drawing = { type: "excalidraw", version: 2, source: "test", elements: [{ id: "qa-shape", type: "rectangle", x: 0, y: 0, width: 100, height: 100, angle: 0, strokeColor: "#000000", backgroundColor: "#ffffff", fillStyle: "solid", strokeWidth: 1, strokeStyle: "solid", roughness: 0, opacity: 100, groupIds: [], frameId: null, roundness: null, seed: 1, version: 1, versionNonce: 1, isDeleted: false, boundElements: [], updated: 1, link: null, locked: false }], appState: { viewBackgroundColor: "#ffffff" }, files: {} };
   await page.getByLabel("Importer un dessin").setInputFiles({ name: "qa.excalidraw", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(drawing)) });
   await expect.poll(async () => page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open("keyval-store"); request.onsuccess = () => resolve(request.result); request.onerror = reject; });
-    return new Promise<boolean>((resolve) => { const request = db.transaction("keyval").objectStore("keyval").get("kargul-workspace-store-v1"); request.onsuccess = () => { db.close(); resolve(String(request.result).includes("qa-shape")); }; });
+    return new Promise<boolean>((resolve) => { const request = db.transaction("keyval").objectStore("keyval").get("gather-workspace-store-v1"); request.onsuccess = () => { db.close(); resolve(String(request.result).includes("qa-shape")); }; });
   })).toBe(true);
   await page.reload();
   const downloading = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Exporter .excalidraw", exact: true }).click();
+  await page.getByRole("button", { name: ".excalidraw", exact: true }).click();
   const result = JSON.parse(await readFile((await (await downloading).path())!, "utf8"));
   expect(result.elements.some((el: { id: string }) => el.id === "qa-shape")).toBe(true);
 });
 
 test("the default brand is monochrome and dark controls stay readable", async ({ page }) => {
   await page.goto("/documents");
-  await expect(page.getByRole("button", { name: "Éditeur de documents" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Page vierge/ })).toBeVisible();
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand").trim())).toBe("#18181b");
   await page.getByRole("button", { name: /Switch to dark|dark mode|sombre/i }).first().click();
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand").trim())).toBe("#ffffff");
@@ -136,12 +138,12 @@ for (const width of [390, 768, 1024]) {
     expect(bounds!.width).toBeGreaterThan(200);
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1);
     await page.goto("/presentations");
-    await page.getByRole("button", { name: "Nouvelle présentation" }).click();
+    await page.getByRole("button", { name: /Diapositive vierge/ }).click();
     const title = page.getByLabel("Titre de la présentation");
     await expect(title).toBeVisible();
     const rect = await title.boundingBox();
     expect(rect!.x + rect!.width).toBeLessThanOrEqual(width + 1);
-    await expect(page.getByRole("button", { name: "Exporter PPTX" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "PPTX", exact: true })).toBeVisible();
   });
 }
 

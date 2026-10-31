@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -60,7 +61,7 @@ export function ChartDialog({ open, onClose, cells, selectedRange }: ChartDialog
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-semibold text-emerald-700 dark:text-emerald-400">
             <BarChart3Icon className="size-5" />
-            Graphique ({selectedRange})
+            {translate("Graphique (")}{selectedRange})
           </DialogTitle>
         </DialogHeader>
 
@@ -72,7 +73,7 @@ export function ChartDialog({ open, onClose, cells, selectedRange }: ChartDialog
             onClick={() => setChartType("bar")}
             className="gap-1.5 text-xs"
           >
-            <BarChart3Icon className="size-3.5" /> Barres
+            <BarChart3Icon className="size-3.5" /> {translate("Barres")}
           </Button>
           <Button
             variant={chartType === "line" ? "default" : "outline"}
@@ -80,7 +81,7 @@ export function ChartDialog({ open, onClose, cells, selectedRange }: ChartDialog
             onClick={() => setChartType("line")}
             className="gap-1.5 text-xs"
           >
-            <LineChartIcon className="size-3.5" /> Courbe
+            <LineChartIcon className="size-3.5" /> {translate("Courbe")}
           </Button>
           <Button
             variant={chartType === "pie" ? "default" : "outline"}
@@ -88,7 +89,7 @@ export function ChartDialog({ open, onClose, cells, selectedRange }: ChartDialog
             onClick={() => setChartType("pie")}
             className="gap-1.5 text-xs"
           >
-            <PieChartIcon className="size-3.5" /> Secteurs
+            <PieChartIcon className="size-3.5" /> {translate("Secteurs")}
           </Button>
         </div>
 

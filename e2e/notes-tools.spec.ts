@@ -6,9 +6,11 @@ test("note resources preserve file bytes and reminders survive reload", async ({
   await page.addInitScript(({ seed, version }) => localStorage.setItem("calendar-app:state", JSON.stringify({ state: seed, version })), { seed, version: STATE_VERSION });
   await page.goto("/notes");
   await page.getByPlaceholder(/idée|pensée|mind|thought|note/i).last().fill("Ressource QA #client/projet");
-  await page.getByLabel("Joindre des fichiers", { exact: true }).setInputFiles({ name: "original.txt", mimeType: "text/plain", buffer: Buffer.from("Retained attachment bytes") });
+  await page.getByText("Joindre des fichiers", { exact: true }).first().click();
+  await page.getByRole("dialog").locator('input[type="file"]').first().setInputFiles({ name: "original.txt", mimeType: "text/plain", buffer: Buffer.from("Retained attachment bytes") });
   await expect(page.getByText(/original.txt/).first()).toBeVisible();
   await page.getByRole("button", { name: /Enregistrer|Save Note/ }).click();
+  await page.getByRole("button", { name: /Outils & Import/ }).click();
   await page.getByText(/^Ressources : 1 fichiers/).click();
   page.once("dialog", (dialog) => dialog.accept("renamed.txt"));
   await page.getByRole("button", { name: "Renommer", exact: true }).click();

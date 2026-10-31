@@ -1,7 +1,7 @@
 "use client";
 import { translate } from "@/lib/i18n/ui-text";
 
-import { CheckIcon, DownloadIcon, PencilIcon, PrinterIcon, SendIcon } from "lucide-react";
+import { CheckIcon, DownloadIcon, PencilIcon, PrinterIcon, SendIcon, FilePlusIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useToday } from "@/hooks/use-today";
 import { useAppStore } from "@/stores/app-store";
 import { useInvoiceUi } from "./invoice-ui-store";
-import { downloadInvoice, effectiveStatus, formatMoney, invoiceTotal, lineTotal, printInvoice } from "./invoice-utils";
+import { downloadInvoice, effectiveStatus, fileInvoice, formatMoney, invoiceSubtotal, invoiceTax, invoiceTotal, lineTotal, printInvoice } from "./invoice-utils";
 import { InvoiceStatusBadge } from "./status-badge";
 
 export function InvoiceView() {
@@ -35,7 +35,12 @@ export function InvoiceView() {
 
   const download = async () => {
     if (!invoice) return;
-    try { if (await downloadInvoice(invoice, profile)) toast.success("Facture téléchargée", { description: `${invoice.number}.pdf` }); }
+    try { if (await downloadInvoice(invoice, profile)) toast.success(translate("Facture téléchargée"), { description: `${invoice.number}.pdf` }); }
+    catch (error) { toast.error(String(error)); }
+  };
+  const file = async () => {
+    if (!invoice) return;
+    try { await fileInvoice(invoice, profile); toast.success(translate("Facture ajoutée à Documents"), { description: `${invoice.number}.pdf` }); }
     catch (error) { toast.error(String(error)); }
   };
   const send = () => {
@@ -56,7 +61,7 @@ export function InvoiceView() {
           <>
             <div className="flex items-center gap-2 border-b border-hairline bg-surface py-3 pr-12 pl-4">
               <DialogTitle className="t-14 min-w-0 flex-1 truncate text-fg">{invoice.number}</DialogTitle>
-              <DialogDescription className="sr-only">Facture pour {invoice.client}</DialogDescription>
+              <DialogDescription className="sr-only">{translate("Facture pour")} {invoice.client}</DialogDescription>
               <div className="flex items-center gap-2 max-sm:hidden">
                 {invoice.status !== "paid" && (
                   <Button size="sm" className="px-2" onClick={() => edit(invoice.id)}>
@@ -97,7 +102,7 @@ export function InvoiceView() {
                 </header>
 
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-y border-hairline py-5 sm:grid-cols-3 sm:gap-6">
-                  <Meta label="Facturé à" value={invoice.client} className="max-sm:col-span-2" />
+                  <Meta label={translate("Facturé à")} value={invoice.client} className="max-sm:col-span-2" />
                   <Meta label={translate("Issued")} value={formatLong(invoice.issueDate)} />
                   <Meta
                     label={translate("Due")}
@@ -146,7 +151,13 @@ export function InvoiceView() {
 
                 <dl className="ml-auto grid w-full grid-cols-[1fr_auto] gap-y-3 sm:w-64 sm:gap-x-4">
                   <dt className="t-14 text-fg-2">{translate("Subtotal")}</dt>
-                  <dd className="t-14 text-right text-table tabular-nums">{formatMoney(total, invoice.currency)}</dd>
+                  <dd className="t-14 text-right text-table tabular-nums">{formatMoney(invoiceSubtotal(invoice), invoice.currency)}</dd>
+                  {invoice.taxRate ? (
+                    <>
+                      <dt className="t-14 text-fg-2">{translate("TVA")} {invoice.taxRate} %</dt>
+                      <dd className="t-14 text-right text-table tabular-nums">{formatMoney(invoiceTax(invoice), invoice.currency)}</dd>
+                    </>
+                  ) : null}
                   <dt className="t-14 border-t border-hairline pt-3 text-fg">{status === "paid" ? translate("Total paid") : translate("Total due")}</dt>
                   <dd className="border-t border-hairline pt-3 text-right text-[20px] leading-none font-medium tracking-[-0.4px] text-fg tabular-nums">
                     {formatMoney(total, invoice.currency)}
@@ -171,12 +182,13 @@ export function InvoiceView() {
                   <Button className="h-10 flex-1" onClick={download}>
                     <DownloadIcon className="text-icon" />{translate("Download")}
                   </Button>
+                  <Button className="h-10 flex-1" onClick={() => void file()}>{translate("Vers Documents")}</Button>
                 </>
               ) : (
                 <>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="icon" className="size-10" aria-label="Plus d'actions">
+                      <Button size="icon" className="size-10" aria-label={translate("Plus d'actions")}>
                         <Icon name="more" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -189,6 +201,9 @@ export function InvoiceView() {
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={download}>
                         <DownloadIcon />{translate("Download")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => void file()}>
+                        <FilePlusIcon /> {translate("Ajouter à Documents")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

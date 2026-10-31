@@ -31,9 +31,9 @@ test("document editing and mobile navigation stay usable on a compact screen", a
   await page.getByRole("link", { name: "Documents", exact: true }).click();
   await expect(page).toHaveURL(/documents/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("button", { name: "Éditeur de documents" }).click();
+  await page.getByRole("button", { name: /^Page vierge/ }).click();
   const editor = page.getByLabel("Contenu du document");
-  await editor.fill("Document sur petit écran");
+  await editor.click(); await editor.pressSequentially("Document sur petit écran");
   const width = await editor.evaluate((el) => el.getBoundingClientRect().width);
   expect(width).toBeGreaterThan(240);
   await editor.click();

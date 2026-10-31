@@ -12,6 +12,7 @@ import {
   ReceiptIcon,
   SettingsIcon,
   TimerIcon,
+  ZapIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { relativeTime } from "@/lib/dates";
@@ -21,6 +22,7 @@ import { useNow, useToday } from "@/hooks/use-today";
 import { useAppStore } from "@/stores/app-store";
 import { openOverlay } from "@/stores/overlay-store";
 import { Card, CardHeader, EmptyState } from "@/components/pages/shared/page-chrome";
+import { invoiceRow, txRow, useMoney } from "@/lib/finance-totals";
 
 // Carte de synthèse financière et trésorerie Gather
 export function FinancesCard() {
@@ -28,10 +30,11 @@ export function FinancesCard() {
   const transactions = useAppStore((s) => s.financeTransactions ?? []);
   const lang = useAppStore((s) => s.settings.language);
 
-  const paidInvoices = invoices.filter((i) => i.status === "paid").reduce((sum, i) => sum + i.items.reduce((s, it) => s + it.quantity * it.rate, 0), 0);
-  const otherIncome = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-  const totalIncome = paidInvoices + otherIncome;
-  const totalExpense = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+  const money = useMoney();
+  const incomeRows = [...invoices.filter((i) => i.status === "paid").map(invoiceRow), ...transactions.filter((t) => t.type === "income").map(txRow)];
+  const foreign = money.unconverted(incomeRows);
+  const totalIncome = money.value(incomeRows);
+  const totalExpense = money.value(transactions.filter((t) => t.type === "expense").map(txRow));
   const netBalance = totalIncome - totalExpense;
 
   const totalFlow = totalIncome + totalExpense || 1;
@@ -53,9 +56,9 @@ export function FinancesCard() {
       <div className="grid gap-4 p-4">
         <div className="flex items-baseline gap-2">
           <span className="text-[26px] leading-none font-bold tracking-tight text-fg font-mono">
-            {netBalance.toLocaleString(lang === "en" ? "en-US" : "fr-FR")} €
+            {money.fmt(netBalance)}
           </span>
-          <span className="t-12 text-fg-2">{translate("solde net", lang)}</span>
+          <span className="t-12 text-fg-2">{translate("solde net", lang)}{foreign ? ` · + ${foreign}` : ""}</span>
         </div>
 
         {/* Barre de répartition revenus vs dépenses */}
@@ -69,13 +72,13 @@ export function FinancesCard() {
             <span className="flex items-center gap-1.5 text-fg-2">
               <span className="size-2 rounded-full bg-emerald-600" /> {translate("Revenus encaissés", lang)}
             </span>
-            <span className="font-mono font-semibold text-emerald-600">+{totalIncome.toLocaleString(lang === "en" ? "en-US" : "fr-FR")} €</span>
+            <span className="font-mono font-semibold text-emerald-600">+{money.fmt(totalIncome)}</span>
           </li>
           <li className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-fg-2">
               <span className="size-2 rounded-full bg-red-600" /> {translate("Dépenses & Abonnements", lang)}
             </span>
-            <span className="font-mono font-semibold text-red-600">-{totalExpense.toLocaleString(lang === "en" ? "en-US" : "fr-FR")} €</span>
+            <span className="font-mono font-semibold text-red-600">-{money.fmt(totalExpense)}</span>
           </li>
         </ul>
 
@@ -94,6 +97,7 @@ export function QuickActionsCard() {
   const today = useToday();
   const lang = useAppStore((s) => s.settings.language);
   const actions: { label: string; icon: React.ReactNode; href?: string; onClick?: () => void }[] = [
+    { label: "Capture rapide", icon: <ZapIcon />, onClick: () => openOverlay({ kind: "capture" }) },
     { label: "Nouvel événement", icon: <CalendarPlusIcon />, onClick: () => openOverlay({ kind: "event", date: today }) },
     { label: "Nouvelle facture", icon: <ReceiptIcon />, href: "/invoice" },
     { label: "Nouvelle écriture", icon: <CreditCardIcon />, href: "/withdrawal-methods" },

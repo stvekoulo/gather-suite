@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo } from "react";
 import type { Editor } from "@tiptap/react";
@@ -50,7 +51,7 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-semibold text-fg">
             <FileTextIcon className="size-4 text-brand" />
-            Statistiques du document
+            {translate("Statistiques du document")}
           </DialogTitle>
         </DialogHeader>
 
@@ -58,7 +59,7 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
           <div className="rounded-lg border border-hairline/80 bg-surface-2/40 p-3">
             <div className="flex items-center gap-2 text-xs text-fg-2">
               <HashIcon className="size-3.5 text-blue-500" />
-              <span>Mots</span>
+              <span>{translate("Mots")}</span>
             </div>
             <p className="mt-1 text-2xl font-bold tracking-tight text-fg">{stats.words.toLocaleString("fr-FR")}</p>
           </div>
@@ -66,7 +67,7 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
           <div className="rounded-lg border border-hairline/80 bg-surface-2/40 p-3">
             <div className="flex items-center gap-2 text-xs text-fg-2">
               <BookOpenIcon className="size-3.5 text-emerald-500" />
-              <span>Pages estimées</span>
+              <span>{translate("Pages estimées")}</span>
             </div>
             <p className="mt-1 text-2xl font-bold tracking-tight text-fg">{stats.pages}</p>
           </div>
@@ -74,7 +75,7 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
           <div className="rounded-lg border border-hairline/80 bg-surface-2/40 p-3">
             <div className="flex items-center gap-2 text-xs text-fg-2">
               <PilcrowIcon className="size-3.5 text-purple-500" />
-              <span>Paragraphes</span>
+              <span>{translate("Paragraphes")}</span>
             </div>
             <p className="mt-1 text-xl font-semibold text-fg">{stats.paragraphs.toLocaleString("fr-FR")}</p>
           </div>
@@ -82,7 +83,7 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
           <div className="rounded-lg border border-hairline/80 bg-surface-2/40 p-3">
             <div className="flex items-center gap-2 text-xs text-fg-2">
               <FileTextIcon className="size-3.5 text-amber-500" />
-              <span>Phrases</span>
+              <span>{translate("Phrases")}</span>
             </div>
             <p className="mt-1 text-xl font-semibold text-fg">{stats.sentences.toLocaleString("fr-FR")}</p>
           </div>
@@ -90,22 +91,22 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
 
         <div className="divide-y divide-hairline rounded-lg border border-hairline bg-surface-1/30 px-3 text-xs">
           <div className="flex justify-between py-2 text-fg-2">
-            <span>Caractères (avec espaces)</span>
+            <span>{translate("Caractères (avec espaces)")}</span>
             <span className="font-mono font-medium text-fg">{stats.charsWithSpaces.toLocaleString("fr-FR")}</span>
           </div>
           <div className="flex justify-between py-2 text-fg-2">
-            <span>Caractères (sans espaces)</span>
+            <span>{translate("Caractères (sans espaces)")}</span>
             <span className="font-mono font-medium text-fg">{stats.charsNoSpaces.toLocaleString("fr-FR")}</span>
           </div>
           <div className="flex items-center justify-between py-2 text-fg-2">
             <span className="flex items-center gap-1.5">
-              <ClockIcon className="size-3 text-fg-3" /> Temps de lecture
+              <ClockIcon className="size-3 text-fg-3" /> {translate("Temps de lecture")}
             </span>
             <span className="font-medium text-fg">~{stats.readTimeMin} min</span>
           </div>
           <div className="flex items-center justify-between py-2 text-fg-2">
             <span className="flex items-center gap-1.5">
-              <MicIcon className="size-3 text-fg-3" /> Temps d&apos;élocution
+              <MicIcon className="size-3 text-fg-3" /> {translate("Temps d'élocution")}
             </span>
             <span className="font-medium text-fg">~{stats.speechTimeMin} min</span>
           </div>
@@ -113,7 +114,7 @@ export function DocumentStatsDialog({ open, onClose, editor }: DocumentStatsDial
 
         <div className="flex justify-end pt-2">
           <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
-            Fermer
+            {translate("Fermer")}
           </Button>
         </div>
       </DialogContent>

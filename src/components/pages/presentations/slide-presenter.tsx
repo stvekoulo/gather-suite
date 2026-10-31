@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useState } from "react";
 import { ArrowLeftIcon, ArrowRightIcon, MaximizeIcon, XIcon } from "lucide-react";
@@ -50,7 +51,7 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label="Présentation plein écran"
+      aria-label={translate("Présentation plein écran")}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -61,7 +62,7 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
         <div className="flex items-center gap-3">
           <span className="text-[13px] font-semibold text-white">{deck.title}</span>
           <span className="text-[12px] text-white/50">
-            Diapositive {index + 1} sur {slides.length}
+            {translate("Diapositive")} {index + 1} {translate("sur")} {slides.length}
           </span>
           <span className="font-mono text-xs text-white/60">
             {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
@@ -71,7 +72,7 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
             onClick={() => setShowNotes(!showNotes)}
             className="rounded-lg bg-white/10 hover:bg-white/20 px-2.5 py-1 text-xs text-white transition-colors"
           >
-            Notes d’orateur
+            {translate("Notes d’orateur")}
           </button>
           <button
             type="button"
@@ -85,13 +86,13 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
             }}
             className="flex items-center gap-1 rounded-lg bg-white/10 hover:bg-white/20 px-2.5 py-1 text-xs text-white transition-colors"
           >
-            <MaximizeIcon className="size-3" /> Plein écran
+            <MaximizeIcon className="size-3" /> {translate("Plein écran")}
           </button>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fermer la présentation"
+          aria-label={translate("Fermer la présentation")}
           className="flex size-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
         >
           <XIcon className="size-4" />
@@ -118,7 +119,7 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
           className="relative aspect-video w-full h-auto flex items-center justify-center cursor-pointer"
           onClick={() => {
             if (index < slides.length - 1) setIndex((i) => i + 1);
-            else toast.info("Fin de la présentation · Échap pour quitter");
+            else toast.info(translate("Fin de la présentation · Échap pour quitter"));
           }}
         >
           <SlideCanvas slide={currentSlide} theme={deck.theme} isPresenter />
@@ -133,7 +134,7 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
             disabled={index === 0}
             onClick={() => setIndex((i) => Math.max(0, i - 1))}
             className="flex size-9 items-center justify-center rounded-xl bg-white/10 text-white disabled:opacity-30 hover:bg-white/20 transition-colors"
-            aria-label="Diapositive précédente"
+            aria-label={translate("Diapositive précédente")}
           >
             <ArrowLeftIcon className="size-4" />
           </button>
@@ -142,13 +143,13 @@ export function SlidePresenter({ deck, initialIndex = 0, onClose }: SlidePresent
             disabled={index >= slides.length - 1}
             onClick={() => setIndex((i) => Math.min(slides.length - 1, i + 1))}
             className="flex size-9 items-center justify-center rounded-xl bg-white/10 text-white disabled:opacity-30 hover:bg-white/20 transition-colors"
-            aria-label="Diapositive suivante"
+            aria-label={translate("Diapositive suivante")}
           >
             <ArrowRightIcon className="size-4" />
           </button>
         </div>
         <span className="text-[12px] text-white/50">
-          Navigation : flèches gauche/droite ou espace · Échap pour quitter
+          {translate("Navigation : flèches gauche/droite ou espace · Échap pour quitter")}
         </span>
       </div>
     </motion.div>

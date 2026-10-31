@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { translate } from "@/lib/i18n/ui-text";
 import type { CalEvent, EventColor, FinanceTransaction, Invoice } from "@/lib/types";
 import { uid } from "./app-history";
+import { invoiceTotal } from "@/components/pages/invoice/invoice-utils";
 import type { Actions, SliceGet, SliceSet } from "./app-store-types";
 
 type WorkActions = Pick<
@@ -26,6 +27,13 @@ type WorkActions = Pick<
   | "claimBenefit"
   | "updateBenefit"
 >;
+
+/** Same day N months later, clamped to the month's end: 31 Jan + 1 month is 28 Feb, not 3 March. */
+export function monthlyOccurrence(year: number, month: number, day: number, monthsLater: number) {
+  const target = new Date(year, month - 1 + monthsLater, 1);
+  const last = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, "0")}-${String(Math.min(day, last)).padStart(2, "0")}`;
+}
 
 const todayKey = () => {
   const d = new Date();
@@ -99,16 +107,14 @@ export function createWorkSlice(set: SliceSet, get: SliceGet): WorkActions {
         end: 600,
         allDay: true,
         color: (saved.status === "paid" ? "green" : "purple") as EventColor,
-        note: `Total : ${saved.items.reduce((sum, item) => sum + item.quantity * item.rate, 0)} ${saved.currency} · Statut : ${saved.status}`,
+        note: `Total : ${invoiceTotal(saved)} ${saved.currency} · Statut : ${saved.status}`,
         requestId: `inv-${saved.id}`,
       } : null;
       set((s) => ({
         invoices: s.invoices.some((i) => i.id === saved.id)
           ? s.invoices.map((i) => (i.id === saved.id ? saved : i))
           : [saved, ...s.invoices],
-        events: dueEvent
-          ? [...s.events.filter((e) => e.requestId !== `inv-${saved.id}` && e.id !== `ev-inv-${saved.id}`), dueEvent]
-          : s.events,
+        events: [...s.events.filter((e) => e.requestId !== `inv-${saved.id}` && e.id !== `ev-inv-${saved.id}`), ...(dueEvent ? [dueEvent] : [])],
       }));
       return saved;
     },
@@ -121,14 +127,16 @@ export function createWorkSlice(set: SliceSet, get: SliceGet): WorkActions {
       const inv = get().invoices.find((i) => i.id === id);
       if (!inv) return;
       const linkedEntries = get().timeEntries;
+      const dueEvents = get().events.filter((e) => e.requestId === `inv-${id}` || e.id === `ev-inv-${id}`);
       set((s) => ({
         invoices: s.invoices.filter((i) => i.id !== id),
         timeEntries: s.timeEntries.map((e) => e.invoiceId === id ? { ...e, invoiceId: undefined } : e),
         events: s.events.filter((e) => e.requestId !== `inv-${id}` && e.id !== `ev-inv-${id}`),
       }));
-      toast("Invoice deleted", {
+      const lang = get().settings?.language || "fr";
+      toast(translate("Facture supprimée", lang), {
         description: inv.number,
-        action: { label: "Undo", onClick: () => set((s) => ({ invoices: [inv, ...s.invoices], timeEntries: s.timeEntries.map((e) => linkedEntries.find((old) => old.id === e.id)?.invoiceId === id ? { ...e, invoiceId: id } : e) })) },
+        action: { label: translate("Undo", lang), onClick: () => set((s) => ({ invoices: [inv, ...s.invoices], events: [...s.events, ...dueEvents], timeEntries: s.timeEntries.map((e) => linkedEntries.find((old) => old.id === e.id)?.invoiceId === id ? { ...e, invoiceId: id } : e) })) },
       });
     },
 
@@ -141,7 +149,7 @@ export function createWorkSlice(set: SliceSet, get: SliceGet): WorkActions {
           ? (isRec ? `💳 Abonnement : ${saved.title}` : `💳 Dépense : ${saved.title}`)
           : `💰 Encaissement : ${saved.title}`;
         const color: EventColor = saved.type === "income" ? "green" : "orange";
-        const note = `Montant : ${saved.amount} € · ${saved.category}${saved.notes ? ` · ${saved.notes}` : ""}`;
+        const note = `Montant : ${saved.amount} ${saved.currency ?? "EUR"} · ${saved.category}${saved.notes ? ` · ${saved.notes}` : ""}`;
         eventsToCreate.push({
           id: uid("ev"),
           title,
@@ -153,16 +161,16 @@ export function createWorkSlice(set: SliceSet, get: SliceGet): WorkActions {
           note,
           requestId: `fin-${saved.id}-0`,
         });
-        const count = saved.recurrence === "monthly" ? 6 : saved.recurrence === "quarterly" ? 4 : saved.recurrence === "yearly" ? 2 : 0;
+        // ponytail: occurrences are materialized over two years; re-saving the transaction extends them.
+        const count = saved.recurrence === "monthly" ? 24 : saved.recurrence === "quarterly" ? 8 : saved.recurrence === "yearly" ? 2 : 0;
         const stepMonths = saved.recurrence === "monthly" ? 1 : saved.recurrence === "quarterly" ? 3 : 12;
         if (count > 0) {
           const [y, m, d] = saved.date.split("-").map(Number);
           for (let i = 1; i <= count; i++) {
-            const nextDateObj = new Date(y, (m - 1) + i * stepMonths, d);
-            const nextKey = `${nextDateObj.getFullYear()}-${String(nextDateObj.getMonth() + 1).padStart(2, "0")}-${String(nextDateObj.getDate()).padStart(2, "0")}`;
+            const nextKey = monthlyOccurrence(y, m, d, i * stepMonths);
             eventsToCreate.push({
               id: uid("ev"),
-              title: `${title} (${i + 1}/${count + 1})`,
+              title,
               date: nextKey,
               start: 540,
               end: 600,
@@ -178,7 +186,7 @@ export function createWorkSlice(set: SliceSet, get: SliceGet): WorkActions {
         financeTransactions: s.financeTransactions.some((t) => t.id === saved.id)
           ? s.financeTransactions.map((t) => (t.id === saved.id ? saved : t))
           : [saved, ...s.financeTransactions],
-        events: eventsToCreate.length ? [...s.events.filter((e) => !e.requestId?.startsWith(`fin-${saved.id}`)), ...eventsToCreate] : s.events,
+        events: [...s.events.filter((e) => !e.requestId?.startsWith(`fin-${saved.id}-`)), ...eventsToCreate],
       }));
       return saved;
     },
@@ -188,7 +196,7 @@ export function createWorkSlice(set: SliceSet, get: SliceGet): WorkActions {
       if (!tx) return;
       set((s) => ({
         financeTransactions: s.financeTransactions.filter((t) => t.id !== id),
-        events: s.events.filter((e) => !e.requestId?.startsWith(`fin-${id}`)),
+        events: s.events.filter((e) => !e.requestId?.startsWith(`fin-${id}-`)),
       }));
       toast("Écriture financière supprimée", { description: tx.title });
     },

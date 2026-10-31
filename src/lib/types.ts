@@ -2,6 +2,7 @@ export type EventColor = "green" | "purple" | "cyan" | "orange" | "pink" | "blue
 
 /** Dates are local calendar days stored as "YYYY-MM-DD"; times are minutes from midnight. */
 export type CalEvent = {
+  noteId?: string;
   id: string;
   title: string;
   date: string;
@@ -52,6 +53,10 @@ export type Profile = {
   address: string;
   emergencyContact: string;
   bio: string;
+  company?: string;
+  siret?: string;
+  vatNumber?: string;
+  legalMentions?: string;
 };
 
 export type Settings = {
@@ -67,6 +72,8 @@ export type Settings = {
   hasCompletedOnboarding?: boolean;
   accentColor?: string;
   language?: string;
+  currency?: string;
+  closeToTray?: boolean;
 };
 
 export type AppNotification = {
@@ -119,6 +126,8 @@ export type Invoice = {
   items: InvoiceItem[];
   notes: string;
   currency: string;
+  /** VAT in percent; absent or 0 means no tax line. */
+  taxRate?: number;
 };
 
 export type WithdrawalKind = "bank" | "paypal" | "wise" | "card";
@@ -163,7 +172,11 @@ export type FinanceTransaction = {
   recurrence?: TransactionRecurrence;
   isSubscription?: boolean;
   syncCalendar?: boolean;
+  /** Absent on older entries, which were always in euros. */
+  currency?: string;
 };
+
+export type Client = { id: string; name: string; email?: string; phone?: string; address?: string; siret?: string; notes?: string };
 
 export type Workspace = { id: string; name: string };
 
@@ -184,4 +197,5 @@ export type AppState = {
   withdrawalMethods: WithdrawalMethod[];
   benefits: Benefit[];
   financeTransactions: FinanceTransaction[];
+  clients: Client[];
 };

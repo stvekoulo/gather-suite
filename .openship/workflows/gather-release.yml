@@ -10,7 +10,7 @@ jobs:
   release-packages:
     name: Compiler et publier les installeurs Gather Suite
     runs-on: [self-hosted, linux, x64, sol-vps]
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - name: Cloner ou mettre a jour le depot
         env:
@@ -25,21 +25,44 @@ jobs:
           else
             rm -rf /home/ubuntu/gather-suite
             git clone --branch main https://x-access-token:${GH_TOKEN}@github.com/stvekoulo/gather-suite.git /home/ubuntu/gather-suite
-            cd /home/ubuntu/gather-suite
           fi
+      - name: Liberer de la place et preparer la memoire
+        run: |
+          echo "--- Etat initial"; free -m; df -h /; docker system df || true
+          # Only what Gather itself left behind: other services on this server are not touched.
+          rm -rf /home/ubuntu/gather-suite/src-tauri/target/aarch64-apple-darwin /home/ubuntu/gather-suite/src-tauri/target/x86_64-apple-darwin
+          rm -rf /home/ubuntu/gather-suite/src-tauri/target/*/release/bundle /home/ubuntu/gather-suite/src-tauri/target/release/bundle
+          docker image prune -f
+          docker builder prune -f --filter "until=72h"
+          FREE_GB=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
+          if [ "$FREE_GB" -lt 10 ]; then echo "Peu de disque : cache Rust supprime"; rm -rf /home/ubuntu/gather-suite/src-tauri/target/*; fi
+          # Temporary swap so compiling cannot starve the services running here.
+          if [ "$(swapon --noheadings | wc -l)" = "0" ] && sudo -n true 2>/dev/null; then
+            sudo fallocate -l 3G /swapfile-gather && sudo chmod 600 /swapfile-gather && sudo mkswap /swapfile-gather && sudo swapon /swapfile-gather
+          fi
+          echo "--- Apres nettoyage"; free -m; df -h /
       - name: Compilation et publication des releases
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          RELEASE_REPO: ${{ vars.RELEASE_REPO }}
         run: |
           cd /home/ubuntu/gather-suite
-          docker build -t gather-builder -f Dockerfile.builder .
+          nice -n 15 docker build -t gather-builder -f Dockerfile.builder .
+          # Memory is capped so an out-of-memory only ever stops this build, never the server's services.
           docker run --rm \
+            --memory=2200m --memory-swap=5g --oom-score-adj=800 --cpu-shares=256 \
             -v /home/ubuntu/.cargo/registry:/usr/local/cargo/registry \
             -v /home/ubuntu/.cargo/git:/usr/local/cargo/git \
             -v /home/ubuntu/gather-suite/src-tauri/target:/app/src-tauri/target \
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            -e TAURI_SIGNING_PRIVATE_KEY="${TAURI_SIGNING_PRIVATE_KEY}" \
+            -e TAURI_SIGNING_PRIVATE_KEY_PASSWORD="" \
+            -e RELEASE_REPO="${RELEASE_REPO}" \
             gather-builder
-          rm -rf /home/ubuntu/gather-suite/src-tauri/target/release/bundle
-          rm -rf /home/ubuntu/gather-suite/src-tauri/target/x86_64-pc-windows-msvc/release/bundle
-          rm -rf /home/ubuntu/gather-suite/src-tauri/target/aarch64-apple-darwin/release/bundle
-          docker image prune -f --filter "until=24h" || true
+      - name: Rendre la memoire
+        if: always()
+        run: |
+          if [ -f /swapfile-gather ] && sudo -n true 2>/dev/null; then sudo swapoff /swapfile-gather; sudo rm -f /swapfile-gather; fi
+          docker image prune -f
+          free -m; df -h /

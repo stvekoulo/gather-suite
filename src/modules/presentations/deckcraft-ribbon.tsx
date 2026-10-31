@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import {
@@ -122,6 +123,7 @@ export function DeckcraftRibbon({
           <Input
             value={deck.title}
             onChange={(e) => onChangeTitle(e.target.value)}
+            aria-label={tr("Titre de la présentation")}
             placeholder={tr("Titre de la présentation")}
             className="h-7 w-48 sm:w-64 border-transparent bg-transparent px-1.5 text-sm font-semibold text-fg hover:border-hairline focus:border-orange-500 focus:bg-surface"
           />
@@ -251,7 +253,7 @@ export function DeckcraftRibbon({
             </Button>
             <div className="h-4 w-px bg-hairline" />
             <div className="flex items-center gap-1">
-              <span className="text-fg-3 text-[11px]">Zoom :</span>
+              <span className="text-fg-3 text-[11px]">{translate("Zoom :")}</span>
               {[75, 100, 125].map((z) => (
                 <Button key={z} variant={zoom === z ? "default" : "outline"} size="sm" className="h-7 px-2 text-xs" onClick={() => onChangeZoom(z)}>
                   {z}%

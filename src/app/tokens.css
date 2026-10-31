@@ -1,14 +1,14 @@
 :root {
-  --bg-app: #f8fafc;
+  --bg-app: #ffffff;
   --bg-surface: #ffffff;
-  --bg-selected: #f1f5f9;
-  --bg-hover: #f1f5f9;
-  --bg-glass: rgba(248, 250, 252, 0.82);
+  --bg-selected: #f4f4f5;
+  --bg-hover: #f4f4f5;
+  --bg-glass: rgba(255, 255, 255, 0.82);
 
-  --border-hairline: #e2e8f0;
-  --border-control: #cbd5e1;
-  --border-subtle: #f1f5f9;
-  --border-segment: #e2e8f0;
+  --border-hairline: #e4e4e7;
+  --border-control: #d4d4d8;
+  --border-subtle: #f4f4f5;
+  --border-segment: #e4e4e7;
   --border-glass: rgba(255, 255, 255, 0.65);
 
   --text-primary: #0f172a;
@@ -89,15 +89,15 @@
 }
 
 [data-theme="dark"] {
-  --bg-app: #09090b;
-  --bg-surface: #141416;
-  --bg-selected: #242428;
-  --bg-hover: #222226;
-  --bg-glass: rgba(9, 9, 11, 0.84);
+  --bg-app: #000000;
+  --bg-surface: #000000;
+  --bg-selected: #1f1f22;
+  --bg-hover: #18181b;
+  --bg-glass: rgba(0, 0, 0, 0.84);
 
   --border-hairline: #27272a;
   --border-control: #38383c;
-  --border-subtle: #1c1c1f;
+  --border-subtle: #18181b;
   --border-segment: #313136;
   --border-glass: rgba(255, 255, 255, 0.08);
 

@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { workspaceStorage } from "@/lib/storage/workspace-storage";
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "@/components/pages/withdrawal-methods/types";
 
 interface FinanceCategoryState {
@@ -44,7 +45,8 @@ export const useFinanceCategories = create<FinanceCategoryState>()(
     }),
     {
       name: "gather-finance-categories-v1",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => workspaceStorage),
+      skipHydration: true,
     }
   )
 );

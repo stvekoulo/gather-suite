@@ -15,6 +15,7 @@ import { BlinkoSidebar } from "./blinko-sidebar";
 import { NoteToolsModal } from "./note-tools-modal";
 import { defaultNoteFilters, matchesNoteFilters, NoteFilters } from "@/modules/notes/note-filters";
 import { NoteBatch } from "@/modules/notes/note-batch";
+import { useHandoff } from "@/lib/handoff";
 
 // Minimalist, airy Blinko notes and memos feed
 export function NotesPage() {
@@ -25,6 +26,7 @@ export function NotesPage() {
   const searchQuery = useBlinkoStore((s) => s.searchQuery);
 
   const [editingNote, setEditingNote] = useState<BlinkoNote | null>(null);
+  useHandoff("note", (id) => setEditingNote(useBlinkoStore.getState().notes.find((n) => n.id === id) ?? null));
   const [advanced, setAdvanced] = useState(defaultNoteFilters);
   const [selected, setSelected] = useState<string[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);

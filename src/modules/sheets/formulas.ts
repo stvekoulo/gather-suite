@@ -1,4 +1,5 @@
 import type { CellStyle } from "@/modules/productivity/types";
+import { toKey } from "@/lib/dates";
 
 type Value = string | number | boolean;
 
@@ -219,7 +220,7 @@ function evaluate(expression: string, resolve: (id: string) => Value): Value {
     if (["OR", "OU"].includes(id)) return args.some(Boolean);
     if (["NOT", "NON"].includes(id)) return !args[0];
     if (["IFERROR", "SIERREUR"].includes(id)) return typeof args[0] === "string" && args[0].startsWith("#") ? (args[1] ?? "") : args[0];
-    if (["TODAY", "AUJOURDHUI"].includes(id)) return new Date().toISOString().slice(0, 10);
+    if (["TODAY", "AUJOURDHUI"].includes(id)) return toKey(new Date());
     if (["NOW", "MAINTENANT"].includes(id)) return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     if (["LEN", "NBCAR"].includes(id)) return String(args[0] ?? "").length;
     if (["LEFT", "GAUCHE"].includes(id)) return String(args[0] ?? "").slice(0, args[1] !== undefined ? number(args[1]) : 1);

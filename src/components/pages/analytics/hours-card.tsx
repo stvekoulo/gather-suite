@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo, useState } from "react";
 import { addDays, formatShort, fromKey, startOfWeek, WEEKDAYS } from "@/lib/dates";
@@ -65,11 +66,11 @@ export function HoursCard() {
 
   return (
     <ChartCard
-      title="Temps de travail enregistré"
+      title={translate("Temps de travail enregistré")}
       description={`${fmtHours(billable + other)} sur les ${mode === "day" ? "14 derniers jours" : "12 dernières semaines"} · ${fmtHours(billable)} facturable`}
       legend={series}
       actions={
-        <div className="flex items-center rounded-lg bg-app p-0.5 md:mr-1" role="group" aria-label="Grouper par">
+        <div className="flex items-center rounded-lg bg-app p-0.5 md:mr-1" role="group" aria-label={translate("Grouper par")}>
           {(["day", "week"] as const).map((m) => (
             <button
               key={m}

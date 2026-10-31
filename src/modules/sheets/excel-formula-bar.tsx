@@ -1,6 +1,7 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CheckIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,14 +25,12 @@ export function ExcelFormulaBar({
 }: ExcelFormulaBarProps) {
   const [localValue, setLocalValue] = useState(rawValue);
   const [nameBoxValue, setNameBoxValue] = useState(activeCell);
-
-  useEffect(() => {
-    setLocalValue(rawValue);
-  }, [rawValue]);
-
-  useEffect(() => {
-    setNameBoxValue(activeCell);
-  }, [activeCell]);
+  const [seen, setSeen] = useState({ rawValue, activeCell });
+  if (seen.rawValue !== rawValue || seen.activeCell !== activeCell) {
+    setSeen({ rawValue, activeCell });
+    if (seen.rawValue !== rawValue) setLocalValue(rawValue);
+    if (seen.activeCell !== activeCell) setNameBoxValue(activeCell);
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -63,7 +62,7 @@ export function ExcelFormulaBar({
         value={nameBoxValue}
         onChange={(e) => setNameBoxValue(e.target.value)}
         onKeyDown={handleNameBoxKeyDown}
-        title="Zone Nom (Entrez une référence et appuyez sur Entrée)"
+        title={translate("Zone Nom (Entrez une référence et appuyez sur Entrée)")}
         className="h-7 w-20 rounded border border-hairline bg-surface-2/60 px-2 text-center font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400 outline-none focus:border-emerald-500 focus:bg-surface"
       />
 
@@ -75,7 +74,7 @@ export function ExcelFormulaBar({
           variant="ghost"
           size="sm"
           className="size-6 p-0 hover:text-red-600"
-          title="Annuler (Échap)"
+          title={translate("Annuler (Échap)")}
           onClick={() => {
             setLocalValue(rawValue);
             onChange(rawValue);
@@ -87,7 +86,7 @@ export function ExcelFormulaBar({
           variant="ghost"
           size="sm"
           className="size-6 p-0 hover:text-emerald-600"
-          title="Valider (Entrée)"
+          title={translate("Valider (Entrée)")}
           onClick={() => {
             onChange(localValue);
             onCommit();
@@ -98,7 +97,7 @@ export function ExcelFormulaBar({
         <button
           type="button"
           onClick={onOpenFunctions}
-          title="Insérer une fonction"
+          title={translate("Insérer une fonction")}
           className="flex size-6 items-center justify-center font-serif text-xs font-bold italic text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 rounded"
         >
           fx
@@ -116,7 +115,7 @@ export function ExcelFormulaBar({
           onChange(e.target.value);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="Saisissez une valeur ou une formule débutant par ="
+        placeholder={translate("Saisissez une valeur ou une formule débutant par =")}
         className="h-7 flex-1 rounded bg-transparent px-2 font-mono text-xs text-fg outline-none focus:bg-surface-2/40"
       />
     </div>

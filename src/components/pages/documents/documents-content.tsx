@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { FileTextIcon, FolderOpenIcon, SearchXIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,15 +43,15 @@ export function DocumentsContent({
       <EmptyState
         className="flex-1 py-12"
         icon={<FolderOpenIcon />}
-        title="Aucun document pour le moment"
-        hint="Démarrez avec l'un des modèles ci-dessus ou importez vos contrats, fiches de paie et fichiers existants."
+        title={translate("Aucun document pour le moment")}
+        hint={translate("Démarrez avec l'un des modèles ci-dessus ou importez vos contrats, fiches de paie et fichiers existants.")}
         action={
           <div className="flex items-center gap-3">
             <Button variant="brand" size="sm" onClick={onOpenFilePicker}>
-              <UploadIcon className="size-3.5" /> Importer des fichiers
+              <UploadIcon className="size-3.5" /> {translate("Importer des fichiers")}
             </Button>
             <Button variant="outline" size="sm" onClick={onNewDoc}>
-              <FileTextIcon className="size-3.5" /> Document vierge
+              <FileTextIcon className="size-3.5" /> {translate("Document vierge")}
             </Button>
           </div>
         }
@@ -69,7 +70,7 @@ export function DocumentsContent({
             ? "Cliquez sur l'étoile d'un document pour l'épingler dans vos favoris."
             : "Modifiez votre recherche ou sélectionnez une autre catégorie."
         }
-        action={hasFilters ? <Button size="sm" onClick={onResetFilters}>Effacer les filtres</Button> : null}
+        action={hasFilters ? <Button size="sm" onClick={onResetFilters}>{translate("Effacer les filtres")}</Button> : null}
       />
     );
   }

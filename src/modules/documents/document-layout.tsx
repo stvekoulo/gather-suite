@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { SlidersIcon } from "lucide-react";
 import { Checkbox } from "@/components/beui/checkbox";
@@ -51,7 +52,7 @@ export function LayoutControls({
       <CollapsibleTrigger className="flex w-full items-center justify-between font-medium text-fg-2 hover:text-fg">
         <span className="flex items-center gap-1.5">
           <SlidersIcon className="size-3.5 text-brand" />
-          Mise en page, en-tête et pagination
+          {translate("Mise en page, en-tête et pagination")}
         </span>
         <CollapsibleIndicator />
       </CollapsibleTrigger>
@@ -59,7 +60,7 @@ export function LayoutControls({
       <CollapsibleContent className="pt-2">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-fg-3">Format :</span>
+            <span className="text-[11px] text-fg-3">{translate("Format :")}</span>
             <div className="w-24">
               <Select value={value.size} onValueChange={(v) => set({ size: v as DocumentLayout["size"] })}>
                 <SelectTrigger className="h-7 text-xs">
@@ -74,24 +75,24 @@ export function LayoutControls({
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-fg-3">Orientation :</span>
+            <span className="text-[11px] text-fg-3">{translate("Orientation :")}</span>
             <div className="w-28">
               <Select value={value.orientation} onValueChange={(v) => set({ orientation: v as DocumentLayout["orientation"] })}>
                 <SelectTrigger className="h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="portrait">Portrait</SelectItem>
-                  <SelectItem value="landscape">Paysage</SelectItem>
+                  <SelectItem value="portrait">{translate("Portrait")}</SelectItem>
+                  <SelectItem value="landscape">{translate("Paysage")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <label className="flex items-center gap-1.5 text-[11px] text-fg-3">
-            Marges (mm)
+            {translate("Marges (mm)")}
             <input
-              aria-label="Marges en millimètres"
+              aria-label={translate("Marges en millimètres")}
               type="number"
               min="5"
               max="50"
@@ -102,9 +103,9 @@ export function LayoutControls({
           </label>
 
           <label className="flex items-center gap-1.5 text-[11px] text-fg-3">
-            En-tête
+            {translate("En-tête")}
             <input
-              aria-label="En-tête"
+              aria-label={translate("En-tête")}
               className="w-28 rounded-md border border-hairline bg-surface px-1.5 py-0.5 text-xs text-fg"
               value={value.header}
               onChange={(e) => set({ header: e.target.value })}
@@ -112,9 +113,9 @@ export function LayoutControls({
           </label>
 
           <label className="flex items-center gap-1.5 text-[11px] text-fg-3">
-            Pied
+            {translate("Pied")}
             <input
-              aria-label="Pied de page"
+              aria-label={translate("Pied de page")}
               className="w-28 rounded-md border border-hairline bg-surface px-1.5 py-0.5 text-xs text-fg"
               value={value.footer}
               onChange={(e) => set({ footer: e.target.value })}
@@ -124,13 +125,13 @@ export function LayoutControls({
           <div className="flex items-center gap-3 border-l border-hairline pl-3">
             <Checkbox
               id="layout-page-numbers"
-              label="Numéros de page"
+              label={translate("Numéros de page")}
               checked={value.pageNumbers}
               onCheckedChange={(c) => set({ pageNumbers: c })}
             />
             <Checkbox
               id="layout-toc"
-              label="Sommaire"
+              label={translate("Sommaire")}
               checked={value.tableOfContents}
               onCheckedChange={(c) => set({ tableOfContents: c })}
             />

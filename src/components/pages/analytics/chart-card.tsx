@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { ChartColumnIcon, TableIcon } from "lucide-react";
@@ -42,11 +43,11 @@ export function ChartCard({
         actions={
           <>
             {actions ? <div className="hidden md:contents">{actions}</div> : null}
-            <div className="flex items-center rounded-lg bg-app p-0.5" role="group" aria-label="View">
-              <ToggleIcon active={view === "chart"} label="Chart view" onClick={() => setView("chart")}>
+            <div className="flex items-center rounded-lg bg-app p-0.5" role="group" aria-label={translate("View")}>
+              <ToggleIcon active={view === "chart"} label={translate("Chart view")} onClick={() => setView("chart")}>
                 <ChartColumnIcon />
               </ToggleIcon>
-              <ToggleIcon active={view === "table"} label="Table view" onClick={() => setView("table")}>
+              <ToggleIcon active={view === "table"} label={translate("Table view")} onClick={() => setView("table")}>
                 <TableIcon />
               </ToggleIcon>
             </div>

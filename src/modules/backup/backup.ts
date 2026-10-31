@@ -3,11 +3,11 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useBlinkoStore } from "@/stores/blinko-store";
 import { flushStorage } from "@/lib/storage/workspace-storage";
 import { validateData } from "./validate-data";
-import { exportSpaces, restoreSpaces, validateCatalog } from "@/modules/spaces/spaces";
+import { applyCategories, captureCategories, exportSpaces, restoreSpaces, validateCatalog } from "@/modules/spaces/spaces";
 
 const dataOf = (state: object) => Object.fromEntries(Object.entries(state).filter(([, value]) => typeof value !== "function"));
 export function createBackup() {
-  return { format: "gather-workspace", version: 1, exportedAt: new Date().toISOString(), app: dataOf(useAppStore.getState()), workspace: dataOf(useWorkspaceStore.getState()), blinko: dataOf(useBlinkoStore.getState()), spaces: exportSpaces() };
+  return { format: "gather-workspace", version: 1, exportedAt: new Date().toISOString(), app: dataOf(useAppStore.getState()), workspace: dataOf(useWorkspaceStore.getState()), blinko: dataOf(useBlinkoStore.getState()), categories: captureCategories(), spaces: exportSpaces() };
 }
 function record(value: unknown): value is Record<string, unknown> { return !!value && typeof value === "object" && !Array.isArray(value); }
 function array(value: unknown, fields: string[]) {
@@ -25,7 +25,7 @@ export function validateBackup(value: unknown): asserts value is ReturnType<type
   for (const note of blinko.notes as unknown as Record<string, unknown>[]) {
     if (!Array.isArray(note.tags) || !Array.isArray(note.references) || !Array.isArray(note.attachments)) throw new Error("Note corrompue dans la sauvegarde.");
   }
-  for (const deck of workspace.decks as unknown as Record<string, unknown>[]) if (!array(deck.slides, ["id", "title", "layout"]) || !(deck.slides as unknown[]).length) throw new Error("Présentation invalide dans la sauvegarde.");
+  for (const deck of workspace.decks as unknown as Record<string, unknown>[]) if (!array(deck.slides, ["id", "title", "layout"])) throw new Error("Présentation invalide dans la sauvegarde.");
   for (const invoice of app.invoices as unknown as Record<string, unknown>[]) if (!Array.isArray(invoice.items)) throw new Error("Facture corrompue.");
   validateData(app, workspace, blinko);
   if (workspace.drawing !== undefined) {
@@ -45,6 +45,7 @@ export async function restoreBackup(value: unknown) {
     useAppStore.setState({ ...selectData(value.app, useAppStore.getState()), workspaceId, workspaces });
     useWorkspaceStore.setState({ ...selectData(value.workspace, useWorkspaceStore.getState()), drawing: value.workspace.drawing as string | undefined, drawingLibrary: value.workspace.drawingLibrary as string | undefined });
     useBlinkoStore.setState(selectData(value.blinko, useBlinkoStore.getState()));
+    applyCategories(value.categories);
     await flushStorage();
   } catch (error) {
     useAppStore.setState(original.app); useWorkspaceStore.setState(original.workspace); useBlinkoStore.setState(original.blinko);

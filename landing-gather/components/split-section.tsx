@@ -33,19 +33,19 @@ export function SplitSection() {
         {/* Colonne texte : Pourquoi Gather a ete cree et pourquoi c'est utile */}
         <div className="flex flex-col justify-center text-left max-w-lg md:pl-4">
           <span className="text-xs font-semibold text-[#111113] uppercase tracking-wider mb-3 sm:mb-4">
-            Why Gather was built
+            Why Gather
           </span>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#111113] leading-snug tracking-tight mb-5">
-            Cloud note apps became bloated, slow, and expensive. We built Gather to give you your focus and your files back.
+            Your week is split between a calendar, a to-do app, a notes app, a spreadsheet and a folder of PDFs. None of them know about the others.
           </h2>
 
           <p className="text-sm sm:text-base text-[#52525b] leading-relaxed mb-4">
-            You shouldn&apos;t need an active internet connection, an account, or a monthly bill just to organize your day.
+            In Gather, an invoice&apos;s due date shows up on your calendar. A note becomes a task in one click. A client&apos;s page lists their invoices, hours, tasks and notes.
           </p>
 
           <p className="text-sm sm:text-base text-[#52525b] leading-relaxed">
-            Gather is built with Rust and native desktop APIs: it boots in 150 milliseconds, operates completely offline, and stores everything in standard SQLite and Markdown files directly on your disk.
+            Your data lives on your computer and works with no connection. Create an account only if you want the same planner on another computer.
           </p>
         </div>
       </div>

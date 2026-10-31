@@ -45,7 +45,7 @@ export function AllDayRow({ days }: { days: string[] }) {
         <div
           key={day}
           role="group"
-          aria-label="Événements de la journée"
+          aria-label={translate("Événements de la journée")}
           onClick={(e) => {
             if (e.target === e.currentTarget) openOverlay({ kind: "event", date: day, allDay: true });
           }}

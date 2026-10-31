@@ -88,7 +88,7 @@ export function Brand({ className }: { className?: string }) {
           >
             <DialogHeader>
               <DialogTitle className="t-16">{translate("Create workspace")}</DialogTitle>
-              <DialogDescription className="t-14">Chaque espace possède ses propres notes, documents, calendrier, présentations, dessins et tableurs.</DialogDescription>
+              <DialogDescription className="t-14">{translate("Chaque espace possède ses propres notes, documents, calendrier, présentations, dessins et tableurs.")}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-2">
               <Label htmlFor="ws-name" className="t-12 text-fg-2">{translate("Name")}

@@ -11,7 +11,8 @@ export function parse(date: string) {
 }
 
 export function iso(time: number) {
-  return new Date(time).toISOString().slice(0, 10);
+  const d = new Date(time);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export function monthOf(date: string) {

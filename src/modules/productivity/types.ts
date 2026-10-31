@@ -7,6 +7,7 @@ export interface Task {
   priority: "low" | "normal" | "high";
   dueDate?: string;
   eventId?: string;
+  noteId?: string;
   subtasks: { id: string; title: string; done: boolean }[];
 }
 export interface CellStyle {

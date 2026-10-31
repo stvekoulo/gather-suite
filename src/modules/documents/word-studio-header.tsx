@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import {
@@ -65,10 +66,10 @@ export function WordStudioHeader({
             size="sm"
             onClick={onBack}
             className="gap-1.5 rounded-lg px-2 text-fg-2 hover:bg-hover hover:text-fg"
-            title="Revenir à l'accueil Documents"
+            title={translate("Revenir à l'accueil Documents")}
           >
             <ArrowLeftIcon className="size-4" />
-            <span className="hidden sm:inline font-medium text-xs">Accueil Docs</span>
+            <span className="hidden sm:inline font-medium text-xs">{translate("Accueil Docs")}</span>
           </Button>
 
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -80,16 +81,16 @@ export function WordStudioHeader({
               <Input
                 value={title}
                 onChange={(e) => onChangeTitle(e.target.value)}
-                placeholder="Document sans titre"
-                aria-label="Titre du document"
+                placeholder={translate("Document sans titre")}
+                aria-label={translate("Titre du document")}
                 className="h-7 w-48 sm:w-64 border-transparent bg-transparent px-1.5 text-sm font-semibold text-fg hover:border-hairline focus:border-brand focus:bg-surface"
               />
               <span className="hidden md:flex items-center gap-1 text-[11px] text-fg-2">
                 {dirty ? (
-                  <span className="text-amber-500 font-medium">Modifié</span>
+                  <span className="text-amber-500 font-medium">{translate("Modifié")}</span>
                 ) : (
                   <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                    <CloudIcon className="size-3" /> Enregistré
+                    <CloudIcon className="size-3" /> {translate("Enregistré")}
                   </span>
                 )}
               </span>
@@ -99,34 +100,34 @@ export function WordStudioHeader({
             <div className="hidden sm:flex items-center gap-0.5 text-xs text-fg-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="rounded px-2 py-0.5 hover:bg-hover hover:text-fg">Fichier</button>
+                  <button className="rounded px-2 py-0.5 hover:bg-hover hover:text-fg">{translate("Fichier")}</button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
                   <DropdownMenuItem onSelect={() => onSwitchDoc("new")}>
-                    <FilePlusIcon className="size-3.5" /> Nouveau document
+                    <FilePlusIcon className="size-3.5" /> {translate("Nouveau document")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={onSave}>
-                    <SaveIcon className="size-3.5" /> Enregistrer les modifications
+                    <SaveIcon className="size-3.5" /> {translate("Enregistrer les modifications")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => onExport("docx")}>
-                    <DownloadIcon className="size-3.5" /> Télécharger en Word (.docx)
+                    <DownloadIcon className="size-3.5" /> {translate("Télécharger en Word (.docx)")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => onExport("pdf")}>
-                    <DownloadIcon className="size-3.5" /> Télécharger en PDF (.pdf)
+                    <DownloadIcon className="size-3.5" /> {translate("Télécharger en PDF (.pdf)")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={onOpenPageSetup}>
-                    <SlidersIcon className="size-3.5" /> Mise en page...
+                    <SlidersIcon className="size-3.5" /> {translate("Mise en page...")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={onPrint}>
-                    <PrinterIcon className="size-3.5" /> Imprimer
+                    <PrinterIcon className="size-3.5" /> {translate("Imprimer")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
               <button onClick={onOpenPageSetup} className="rounded px-2 py-0.5 hover:bg-hover hover:text-fg">
-                Mise en page
+                {translate("Mise en page")}
               </button>
             </div>
           </div>
@@ -135,12 +136,12 @@ export function WordStudioHeader({
         {/* Côté droit : Sélecteur de document et actions */}
         <div className="flex items-center gap-2">
           <Select value={currentDoc?.id ?? "new"} onValueChange={onSwitchDoc}>
-            <SelectTrigger className="h-8 w-44 sm:w-52 text-xs font-medium" aria-label="Choisir un document">
-              <SelectValue placeholder="Changer de document" />
+            <SelectTrigger className="h-8 w-44 sm:w-52 text-xs font-medium" aria-label={translate("Choisir un document")}>
+              <SelectValue placeholder={translate("Changer de document")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="new" className="font-semibold text-brand">
-                + Nouveau document vierge
+                {translate("+ Nouveau document vierge")}
               </SelectItem>
               {documents.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
@@ -157,13 +158,13 @@ export function WordStudioHeader({
             onClick={onCreateSlides}
             className="hidden md:flex text-xs"
           >
-            <PresentationIcon className="size-3.5" /> Diaporama
+            <PresentationIcon className="size-3.5" /> {translate("Diaporama")}
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="brand" size="sm" className="gap-1.5 text-xs">
-                <DownloadIcon className="size-3.5" /> Exporter
+                <DownloadIcon className="size-3.5" /> {translate("Exporter")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -171,7 +172,7 @@ export function WordStudioHeader({
                 <DownloadIcon className="size-3.5" /> Microsoft Word (.docx)
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onExport("pdf")}>
-                <DownloadIcon className="size-3.5" /> Document PDF (.pdf)
+                <DownloadIcon className="size-3.5" /> {translate("Document PDF (.pdf)")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

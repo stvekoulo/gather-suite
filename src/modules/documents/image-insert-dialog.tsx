@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import {
@@ -50,7 +51,7 @@ export function ImageInsertDialog({
       setSrc(dataUrl);
       if (!alt) setAlt(file.name.replace(/\.[^.]+$/, ""));
     } catch {
-      toast.error("Impossible de lire cette image.");
+      toast.error(translate("Impossible de lire cette image."));
     }
   };
 
@@ -63,20 +64,20 @@ export function ImageInsertDialog({
           const blob = await item.getType(imageType);
           const dataUrl = await readAsDataUrl(blob as File);
           setSrc(dataUrl);
-          toast.success("Image récupérée du presse-papier");
+          toast.success(translate("Image récupérée du presse-papier"));
           return;
         }
       }
-      toast.info("Aucune image trouvée dans le presse-papier.");
+      toast.info(translate("Aucune image trouvée dans le presse-papier."));
     } catch {
-      toast.error("Accès au presse-papier non autorisé.");
+      toast.error(translate("Accès au presse-papier non autorisé."));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!src.trim()) {
-      toast.error("Veuillez sélectionner ou saisir une image.");
+      toast.error(translate("Veuillez sélectionner ou saisir une image."));
       return;
     }
     onInsert({ src: src.trim(), alt: alt.trim(), width, align });
@@ -90,10 +91,10 @@ export function ImageInsertDialog({
       <DialogContent className="sm:max-w-md gap-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 t-16">
-            <ImageIcon className="size-4.5 text-brand" /> Insérer une image (Style Word)
+            <ImageIcon className="size-4.5 text-brand" /> {translate("Insérer une image (Style Word)")}
           </DialogTitle>
           <DialogDescription className="t-14">
-            Choisissez une image depuis cet appareil, une adresse web ou votre presse-papier.
+            {translate("Choisissez une image depuis cet appareil, une adresse web ou votre presse-papier.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -101,21 +102,21 @@ export function ImageInsertDialog({
           <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
             <TabsList className="grid grid-cols-3 h-8">
               <TabsTrigger value="file" className="text-xs gap-1.5">
-                <UploadIcon className="size-3.5" /> Cet appareil
+                <UploadIcon className="size-3.5" /> {translate("Cet appareil")}
               </TabsTrigger>
               <TabsTrigger value="url" className="text-xs gap-1.5">
-                <GlobeIcon className="size-3.5" /> Adresse web
+                <GlobeIcon className="size-3.5" /> {translate("Adresse web")}
               </TabsTrigger>
               <TabsTrigger value="clipboard" className="text-xs gap-1.5">
-                <ClipboardIcon className="size-3.5" /> Presse-papier
+                <ClipboardIcon className="size-3.5" /> {translate("Presse-papier")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="file" className="pt-3">
               <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-hairline hover:border-brand/50 bg-surface-2/50 p-6 cursor-pointer transition-colors">
                 <UploadIcon className="size-6 text-brand" />
-                <span className="text-xs font-semibold text-fg">Cliquez pour parcourir vos photos</span>
-                <span className="text-[11px] text-fg-2">PNG, JPG, SVG, WebP jusqu&apos;à 10 Mo</span>
+                <span className="text-xs font-semibold text-fg">{translate("Cliquez pour parcourir vos photos")}</span>
+                <span className="text-[11px] text-fg-2">{translate("PNG, JPG, SVG, WebP jusqu'à 10 Mo")}</span>
                 <FilePicker
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
@@ -126,10 +127,10 @@ export function ImageInsertDialog({
             </TabsContent>
 
             <TabsContent value="url" className="pt-3 flex flex-col gap-2">
-              <Label className="text-xs">Lien direct de l&apos;image (HTTPS)</Label>
+              <Label className="text-xs">{translate("Lien direct de l'image (HTTPS)")}</Label>
               <Input
                 type="url"
-                placeholder="https://exemple.com/image.png"
+                placeholder={translate("https://exemple.com/image.png")}
                 value={src.startsWith("data:") ? "" : src}
                 onChange={(e) => setSrc(e.target.value)}
                 className="h-8 text-xs"
@@ -138,7 +139,7 @@ export function ImageInsertDialog({
 
             <TabsContent value="clipboard" className="pt-3 flex flex-col items-center gap-3">
               <Button type="button" variant="outline" size="sm" onClick={handlePasteClipboard} className="text-xs gap-2">
-                <ClipboardIcon className="size-4" /> Coller l&apos;image du presse-papier
+                <ClipboardIcon className="size-4" /> {translate("Coller l'image du presse-papier")}
               </Button>
             </TabsContent>
           </Tabs>
@@ -146,7 +147,7 @@ export function ImageInsertDialog({
           {/* Aperçu en direct */}
           {src && (
             <div className="flex flex-col gap-2 rounded-lg border border-hairline bg-surface p-2.5">
-              <span className="text-[11px] font-semibold text-fg-2">Aperçu :</span>
+              <span className="text-[11px] font-semibold text-fg-2">{translate("Aperçu :")}</span>
               <div className="flex max-h-36 items-center justify-center overflow-hidden rounded bg-slate-100 dark:bg-zinc-900 p-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={src} alt="Aperçu" className="max-h-32 object-contain rounded" />
@@ -157,7 +158,7 @@ export function ImageInsertDialog({
           {/* Options de taille et d'alignement comme dans Word */}
           <div className="grid grid-cols-2 gap-3 pt-1 border-t border-hairline text-xs">
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs">Taille dans la page</Label>
+              <Label className="text-xs">{translate("Taille dans la page")}</Label>
               <div className="grid grid-cols-4 gap-1">
                 {(["25%", "50%", "75%", "100%"] as const).map((sz) => (
                   <button
@@ -177,7 +178,7 @@ export function ImageInsertDialog({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs">Alignement</Label>
+              <Label className="text-xs">{translate("Alignement")}</Label>
               <div className="grid grid-cols-3 gap-1">
                 {[
                   { al: "left" as const, Icon: AlignLeftIcon, lbl: "Gauche" },
@@ -202,9 +203,9 @@ export function ImageInsertDialog({
             </div>
 
             <div className="col-span-2 flex flex-col gap-1.5">
-              <Label className="text-xs">Légende / Texte alternatif</Label>
+              <Label className="text-xs">{translate("Légende / Texte alternatif")}</Label>
               <Input
-                placeholder="Description de l'image (optionnel)"
+                placeholder={translate("Description de l'image (optionnel)")}
                 value={alt}
                 onChange={(e) => setAlt(e.target.value)}
                 className="h-8 text-xs"
@@ -214,10 +215,10 @@ export function ImageInsertDialog({
 
           <DialogFooter className="gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={onClose} className="text-xs">
-              Annuler
+              {translate("Annuler")}
             </Button>
             <Button type="submit" variant="brand" size="sm" disabled={!src} className="text-xs">
-              Insérer l&apos;image
+              {translate("Insérer l'image")}
             </Button>
           </DialogFooter>
         </form>

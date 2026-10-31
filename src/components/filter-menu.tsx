@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { CheckIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Icon } from "@/components/icon";
@@ -79,7 +80,7 @@ export function FilterMenu({ groups, activeCount, onReset, title = "Filters", tr
           <DrawerHeader className="flex-row items-center justify-between pb-2 text-left">
             <div className="grid gap-1">
               <DrawerTitle>{title}</DrawerTitle>
-              <DrawerDescription className="sr-only">Filter and sort the list</DrawerDescription>
+              <DrawerDescription className="sr-only">{translate("Filter and sort the list")}</DrawerDescription>
             </div>
             <Button variant="ghost" size="sm" disabled={activeCount === 0} onClick={onReset}>
               Reset
@@ -89,7 +90,7 @@ export function FilterMenu({ groups, activeCount, onReset, title = "Filters", tr
           <DrawerFooter className="border-t border-hairline pt-3">
             <DrawerClose asChild>
               <Button variant="brand" size="lg" className="w-full">
-                Show results
+                {translate("Show results")}
               </Button>
             </DrawerClose>
           </DrawerFooter>

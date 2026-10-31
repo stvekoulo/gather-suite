@@ -29,7 +29,7 @@ export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => v
             />
             <div>
               <DialogTitle className="text-xl font-bold tracking-tight text-fg">Gather Suite</DialogTitle>
-              <p className="text-xs text-fg-3 font-mono">Version 0.2.0 · {translate("Plateforme de productivité locale autonome", lang)}</p>
+              <p className="text-xs text-fg-3 font-mono">Version 0.3.0 · {translate("Plateforme de productivité locale autonome", lang)}</p>
             </div>
           </div>
           <DialogDescription className="text-xs text-fg-2 leading-relaxed pt-1 max-w-2xl">

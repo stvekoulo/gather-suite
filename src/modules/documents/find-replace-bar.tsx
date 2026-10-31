@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useState } from "react";
 import type { Editor } from "@tiptap/react";
@@ -28,6 +29,7 @@ export function FindReplaceBar({ editor, open, onClose }: FindReplaceBarProps) {
   // Recherche des occurrences dans l'arbre ProseMirror
   useEffect(() => {
     if (!open || !editor || !searchQuery.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- derived from the live ProseMirror document
       setMatches([]);
       setActiveIndex(0);
       return;
@@ -96,7 +98,7 @@ export function FindReplaceBar({ editor, open, onClose }: FindReplaceBarProps) {
         <Input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Rechercher…"
+          placeholder={translate("Rechercher…")}
           className="h-7 w-44 pl-7 pr-16 text-xs"
           autoFocus
           onKeyDown={(e) => {
@@ -114,10 +116,10 @@ export function FindReplaceBar({ editor, open, onClose }: FindReplaceBarProps) {
       </div>
 
       <div className="flex items-center gap-0.5">
-        <Button variant="ghost" size="icon-sm" onClick={handlePrev} disabled={matches.length === 0} title="Précédent (Maj+Entrée)">
+        <Button variant="ghost" size="icon-sm" onClick={handlePrev} disabled={matches.length === 0} title={translate("Précédent (Maj+Entrée)")}>
           <ChevronUpIcon className="size-3.5" />
         </Button>
-        <Button variant="ghost" size="icon-sm" onClick={handleNext} disabled={matches.length === 0} title="Suivant (Entrée)">
+        <Button variant="ghost" size="icon-sm" onClick={handleNext} disabled={matches.length === 0} title={translate("Suivant (Entrée)")}>
           <ChevronDownIcon className="size-3.5" />
         </Button>
       </div>
@@ -127,7 +129,7 @@ export function FindReplaceBar({ editor, open, onClose }: FindReplaceBarProps) {
       <Input
         value={replaceQuery}
         onChange={(e) => setReplaceQuery(e.target.value)}
-        placeholder="Remplacer par…"
+        placeholder={translate("Remplacer par…")}
         className="h-7 w-44 text-xs"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -138,15 +140,15 @@ export function FindReplaceBar({ editor, open, onClose }: FindReplaceBarProps) {
       />
 
       <Button variant="outline" size="sm" onClick={handleReplaceCurrent} disabled={matches.length === 0} className="h-7 text-xs">
-        Remplacer
+        {translate("Remplacer")}
       </Button>
 
       <Button variant="outline" size="sm" onClick={handleReplaceAll} disabled={matches.length === 0} className="h-7 gap-1 text-xs">
-        <ReplaceIcon className="size-3" /> Tout remplacer
+        <ReplaceIcon className="size-3" /> {translate("Tout remplacer")}
       </Button>
 
       <div className="ml-auto">
-        <Button variant="ghost" size="icon-sm" onClick={onClose} title="Fermer la recherche (Échap)">
+        <Button variant="ghost" size="icon-sm" onClick={onClose} title={translate("Fermer la recherche (Échap)")}>
           <XIcon className="size-3.5" />
         </Button>
       </div>

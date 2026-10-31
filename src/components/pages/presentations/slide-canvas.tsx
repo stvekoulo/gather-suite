@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { motion } from "motion/react";
 import { SPRING_LAYOUT } from "@/lib/ease";
@@ -65,7 +66,7 @@ export function SlideCanvas({
           {slide.layout === "title" && (
             <div className="my-auto flex flex-col items-center justify-center text-center gap-4">
               <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                <PresentationIcon className="size-3.5" /> Présentation Gather
+                <PresentationIcon className="size-3.5" /> {translate("Présentation Gather")}
               </div>
               <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
                 {slide.title || "Titre de la présentation"}
@@ -83,7 +84,7 @@ export function SlideCanvas({
               <div className="flex items-center justify-between border-b border-hairline/60 pb-3">
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{slide.title}</h2>
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-orange-500/10 px-3 py-1 rounded-full">
-                  <TrendingUpIcon className="size-4" /> Indicateurs clés
+                  <TrendingUpIcon className="size-4" /> {translate("Indicateurs clés")}
                 </span>
               </div>
               <div className="my-auto flex flex-col items-center justify-center rounded-2xl border border-hairline/60 bg-surface-2/40 p-8 shadow-xs">
@@ -159,8 +160,8 @@ export function SlideCanvas({
           )}
 
           <div className={cn("flex items-center justify-between text-[11px] pt-3 border-t", isDark ? "border-zinc-800 text-zinc-500" : "border-zinc-200 text-zinc-400")}>
-            <span className="font-semibold">Gather Présentations</span>
-            <span>Diaporama 16:9</span>
+            <span className="font-semibold">{translate("Gather Présentations")}</span>
+            <span>{translate("Diaporama 16:9")}</span>
           </div>
         </>
       )}

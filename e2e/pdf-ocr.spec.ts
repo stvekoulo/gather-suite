@@ -16,16 +16,17 @@ test("scanned PDF becomes searchable with offline French/English OCR", async ({ 
   });
   const scanned = await PDFDocument.create(); const image = await scanned.embedPng(Buffer.from(png, "base64"));
   scanned.addPage([600, 200]).drawImage(image, { x: 0, y: 0, width: 600, height: 200 });
-  await page.getByRole("button", { name: /^Reconnaissance OCR/ }).click();
+  await page.getByRole("button", { name: /Reconnaissance OCR/ }).click();
   await page.getByLabel("Fichiers PDF", { exact: true }).setInputFiles({ name: "scan.pdf", mimeType: "application/pdf", buffer: Buffer.from(await scanned.save()) });
   const downloading = page.waitForEvent("download", { timeout: 100_000 });
-  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  await page.getByRole("button", { name: /^Lancer/ }).click();
   const bytes = await readFile((await (await downloading).path())!);
   await expect(page.getByLabel("Texte extrait")).toHaveValue(/Gather\s+OCR\s+local\s+document/i);
   expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
   // Re-extract from the downloaded PDF to verify its actual searchable text layer.
-  await page.getByRole("button", { name: /^Extraire le texte/ }).click();
+  await page.getByRole("button", { name: "Retour aux outils" }).click();
+  await page.getByRole("button", { name: /Extraire le texte/ }).click();
   await page.getByLabel("Fichiers PDF", { exact: true }).setInputFiles({ name: "searchable.pdf", mimeType: "application/pdf", buffer: bytes });
-  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  await page.getByRole("button", { name: /^Lancer/ }).click();
   await expect(page.getByLabel("Texte extrait")).toHaveValue(/Gather\s+OCR\s+local\s+document/i);
 });

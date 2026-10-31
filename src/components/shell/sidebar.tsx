@@ -139,7 +139,7 @@ function AccountMenu({ collapsed }: { collapsed?: boolean }) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side={collapsed ? "right" : "top"} align="start" sideOffset={10} className="w-[215px]">
-        <DropdownMenuLabel className="t-12 text-fg-2">Profil local : {profile.name || "Utilisateur local"}</DropdownMenuLabel>
+        <DropdownMenuLabel className="t-12 text-fg-2">{translate("Profil local :")} {profile.name || "Utilisateur local"}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/personal-details">
@@ -162,7 +162,7 @@ export function SidebarBody({ className, collapsed }: { className?: string; coll
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col justify-between gap-6 overflow-y-auto p-2.5 [scrollbar-width:none]", className)}>
-      <nav aria-label="Navigation principale" className="flex w-full flex-col gap-4">
+      <nav aria-label={translate("Navigation principale")} className="flex w-full flex-col gap-4">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="flex w-full flex-col gap-0.5">
             <SectionLabel collapsed={collapsed}>{translate(group.label)}</SectionLabel>
@@ -235,7 +235,7 @@ export function Sidebar() {
           <button
             type="button"
             onClick={toggleCollapse}
-            title="Agrandir le menu"
+            title={translate("Agrandir le menu")}
             className="mx-auto flex size-7 items-center justify-center rounded-md hover:bg-hover transition-colors"
           >
             <img src="/logo.png" alt="Gather" className="size-5 rounded-md object-contain select-none" />
@@ -246,8 +246,8 @@ export function Sidebar() {
             variant="ghost"
             size="icon-sm"
             onClick={toggleCollapse}
-            title="Réduire le menu"
-            aria-label="Réduire le menu"
+            title={translate("Réduire le menu")}
+            aria-label={translate("Réduire le menu")}
             className="text-icon hover:text-fg"
           >
             <PanelLeftCloseIcon className="size-4" />
@@ -262,7 +262,7 @@ export function Sidebar() {
         <div
           onMouseDown={onMouseDown}
           onDoubleClick={toggleCollapse}
-          title="Glisser pour redimensionner / Double-cliquer pour réduire"
+          title={translate("Glisser pour redimensionner / Double-cliquer pour réduire")}
           className="absolute top-0 right-0 z-20 h-full w-1.5 cursor-col-resize transition-colors hover:bg-brand/40 active:bg-brand"
         />
       )}

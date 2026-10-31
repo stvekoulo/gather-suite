@@ -1,12 +1,12 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/stores/app-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import type { DocumentFile } from "@/lib/types";
 import { flushStorage } from "@/lib/storage/workspace-storage";
-import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { documentToSlides } from "./document-format";
 import { defaultLayout, type DocumentLayout } from "./document-layout";
 import { WordStudioHeader } from "./word-studio-header";
@@ -22,9 +22,12 @@ import { useWordcraftEditor } from "./use-wordcraft-editor";
 import { saveWordStudioDoc } from "./word-studio-save";
 import { extractDocumentHtml } from "./doc-extract";
 import { toast } from "sonner";
+import { safeFilename } from "@/lib/files";
 import "./editor.css";
 
 // Espace d'édition Word Studio pour Gather inspiré de Wordcraft
+const UNTITLED = "Sans titre";
+
 export function WordStudio({
   initialDoc,
   initialContent,
@@ -37,8 +40,9 @@ export function WordStudio({
   const router = useRouter();
   const documents = useAppStore((s) => s.documents);
   const [currentDoc, setCurrentDoc] = useState<DocumentFile | undefined>(initialDoc);
-  const [title, setTitle] = useState(initialDoc?.name.replace(/\.[^.]+$/, "") ?? "Sans titre");
-  const [dirty, setDirty] = useState(false);
+  const [title, setTitle] = useState(initialDoc?.name.replace(/\.[^.]+$/, "") ?? UNTITLED);
+  // Un modèle choisi devient tout de suite un fichier ; une page vierge, au premier mot.
+  const [dirty, setDirty] = useState(!initialDoc && !!initialContent && initialContent !== "<p></p>");
   const [busy, setBusy] = useState(false);
   const [layout, setLayout] = useState<DocumentLayout>(initialDoc?.pageSetup ?? defaultLayout);
   const [pageSetupOpen, setPageSetupOpen] = useState(false);
@@ -48,8 +52,6 @@ export function WordStudio({
   const [viewMode, setViewMode] = useState<"page" | "web">("page");
   const [showRuler, setShowRuler] = useState(true);
   const [zoom, setZoom] = useState(100);
-
-  useUnsavedChanges(dirty);
 
   useEffect(() => {
     if (currentDoc?.id) {
@@ -63,16 +65,48 @@ export function WordStudio({
     onUpdate: () => setDirty(true),
   });
 
-  // Sauvegarde automatique transparente des modifications en cours
+  // Le fichier existe dès la première modification, et chaque changement s'enregistre seul.
+  const autosave = useRef(() => {});
   useEffect(() => {
-    if (!dirty || !editor || !currentDoc?.id) return;
-    const t = setTimeout(() => {
-      const json = editor.getJSON();
-      useAppStore.getState().updateDocument(currentDoc.id, { editorContent: json, pageSetup: layout });
+    autosave.current = () => {
+      if (!dirty || !editor) return;
+      const content = editor.getJSON();
+      const name = `${safeFilename(title.trim() || translate("Sans titre"))}.docx`;
+      const app = useAppStore.getState();
+      if (currentDoc?.id) {
+        app.updateDocument(currentDoc.id, { name, editorContent: content, pageSetup: layout });
+      } else {
+        if (editor.isEmpty && title === UNTITLED) return;
+        app.addDocument({ name, category: "Autre", size: editor.getText().length, starred: false, editorContent: content, pageSetup: layout });
+        setCurrentDoc(useAppStore.getState().documents[0]);
+      }
       setDirty(false);
-    }, 1500);
+    };
+  });
+  useEffect(() => {
+    if (!dirty) return;
+    const t = setTimeout(() => autosave.current(), 1000);
     return () => clearTimeout(t);
-  }, [dirty, editor, currentDoc?.id, layout]);
+  }, [dirty, title, layout, editor]);
+  useEffect(() => {
+    const flush = () => autosave.current();
+    window.addEventListener("gather-flush-editors", flush);
+    return () => { window.removeEventListener("gather-flush-editors", flush); flush(); };
+  }, []);
+
+  const saveNow = useRef(() => {});
+  useEffect(() => {
+    const onSave = (event: Event) => { event.preventDefault(); saveNow.current(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "p") { e.preventDefault(); window.print(); }
+      else if (k === "f" || k === "h") { e.preventDefault(); setFindReplaceOpen(true); }
+    };
+    window.addEventListener("gather-save", onSave);
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("gather-save", onSave); window.removeEventListener("keydown", onKey); };
+  }, []);
 
   const wordCount = useMemo(() => {
     if (!editor) return 0;
@@ -81,11 +115,11 @@ export function WordStudio({
   }, [editor, dirty]);
 
   function switchDocument(docId: string) {
-    if (dirty && !window.confirm("Changer de document sans enregistrer ?")) return;
+    autosave.current();
     if (docId === "new") {
       try { localStorage.removeItem("gather:active-doc-id"); } catch {}
       setCurrentDoc(undefined);
-      setTitle("Sans titre");
+      setTitle(UNTITLED);
       setLayout(defaultLayout);
       editor?.commands.setContent("<p></p>");
       setDirty(false);
@@ -116,6 +150,8 @@ export function WordStudio({
     setBusy(false);
   }
 
+  useEffect(() => { saveNow.current = () => void handleSave(); });
+
   const handleExport = async (format: "docx" | "pdf" | "md" | "txt") => {
     if (!editor) return;
     setBusy(true);
@@ -132,7 +168,7 @@ export function WordStudio({
       slides: documentToSlides(title, editor.getJSON()),
     });
     await flushStorage();
-    toast.success("Présentation créée");
+    toast.success(translate("Présentation créée"));
     router.push("/presentations");
   };
 
@@ -146,7 +182,7 @@ export function WordStudio({
         busy={busy}
         canCreateSlides={!!editor}
         onBack={() => {
-          if (dirty && !window.confirm("Quitter sans enregistrer ?")) return;
+          autosave.current();
           onBack();
         }}
         onSwitchDoc={switchDocument}

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import {
   FileTextIcon,
@@ -28,9 +29,9 @@ export function TemplateBanner({
     <div className="border-b border-hairline bg-surface-2/30 px-4 py-4 md:px-6">
       <div className="flex items-center justify-between pb-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-fg-2">
-          Démarrer un nouveau document
+          {translate("Démarrer un nouveau document")}
         </h2>
-        <span className="text-xs text-fg-2/70 font-medium">Modèles Word & Google Docs</span>
+        <span className="text-xs text-fg-2/70 font-medium">{translate("Modèles Word & Google Docs")}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-5">
@@ -52,7 +53,7 @@ export function TemplateBanner({
                     <div className="flex size-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs group-hover:scale-110 transition-transform">
                       <Icon className="size-5 stroke-[2.5]" />
                     </div>
-                    <span className="text-[10px] font-medium text-fg-2">Page vierge</span>
+                    <span className="text-[10px] font-medium text-fg-2">{translate("Page vierge")}</span>
                   </div>
                 ) : (
                   <div className="flex h-full w-full flex-col justify-between p-2.5">

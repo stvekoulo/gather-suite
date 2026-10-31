@@ -47,7 +47,7 @@ export async function saveWordStudioDoc({
     }
     useAppStore.getState().addDocument({
       name: docName,
-      category: "Contrat",
+      category: "Autre",
       size: blob.size,
       dataUrl,
       starred: false,

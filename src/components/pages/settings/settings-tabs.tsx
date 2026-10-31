@@ -13,6 +13,7 @@ import type { Settings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useToday } from "@/hooks/use-today";
 import { useAppStore } from "@/stores/app-store";
+import { OnlineSettings } from "./online-settings";
 import {
   Panel,
   Row,
@@ -71,6 +72,7 @@ export function GeneralTab() {
       <Row title={tr("Show weekends")} description={tr("Hide Saturday and Sunday to focus on the work week")} htmlFor="st-weekends">
         <Switch id="st-weekends" checked={settings.showWeekends} onCheckedChange={(v) => set("showWeekends", v)} />
       </Row>
+      <OnlineSettings />
     </Panel>
   );
 }
@@ -118,25 +120,10 @@ export function TimeOffTab() {
 export function NotificationsTab() {
   const [settings, set] = useSettings();
   const tr = (k: string) => translate(k, settings.language);
-  const email = useAppStore((s) => s.profile.email);
-  const emailDesc =
-    settings.language === "en"
-      ? `Approvals, declines and reminders to ${email || "your email address"}`
-      : `Approbations, refus et rappels à ${email || "votre adresse e-mail"}`;
   return (
-    <Panel title={tr("Notifications")} description={tr("Choose how you hear about approvals and reminders.")}>
-      <Row title={tr("Email")} description={emailDesc} htmlFor="st-email">
-        <Switch
-          id="st-email"
-          checked={settings.emailNotifications}
-          onCheckedChange={(v) => set("emailNotifications", v)}
-        />
-      </Row>
-      <Row title={tr("Push")} description={tr("Instant alerts in this browser")} htmlFor="st-push">
+    <Panel title={tr("Notifications")} description={translate("Choisissez comment Gather vous prévient")}>
+      <Row title={tr("Push")} description={translate("Alertes système pour les rappels d’événements, de tâches, de notes et de factures")} htmlFor="st-push">
         <Switch id="st-push" checked={settings.pushNotifications} onCheckedChange={(v) => set("pushNotifications", v)} />
-      </Row>
-      <Row title={tr("Weekly digest")} description={tr("A Monday summary of your week ahead and leave balance")} htmlFor="st-digest">
-        <Switch id="st-digest" checked={settings.weeklyDigest} onCheckedChange={(v) => set("weeklyDigest", v)} />
       </Row>
     </Panel>
   );

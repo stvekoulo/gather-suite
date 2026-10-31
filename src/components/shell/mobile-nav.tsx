@@ -28,7 +28,7 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" showCloseButton={false} className="w-[280px] max-w-[85vw] gap-0 border-hairline bg-app p-0">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <SheetDescription className="sr-only">Pages, settings and your account</SheetDescription>
+        <SheetDescription className="sr-only">{translate("Pages, settings and your account")}</SheetDescription>
         <div className="h-[53px] shrink-0 border-b border-hairline">
           <Brand className="w-full border-r-0" />
         </div>

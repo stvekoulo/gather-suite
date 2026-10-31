@@ -117,29 +117,37 @@ export function isWeekend(key: string): boolean {
   return d === 0 || d === 6;
 }
 
+let dateLanguage: "fr" | "en" = "fr";
+/** Called by the locale boundary, which remounts the app when the language changes. */
+export function setDateLanguage(language: "fr" | "en") { dateLanguage = language; }
+const WEEKDAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const months = () => (dateLanguage === "en" ? MONTHS_EN : MONTHS);
+const shortMonth = (index: number) => (dateLanguage === "en" ? MONTHS_EN[index].slice(0, 3) : MONTHS_SHORT[index].toLowerCase());
+
 export function monthName(key: string): string {
-  return MONTHS[fromKey(key).getMonth()];
+  return months()[fromKey(key).getMonth()];
 }
 
 export function formatLong(key: string): string {
   const d = fromKey(key);
+  if (dateLanguage === "en") return `${MONTHS_EN[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   return `${d.getDate()} ${MONTHS[d.getMonth()].toLowerCase()} ${d.getFullYear()}`;
 }
 
 export function formatShort(key: string): string {
   const d = fromKey(key);
-  return `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
+  return dateLanguage === "en" ? `${shortMonth(d.getMonth())} ${d.getDate()}` : `${d.getDate()} ${shortMonth(d.getMonth())}`;
 }
 
 export function formatWeekday(key: string): string {
-  return WEEKDAYS[dayOfWeek(key)];
+  return (dateLanguage === "en" ? WEEKDAYS_EN : WEEKDAYS)[dayOfWeek(key)];
 }
 
 export function formatRange(from: string, to: string): string {
   const a = fromKey(from);
   const b = fromKey(to);
   if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) {
-    return `${MONTHS_SHORT[a.getMonth()]} ${a.getDate()} – ${b.getDate()}`;
+    return dateLanguage === "en" ? `${shortMonth(a.getMonth())} ${a.getDate()} – ${b.getDate()}` : `${a.getDate()} – ${b.getDate()} ${shortMonth(a.getMonth())}`;
   }
   return `${formatShort(from)} – ${formatShort(to)}`;
 }

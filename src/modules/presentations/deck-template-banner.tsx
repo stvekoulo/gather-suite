@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import {
   PlusIcon,
@@ -26,9 +27,9 @@ export function DeckTemplateBanner({
     <div className="border-b border-hairline bg-surface-2/30 px-4 py-4 md:px-6 select-none">
       <div className="flex items-center justify-between pb-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-fg-2">
-          Démarrer une nouvelle présentation
+          {translate("Démarrer une nouvelle présentation")}
         </h2>
-        <span className="text-xs text-fg-2/70 font-medium">Modèles PowerPoint 16:9</span>
+        <span className="text-xs text-fg-2/70 font-medium">{translate("Modèles PowerPoint 16:9")}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
@@ -56,7 +57,7 @@ export function DeckTemplateBanner({
                     <div className="flex size-9 items-center justify-center rounded-xl bg-orange-600 text-white shadow-xs group-hover:scale-110 transition-transform">
                       <Icon className="size-5 stroke-[2.5]" />
                     </div>
-                    <span className="text-[10px] font-medium text-fg-2">Diapositive vierge</span>
+                    <span className="text-[10px] font-medium text-fg-2">{translate("Diapositive vierge")}</span>
                   </div>
                 ) : (
                   <div className="flex h-full w-full flex-col justify-between p-2.5">

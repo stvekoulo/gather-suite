@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { FileIcon, FileImageIcon, FileSpreadsheetIcon, FileTextIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -67,15 +68,15 @@ export async function downloadDoc(doc: DocumentFile) {
       return;
     }
     if (!doc.dataUrl) {
-      toast("Fichier de démonstration", {
-        description: `« ${doc.name} » n'a pas de contenu binaire attaché.`,
+      toast(translate("Fichier absent de cet ordinateur"), {
+        description: `« ${doc.name} » est resté sur l’appareil où il a été ajouté.`,
       });
       return;
     }
     const response = await fetch(doc.dataUrl);
     await saveFile(doc.name, await response.blob());
   } catch (error) {
-    toast.error("Téléchargement impossible", { description: String(error) });
+    toast.error(translate("Téléchargement impossible"), { description: String(error) });
   }
 }
 

@@ -9,36 +9,68 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    tag: "Unified Workspace",
-    title: "Notes, agenda, and canvas in one quiet window",
+    tag: "Today",
+    title: "See your whole day on one screen",
     description:
-      "Stop switching between three separate browser tabs for your notes, calendar, and brainstorm drawings.",
+      "Events, tasks due, overdue invoices and reminders from every part of your life, in one list.",
     utility:
-      "Gather integrates markdown writing, calendar scheduling, and visual canvases into one unified desktop tool.",
+      "Drag a task onto the calendar, start a timer from it, and get an alert before your next meeting.",
   },
   {
-    tag: "Instant Startup & Search",
-    title: "Sub-200ms launch with zero loading spinners",
+    tag: "Clients & invoices",
+    title: "Go from hours worked to invoice paid",
     description:
-      "Web-based note apps take 5 to 10 seconds to load and stall when your Wi-Fi is spotty.",
+      "Track time against a client, turn the billable hours into invoice lines, and export a PDF with your VAT and legal details.",
     utility:
-      "Built with Rust and Tauri v2. Gather opens in a blink, searches thousands of files locally, and never buffers.",
+      "Each client gets a page with their invoices, hours, tasks, notes and documents.",
   },
   {
-    tag: "Local PDF Signing & OCR",
-    title: "Sign documents and scan receipts on your device",
+    tag: "Money",
+    title: "Rent in euros, software in dollars, one total",
     description:
-      "You no longer need to upload private contracts or financial invoices to random online converters.",
+      "Record income, expenses and subscriptions in any of eight currencies, including CFA francs.",
     utility:
-      "Apply valid X.509 digital signatures and run optical character recognition locally on your own processor.",
+      "Pick your currency in settings. Gather downloads exchange rates and converts every total, and keeps the last rates for when you are offline.",
   },
   {
-    tag: "Data Durability",
-    title: "Your files will still open 20 years from now",
+    tag: "Notes",
+    title: "Write things down and find your way back",
     description:
-      "SaaS tools lock your knowledge behind proprietary schemas and monthly paywalls.",
+      "Markdown notes with nested tags, links between notes, attachments, reminders and version history.",
     utility:
-      "Everything in Gather lives in standard Markdown and open SQLite files in your user folder. You own the raw files.",
+      "Turn any note into a task or a calendar event. The two stay linked.",
+  },
+  {
+    tag: "Documents, sheets & slides",
+    title: "Write, calculate and present in the same app",
+    description:
+      "A document editor, a spreadsheet with formulas and charts, presentations and a whiteboard.",
+    utility:
+      "Open and export DOCX, XLSX and PPTX files. Complex layouts may not import perfectly.",
+  },
+  {
+    tag: "PDF tools",
+    title: "Handle private PDFs without uploading them",
+    description:
+      "Merge, split, compress, redact, watermark and digitally sign, with 21 tools in total.",
+    utility:
+      "OCR for French and English turns scans into searchable PDFs, and all of it runs on your computer.",
+  },
+  {
+    tag: "Search & capture",
+    title: "Find anything. Save anything from anywhere.",
+    description:
+      "Ctrl+K searches file names and the words inside your files, notes, tasks, invoices and clients as you type.",
+    utility:
+      "Press Ctrl+Shift+Space in any app to drop a note, task or event into Gather without losing your place.",
+  },
+  {
+    tag: "AI agents",
+    title: "Let your AI assistant use your planner",
+    description:
+      "Connect Claude, Cursor or any other MCP client running on your computer, and ask it what is due this week.",
+    utility:
+      "Agents can only read until you allow changes. Then they can add tasks, log time or draft invoices. The server is off by default.",
   },
 ];
 
@@ -48,10 +80,10 @@ export function FeaturesGrid() {
     <section id="features" className="w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 py-16 sm:py-24 border-t border-black/[0.04]">
       <div className="max-w-2xl mb-12 sm:mb-16">
         <span className="text-xs font-semibold text-[#111113] uppercase tracking-wider">
-          Practical Utility
+          Everything connected
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#111113] tracking-tight mt-2">
-          Everything you actually need to do great work, with nothing you don&apos;t.
+          Everything you plan, write and bill, in one app.
         </h2>
       </div>
 

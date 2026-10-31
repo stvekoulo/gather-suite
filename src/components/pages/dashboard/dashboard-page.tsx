@@ -23,7 +23,9 @@ import { openOverlay } from "@/stores/overlay-store";
 import { Card, CardHeader, EmptyState, PageHeader, PageRoot, StatGrid, StatTile } from "@/components/pages/shared/page-chrome";
 import { translate } from "@/lib/i18n/ui-text";
 import { FinancesCard, NotificationsCard, QuickActionsCard } from "./dashboard-cards";
+import { invoiceRow, txRow, useMoney } from "@/lib/finance-totals";
 import { WeekHoursCard } from "./week-hours-card";
+import { TodayCard } from "./today-card";
 
 function greetingFor(now: number, lang?: string) {
   if (!now) return translate("Bienvenue", lang);
@@ -74,6 +76,7 @@ export function DashboardPage() {
         <StatRow />
         <div className="grid grid-cols-1 items-start gap-3 md:gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="grid min-w-0 gap-3 md:gap-4">
+            <TodayCard />
             <UpcomingCard />
             <WeekHoursCard />
           </div>
@@ -98,23 +101,14 @@ function StatRow() {
   const events = useAppStore((s) => s.events);
 
   // Revenus réalisés et factures en attente
-  const { totalIncome, pendingIncome } = useMemo(() => {
-    const paidInv = invoices
-      .filter((i) => i.status === "paid")
-      .reduce((sum, i) => sum + i.items.reduce((s, it) => s + it.quantity * it.rate, 0), 0);
-    const sentInv = invoices
-      .filter((i) => i.status === "sent")
-      .reduce((sum, i) => sum + i.items.reduce((s, it) => s + it.quantity * it.rate, 0), 0);
-    const otherInc = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-    return { totalIncome: paidInv + otherInc, pendingIncome: sentInv };
-  }, [invoices, transactions]);
+  const money = useMoney();
+  const incomeRows = [...invoices.filter((i) => i.status === "paid").map(invoiceRow), ...transactions.filter((t) => t.type === "income").map(txRow)];
+  const totalIncome = money.value(incomeRows);
+  const foreign = money.unconverted(incomeRows);
+  const pendingIncome = money.value(invoices.filter((i) => i.status === "sent").map(invoiceRow));
+  const totalExpense = money.value(transactions.filter((t) => t.type === "expense").map(txRow));
+  const activeSubs = transactions.filter((t) => t.isSubscription || (t.recurrence && t.recurrence !== "none")).length;
 
-  // Dépenses et abonnements récurrents
-  const { totalExpense, activeSubs } = useMemo(() => {
-    const exp = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-    const subs = transactions.filter((t) => t.isSubscription || (t.recurrence && t.recurrence !== "none")).length;
-    return { totalExpense: exp, activeSubs: subs };
-  }, [transactions]);
 
   // Heures travaillées cette semaine
   const week = useMemo(() => {
@@ -140,14 +134,14 @@ function StatRow() {
       <StatTile
         icon="available"
         label={translate("Revenus encaissés", lang)}
-        value={`${totalIncome.toLocaleString(lang === "en" ? "en-US" : "fr-FR")} €`}
-        hint={pendingIncome > 0 ? `${pendingIncome.toLocaleString(lang === "en" ? "en-US" : "fr-FR")} € ${translate("en attente", lang)}` : translate("Trésorerie à jour", lang)}
+        value={money.fmt(totalIncome)}
+        hint={foreign ? `+ ${foreign}` : pendingIncome > 0 ? `${money.fmt(pendingIncome)} ${translate("en attente", lang)}` : translate("Trésorerie à jour", lang)}
         href="/withdrawal-methods"
       />
       <StatTile
         icon="pending"
         label={translate("Dépenses & Charges", lang)}
-        value={`${totalExpense.toLocaleString(lang === "en" ? "en-US" : "fr-FR")} €`}
+        value={money.fmt(totalExpense)}
         hint={`${activeSubs} ${translate("abonnement(s) récurrent(s)", lang)}`}
         href="/withdrawal-methods"
       />

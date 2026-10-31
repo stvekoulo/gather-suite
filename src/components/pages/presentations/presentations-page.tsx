@@ -1,6 +1,9 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
+import { useHandoff } from "@/lib/handoff";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useWorkspaceUndo } from "@/modules/spaces/use-workspace-undo";
 import { FileUpIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -33,8 +36,11 @@ export function PresentationsPage() {
   const updateSlide = useWorkspaceStore((s) => s.updateSlide);
   const deleteSlide = useWorkspaceStore((s) => s.deleteSlide);
 
-  const [mode, setMode] = useState<"home" | "editor">("home");
   const activeDeck = useMemo(() => decks.find((d) => d.id === activeDeckId) ?? decks[0], [decks, activeDeckId]);
+  // Restaure le mode éditeur si l'utilisateur était en train d'éditer
+  const [mode, setMode] = useState<"home" | "editor">(() => {
+    try { return localStorage.getItem("gather:active-deck-mode") === "editor" && activeDeck ? "editor" : "home"; } catch { return "home"; }
+  });
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isPresenting, setIsPresenting] = useState(false);
   const [isPresenterView, setIsPresenterView] = useState(false);
@@ -78,19 +84,17 @@ export function PresentationsPage() {
         setPresentationStartIdx(e.shiftKey ? activeSlideIndex : 0);
         setIsPresenting(true);
       }
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && activeDeck && mode === "editor" && !(e.target instanceof HTMLElement && (e.target.isContentEditable || ["INPUT", "TEXTAREA"].includes(e.target.tagName)))) {
+        const k = e.key.toLowerCase();
+        if (k === "m") { e.preventDefault(); handleAddSlide(); }
+        else if (k === "d") { e.preventDefault(); handleDuplicateSlide(activeSlideIndex); }
+      }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the handlers follow these values
   }, [activeDeck, activeSlideIndex, mode]);
-
-  // Restaure le mode éditeur si l'utilisateur était en train d'éditer
-  useEffect(() => {
-    try {
-      if (localStorage.getItem("gather:active-deck-mode") === "editor" && activeDeck) {
-        setMode("editor");
-      }
-    } catch {}
-  }, [activeDeck]);
+  useWorkspaceUndo("decks");
 
   const handleOpenDeck = (d: PresentationDeck) => {
     try { localStorage.setItem("gather:active-deck-mode", "editor"); } catch {}
@@ -98,6 +102,8 @@ export function PresentationsPage() {
     setActiveSlideIndex(0);
     setMode("editor");
   };
+
+  useHandoff("deck", (id) => { const d = decks.find((x) => x.id === id); if (d) handleOpenDeck(d); });
 
   const handleSelectTemplate = (tmpl: DeckTemplate) => {
     const created = addDeck({
@@ -123,7 +129,7 @@ export function PresentationsPage() {
       const result = await importPptx(file);
       const created = addDeck(result.deck);
       handleOpenDeck(created);
-      toast.success("Présentation PPTX importée avec succès", { id: "import-pptx" });
+      toast.success(translate("Présentation PPTX importée avec succès"), { id: "import-pptx" });
     } catch (error) {
       toast.error(`Erreur d’importation : ${String(error)}`, { id: "import-pptx" });
     } finally {
@@ -138,11 +144,11 @@ export function PresentationsPage() {
       <PageRoot className="relative select-none bg-surface">
         <input ref={fileInputRef} type="file" accept=".pptx" className="hidden" onClick={(e) => { (e.target as HTMLInputElement).value = ""; }} onChange={handleImportPptx} />
         <PageHeader
-          title="Gather PowerPoint Studio"
+          title={translate("Gather PowerPoint Studio")}
           description={`${decks.length} présentation${decks.length > 1 ? "s" : ""} · Support PPTX & diaporama`}
           actions={
             <Button variant="outline" size="sm" disabled={isImporting} onClick={() => fileInputRef.current?.click()} className="gap-2 text-xs">
-              {isImporting ? <><Loader2Icon className="size-3.5 animate-spin text-orange-600" /><span>Importation en cours…</span></> : <><FileUpIcon className="size-3.5 text-orange-600" /><span>Importer un fichier PPTX</span></>}
+              {isImporting ? <><Loader2Icon className="size-3.5 animate-spin text-orange-600" /><span>{translate("Importation en cours…")}</span></> : <><FileUpIcon className="size-3.5 text-orange-600" /><span>{translate("Importer un fichier PPTX")}</span></>}
             </Button>
           }
         />

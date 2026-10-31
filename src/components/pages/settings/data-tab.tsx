@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 import { FilePicker } from "@/components/file-picker";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,15 +10,19 @@ import { saveFile } from "@/lib/files";
 import { isDesktop } from "@/lib/storage/database";
 import { useTranslate } from "@/lib/i18n/ui-text";
 import { Panel, Row } from "./settings-shared";
+import { AccountPanel } from "@/modules/cloud/account-form";
+import { McpSettings } from "@/modules/mcp/mcp-bridge";
 
 export function DataTab() {
   const tr = useTranslate();
   const [busy, setBusy] = useState(false);
   return (
     <Panel
-      title={tr("Données locales")}
+      title={translate("Compte et données")}
       description={isDesktop() ? tr("Stockage SQLite sur cet ordinateur.") : tr("Stockage IndexedDB dans ce navigateur.")}
     >
+      <AccountPanel />
+      <McpSettings />
       <Row
         title={tr("Sauvegarde complète")}
         description={tr("Calendrier, documents, pièces jointes, notes et leur historique, présentations et tableau blanc.")}

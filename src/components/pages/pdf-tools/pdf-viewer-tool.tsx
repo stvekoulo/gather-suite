@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy, PDFDocumentLoadingTask, RenderTask } from "pdfjs-dist";
@@ -84,6 +85,7 @@ export function PdfViewerTool() {
       <input
         ref={fileInputRef}
         type="file"
+        aria-label={translate("Ouvrir un PDF")}
         accept=".pdf,application/pdf"
         className="hidden"
         onChange={handleSelectFile}
@@ -100,7 +102,7 @@ export function PdfViewerTool() {
               className="gap-2 text-xs font-medium"
             >
               <FileUpIcon className="size-3.5" />
-              Changer de fichier
+              {translate("Changer de fichier")}
             </Button>
             {file && (
               <span className="max-w-64 truncate text-xs font-semibold text-fg">
@@ -165,7 +167,7 @@ export function PdfViewerTool() {
               className="gap-1.5 text-xs"
             >
               <RotateCwIcon className="size-3.5" />
-              Rotation
+              {translate("Rotation")}
             </Button>
           </div>
         </div>
@@ -195,7 +197,7 @@ export function PdfViewerTool() {
         {doc ? (
           <canvas
             ref={canvasRef}
-            aria-label="Page PDF"
+            aria-label={translate("Page PDF")}
             className="mx-auto rounded-lg bg-white shadow-xl border border-hairline"
           />
         ) : (
@@ -205,10 +207,10 @@ export function PdfViewerTool() {
             </div>
             <div>
               <h3 className="text-base font-semibold text-fg">
-                Lecteur de document PDF
+                {translate("Lecteur de document PDF")}
               </h3>
               <p className="mt-1 text-xs text-fg-2 leading-relaxed">
-                Visualisez vos documents en haute définition avec zoom et rotation.
+                {translate("Visualisez vos documents en haute définition avec zoom et rotation.")}
               </p>
             </div>
             <Button
@@ -218,7 +220,7 @@ export function PdfViewerTool() {
               className="gap-2 mt-2"
             >
               <FileUpIcon className="size-4" />
-              Sélectionner un fichier PDF
+              {translate("Sélectionner un fichier PDF")}
             </Button>
           </div>
         )}

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo, useState } from "react";
 import {
@@ -60,7 +61,7 @@ export function DocReader({
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-hairline bg-surface px-4 md:px-6 shadow-xs select-none">
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="sm" onClick={onClose} className="gap-1.5 text-xs text-fg-2 hover:text-fg">
-            <ArrowLeftIcon className="size-4" /> Revenir aux documents
+            <ArrowLeftIcon className="size-4" /> {translate("Revenir aux documents")}
           </Button>
 
           <div className="h-4 w-px bg-hairline" />
@@ -87,7 +88,7 @@ export function DocReader({
               <button
                 onClick={() => setZoom((z) => Math.max(50, z - 25))}
                 className="p-1 hover:text-fg text-fg-2"
-                title="Dézoomer"
+                title={translate("Dézoomer")}
               >
                 <ZoomOutIcon className="size-3.5" />
               </button>
@@ -95,7 +96,7 @@ export function DocReader({
               <button
                 onClick={() => setZoom((z) => Math.min(200, z + 25))}
                 className="p-1 hover:text-fg text-fg-2"
-                title="Zoomer"
+                title={translate("Zoomer")}
               >
                 <ZoomInIcon className="size-3.5" />
               </button>
@@ -104,7 +105,7 @@ export function DocReader({
 
           {isWord && (
             <Button variant="brand" size="sm" onClick={() => onEditInStudio(doc)} className="text-xs gap-1.5">
-              <PencilIcon className="size-3.5" /> Éditer le document
+              <PencilIcon className="size-3.5" /> {translate("Éditer le document")}
             </Button>
           )}
 
@@ -119,7 +120,7 @@ export function DocReader({
           </Button>
 
           <Button variant="outline" size="sm" onClick={() => downloadDoc(doc)} className="text-xs gap-1">
-            <DownloadIcon className="size-3.5" /> Télécharger
+            <DownloadIcon className="size-3.5" /> {translate("Télécharger")}
           </Button>
         </div>
       </header>
@@ -154,13 +155,13 @@ export function DocReader({
               <FileTextIcon className="size-7" />
             </span>
             <div className="flex flex-col gap-1.5">
-              <h3 className="text-base font-semibold text-fg">Document prêt pour l&apos;édition</h3>
+              <h3 className="text-base font-semibold text-fg">{translate("Document prêt pour l'édition")}</h3>
               <p className="text-xs text-fg-2">
-                Ce fichier DOCX peut être ouvert et édité directement dans Gather Documents.
+                {translate("Ce fichier DOCX peut être ouvert et édité directement dans Gather Documents.")}
               </p>
             </div>
             <Button variant="brand" className="w-full text-xs" onClick={() => onEditInStudio(doc)}>
-              <PencilIcon className="size-3.5" /> Éditer le document
+              <PencilIcon className="size-3.5" /> {translate("Éditer le document")}
             </Button>
           </div>
         ) : (
@@ -168,10 +169,10 @@ export function DocReader({
             <DocGlyph name={doc.name} className="size-12 text-icon" />
             <div className="flex flex-col gap-1.5">
               <h3 className="text-base font-semibold text-fg">{doc.name}</h3>
-              <p className="text-xs text-fg-2">Aperçu direct non disponible pour ce type de fichier binaire.</p>
+              <p className="text-xs text-fg-2">{translate("Aperçu direct non disponible pour ce type de fichier binaire.")}</p>
             </div>
             <Button variant="brand" onClick={() => downloadDoc(doc)} className="text-xs">
-              <DownloadIcon className="size-3.5" /> Télécharger ({formatSize(doc.size)})
+              <DownloadIcon className="size-3.5" /> {translate("Télécharger (")}{formatSize(doc.size)})
             </Button>
           </div>
         )}

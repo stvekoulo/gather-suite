@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { ArrowLeftIcon, ArrowRightIcon, CompassIcon } from "lucide-react";
@@ -11,6 +12,8 @@ import { sendDesktopNotification } from "@/lib/notifications";
 import type { PaletteId } from "@/lib/theme-palettes";
 import { useAppStore } from "@/stores/app-store";
 import { StepLanguage, StepNotifications, StepPalette, StepProfile } from "./onboarding-steps";
+import { AccountForm } from "@/modules/cloud/account-form";
+import { useCloud } from "@/modules/cloud/cloud-sync";
 
 export function OnboardingWizard() {
   const { t, language, setLanguage } = useI18n();
@@ -19,6 +22,7 @@ export function OnboardingWizard() {
   const updateProfile = useAppStore((s) => s.updateProfile);
 
   const hasCompleted = settings.hasCompletedOnboarding ?? false;
+  const cloudUser = useCloud((s) => s.user);
   const [step, setStep] = useState(0);
 
   // Form states
@@ -33,10 +37,10 @@ export function OnboardingWizard() {
   const handleFinish = async () => {
     // 1. Update Profile
     updateProfile({
-      name: name.trim() || "Steve",
-      email: email.trim() || "user@example.com",
-      jobTitle: jobTitle.trim() || "Creator",
-      initials: (name.trim() || "AU").slice(0, 2).toUpperCase(),
+      name: name.trim(),
+      email: email.trim(),
+      jobTitle: jobTitle.trim(),
+      initials: name.trim().slice(0, 2).toUpperCase(),
     });
 
     // 2. Update Settings
@@ -47,7 +51,7 @@ export function OnboardingWizard() {
       pushNotifications: notificationsEnabled,
     });
 
-    toast.success("Bienvenue dans votre nouvel espace Gather !");
+    toast.success(translate("Bienvenue dans votre nouvel espace Gather !"));
 
     // 3. Send welcome native desktop notification if enabled
     if (notificationsEnabled) {
@@ -58,7 +62,7 @@ export function OnboardingWizard() {
     }
   };
 
-  const stepsCount = 4;
+  const stepsCount = 5;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xl p-4 select-none">
@@ -107,6 +111,13 @@ export function OnboardingWizard() {
         {/* Dynamic Step Content */}
         <div className="my-auto py-2">
           {step === 0 && <StepLanguage selected={language} onSelect={setLanguage} />}
+          {step === 4 && (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-semibold text-fg">{translate("Retrouvez vos données partout")}</h3>
+              <p className="text-xs text-fg-2">{translate("Créez un compte pour sauvegarder et synchroniser vos notes, tâches, finances et préférences. C’est facultatif : Gather fonctionne aussi sans compte.")}</p>
+              {cloudUser ? <p role="status" className="rounded-lg bg-brand-tint p-3 text-sm text-fg">{translate("Connecté :")} {cloudUser.email}{translate(". Terminez pour commencer.")}</p> : <AccountForm />}
+            </div>
+          )}
           {step === 1 && (
             <StepProfile
               name={name}

@@ -23,6 +23,7 @@ import { useToday } from "@/hooks/use-today";
 import { useAppStore } from "@/stores/app-store";
 import { blankLine, LineItems, type Line } from "./invoice-line-items";
 import { useInvoiceUi } from "./invoice-ui-store";
+import { knownClientNames } from "@/lib/links";
 import { CURRENCIES, lineTotal, nextInvoiceNumber } from "./invoice-utils";
 
 type Draft = Omit<Invoice, "id" | "items" | "status"> & { items: Line[] };
@@ -48,6 +49,7 @@ function initialDraft(existing: Invoice | undefined, invoices: Invoice[], today:
       dueDate: existing.dueDate,
       currency: existing.currency,
       notes: existing.notes,
+      taxRate: existing.taxRate,
       items: existing.items.map((i) => ({
         id: i.id,
         description: i.description,
@@ -61,7 +63,7 @@ function initialDraft(existing: Invoice | undefined, invoices: Invoice[], today:
     client: "",
     issueDate: today,
     dueDate: addDays(today, 30),
-    currency: invoices[0]?.currency ?? "EUR",
+    currency: useAppStore.getState().settings.currency ?? invoices[0]?.currency ?? "EUR",
     notes: "Merci pour votre confiance.",
     items: [blankLine()],
   };
@@ -80,8 +82,10 @@ function EditorForm({ invoiceId, onDone }: { invoiceId?: string; onDone: () => v
   const setLine = (id: string, patch: Partial<Line>) =>
     setDraft((d) => ({ ...d, items: d.items.map((l) => (l.id === id ? { ...l, ...patch } : l)) }));
 
-  const clients = useMemo(() => [...new Set(invoices.map((i) => i.client))].sort(), [invoices]);
-  const total = draft.items.reduce((n, l) => n + lineTotal({ quantity: Number(l.quantity), rate: Number(l.rate) }), 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- directory and invoices share the same store
+  const clients = useMemo(() => knownClientNames(), [invoices]);
+  const subtotal = draft.items.reduce((n, l) => n + lineTotal({ quantity: Number(l.quantity), rate: Number(l.rate) }), 0);
+  const total = subtotal + Math.round(subtotal * (draft.taxRate ?? 0)) / 100;
   const filled = draft.items.filter((l) => l.description.trim() && Number(l.quantity) > 0);
   const duplicateNumber = invoices.some((i) => i.number === draft.number.trim() && i.id !== invoiceId);
 
@@ -108,6 +112,7 @@ function EditorForm({ invoiceId, onDone }: { invoiceId?: string; onDone: () => v
       dueDate: draft.dueDate,
       currency: draft.currency,
       notes: draft.notes,
+      taxRate: draft.taxRate,
       status,
       items: filled.map((l) => ({
         id: l.id,
@@ -145,7 +150,7 @@ function EditorForm({ invoiceId, onDone }: { invoiceId?: string; onDone: () => v
               id="inv-client"
               list="inv-clients"
               autoFocus={!existing}
-              placeholder="Nom de l'entreprise"
+              placeholder={translate("Nom de l'entreprise")}
               value={draft.client}
               aria-invalid={touched && !draft.client.trim()}
               onChange={(e) => set("client", e.target.value)}
@@ -216,11 +221,22 @@ function EditorForm({ invoiceId, onDone }: { invoiceId?: string; onDone: () => v
           onAdd={() => set("items", [...draft.items, blankLine()])}
         />
 
+        <Field label={translate("TVA (%)")} htmlFor="inv-tax" className="max-w-40">
+          <Input
+            id="inv-tax"
+            type="number"
+            min="0"
+            step="0.1"
+            placeholder="0"
+            value={draft.taxRate ?? ""}
+            onChange={(e) => set("taxRate", e.target.value === "" ? undefined : Math.max(0, Number(e.target.value)))}
+          />
+        </Field>
         <Field label={translate("Notes")} htmlFor="inv-notes">
           <Textarea
             id="inv-notes"
             rows={2}
-            placeholder="Conditions de paiement, coordonnées bancaires ou remerciement"
+            placeholder={translate("Conditions de paiement, coordonnées bancaires ou remerciement")}
             value={draft.notes}
             onChange={(e) => set("notes", e.target.value)}
           />
@@ -240,9 +256,9 @@ function EditorForm({ invoiceId, onDone }: { invoiceId?: string; onDone: () => v
           </Button>
         ) : (
           <>
-            <Button type="submit">Enregistrer brouillon</Button>
+            <Button type="submit">{translate("Enregistrer brouillon")}</Button>
             <Button type="button" variant="brand" onClick={() => save("sent")}>
-              Créer et marquer envoyée
+              {translate("Créer et marquer envoyée")}
             </Button>
           </>
         )}

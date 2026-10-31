@@ -1,4 +1,6 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
+import { invoiceRow, txRow, useMoney } from "@/lib/finance-totals";
 
 import { useMemo } from "react";
 import { addDays, fromKey, MONTHS, MONTHS_SHORT } from "@/lib/dates";
@@ -7,10 +9,9 @@ import { useAppStore } from "@/stores/app-store";
 import { PageHeader, PageRoot, StatGrid, StatTile } from "@/components/pages/shared/page-chrome";
 import {
   ExpenseCategoriesCard,
-  fmtEuros,
+  fmtMoney,
   fmtHours,
   InvoicesCard,
-  invoiceTotal,
 } from "./analytics-cards";
 import { HoursCard } from "./hours-card";
 import { ChartCard, ColumnChart, DataTable, SERIES, type Column, type Series } from "./charts";
@@ -22,7 +23,7 @@ export function AnalyticsPage() {
   return (
     <PageRoot>
       <PageHeader
-        title="Analytique & Trésorerie"
+        title={translate("Analytique & Trésorerie")}
         description={`Année ${year} · Performances financières, temps et facturation en un coup d'œil`}
       />
       <div className="grid gap-3 p-4 md:gap-4">
@@ -45,11 +46,12 @@ function KpiRow() {
   const invoices = useAppStore((s) => s.invoices);
   const transactions = useAppStore((s) => s.financeTransactions ?? []);
 
+  const money = useMoney();
   const kpis = useMemo(() => {
-    const paidInv = invoices.filter((i) => i.status === "paid").reduce((a, i) => a + invoiceTotal(i), 0);
-    const pendingInv = invoices.filter((i) => i.status === "sent" || i.status === "overdue").reduce((a, i) => a + invoiceTotal(i), 0);
-    const otherInc = transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
-    const totalExp = transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+    const paid = invoices.filter((i) => i.status === "paid");
+    const incomeRows = [...paid.map(invoiceRow), ...transactions.filter((t) => t.type === "income").map(txRow)];
+    const pendingInv = money.value(invoices.filter((i) => i.status === "sent" || i.status === "overdue").map(invoiceRow));
+    const totalExp = money.value(transactions.filter((t) => t.type === "expense").map(txRow));
     const activeSubs = transactions.filter((t) => t.isSubscription || (t.recurrence && t.recurrence !== "none")).length;
 
     const since = addDays(today, -29);
@@ -61,7 +63,8 @@ function KpiRow() {
     const recoveryRate = invoices.length ? Math.round((paidCount / invoices.length) * 100) : 100;
 
     return {
-      totalPaid: paidInv + otherInc,
+      totalPaid: money.value(incomeRows),
+      foreignPaid: money.unconverted(incomeRows),
       pendingInv,
       totalExp,
       activeSubs,
@@ -70,34 +73,35 @@ function KpiRow() {
       paidCount,
       recoveryRate,
     };
-  }, [timeEntries, invoices, transactions, today]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- money changes with currency and rates
+  }, [timeEntries, invoices, transactions, today, money.currency, money.rates]);
 
   return (
     <StatGrid>
       <StatTile
         icon="upcoming"
-        label="Chiffre d'affaires encaissé"
-        value={fmtEuros(kpis.totalPaid)}
-        hint={kpis.pendingInv > 0 ? `${fmtEuros(kpis.pendingInv)} en attente` : "Aucun impayé"}
+        label={translate("Chiffre d'affaires encaissé")}
+        value={fmtMoney(kpis.totalPaid)}
+        hint={[kpis.foreignPaid && `+ ${kpis.foreignPaid}`, kpis.pendingInv > 0 ? `${fmtMoney(kpis.pendingInv)} en attente` : "Aucun impayé"].filter(Boolean).join(" · ")}
         href="/withdrawal-methods"
       />
       <StatTile
         icon="pending"
-        label="Dépenses & Charges"
-        value={fmtEuros(kpis.totalExp)}
+        label={translate("Dépenses & Charges")}
+        value={fmtMoney(kpis.totalExp)}
         hint={`${kpis.activeSubs} abonnement(s) récurrent(s)`}
         href="/withdrawal-methods"
       />
       <StatTile
         icon="per-year"
-        label="Heures (30 derniers jours)"
+        label={translate("Heures (30 derniers jours)")}
         value={fmtHours(kpis.minutes)}
         hint={kpis.minutes ? `${Math.round((kpis.billable / kpis.minutes) * 100)}% facturable · ${fmtHours(kpis.billable)}` : "Aucune heure"}
         href="/time-tracking"
       />
       <StatTile
         icon="available"
-        label="Taux de recouvrement factures"
+        label={translate("Taux de recouvrement factures")}
         value={`${kpis.recoveryRate}%`}
         hint={`${kpis.paidCount} payée(s) sur ${invoices.length} factures`}
         href="/invoice"
@@ -108,6 +112,7 @@ function KpiRow() {
 
 // Flux financier mensuel : Revenus vs Dépenses sur l'année
 function FinanceFlowCard() {
+  const money = useMoney();
   const today = useToday();
   const year = today.slice(0, 4);
   const month = fromKey(today).getMonth();
@@ -121,7 +126,7 @@ function FinanceFlowCard() {
     for (const inv of invoices) {
       if (inv.status === "paid" && inv.issueDate.startsWith(year)) {
         const m = Number(inv.issueDate.slice(5, 7)) - 1;
-        if (m >= 0 && m < 12) monthlyInc[m] += invoiceTotal(inv);
+        if (m >= 0 && m < 12) monthlyInc[m] += money.value([invoiceRow(inv)]);
       }
     }
 
@@ -129,8 +134,8 @@ function FinanceFlowCard() {
       if (t.date.startsWith(year)) {
         const m = Number(t.date.slice(5, 7)) - 1;
         if (m >= 0 && m < 12) {
-          if (t.type === "income") monthlyInc[m] += t.amount;
-          else monthlyExp[m] += t.amount;
+          if (t.type === "income") monthlyInc[m] += money.value([txRow(t)]);
+          else monthlyExp[m] += money.value([txRow(t)]);
         }
       }
     }
@@ -148,7 +153,8 @@ function FinanceFlowCard() {
       totalInc: monthlyInc.reduce((a, v) => a + v, 0),
       totalExp: monthlyExp.reduce((a, v) => a + v, 0),
     };
-  }, [invoices, transactions, year, month]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- money changes with currency and rates
+  }, [invoices, transactions, year, month, money.currency, money.rates]);
 
   const series: Series[] = [
     { id: "income", label: "Revenus", color: SERIES.one },
@@ -157,20 +163,20 @@ function FinanceFlowCard() {
 
   return (
     <ChartCard
-      title="Flux financier mensuel"
-      description={`Revenus vs Dépenses en ${year} · Solde net : ${fmtEuros(totalInc - totalExp)}`}
+      title={translate("Flux financier mensuel")}
+      description={`Revenus vs Dépenses en ${year} · Solde net : ${fmtMoney(totalInc - totalExp)}`}
       legend={series}
-      chart={<ColumnChart columns={columns} series={series} format={fmtEuros} formatTick={(v) => `${Math.round(v)} €`} compactLabelEvery={2} />}
+      chart={<ColumnChart columns={columns} series={series} format={fmtMoney} formatTick={(v) => `${Math.round(v)} €`} compactLabelEvery={2} />}
       table={
         <DataTable
           head={["Mois", "Revenus", "Dépenses", "Solde net"]}
           rows={columns.map((c, i) => [
             MONTHS[i],
-            fmtEuros(c.values[0]),
-            fmtEuros(c.values[1]),
-            fmtEuros(c.values[0] - c.values[1]),
+            fmtMoney(c.values[0]),
+            fmtMoney(c.values[1]),
+            fmtMoney(c.values[0] - c.values[1]),
           ])}
-          foot={["Total", fmtEuros(totalInc), fmtEuros(totalExp), fmtEuros(totalInc - totalExp)]}
+          foot={["Total", fmtMoney(totalInc), fmtMoney(totalExp), fmtMoney(totalInc - totalExp)]}
         />
       }
     />

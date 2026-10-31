@@ -50,7 +50,8 @@ export function WordcraftCanvas({
             style={{
               maxWidth: pageWidth,
               minHeight: pageMinHeight,
-              padding: `${layout.margin}mm`,
+              // Printed margins are kept in exports; small windows only trim the on-screen side margins.
+              padding: `${layout.margin}mm min(${layout.margin}mm, max(12px, calc((100vw - 320px) / 6)))`,
             }}
           >
             {/* En-tête de page discret */}

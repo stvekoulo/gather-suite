@@ -81,7 +81,7 @@ export function WeekChart({
                   </span>
                   <span className="t-12 flex items-center gap-1.5">
                     <span className="size-2 rounded-[2px]" style={{ background: NON_BILLABLE_COLOR }} />
-                    Non-billable {formatHours(d.nonBillable)}
+                    {translate("Non-billable")} {formatHours(d.nonBillable)}
                   </span>
                 </TooltipContent>
               </Tooltip>
@@ -125,7 +125,7 @@ export function ChartLegend() {
         <span className="size-2 rounded-[2px]" style={{ background: BILLABLE_COLOR }} />{translate("Billable")}
       </span>
       <span className="t-12 flex items-center gap-1.5 text-fg-2">
-        <span className="size-2 rounded-[2px]" style={{ background: NON_BILLABLE_COLOR }} /> Non-billable
+        <span className="size-2 rounded-[2px]" style={{ background: NON_BILLABLE_COLOR }} /> {translate("Non-billable")}
       </span>
     </div>
   );

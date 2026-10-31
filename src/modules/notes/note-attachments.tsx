@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { DownloadIcon, FileIcon, ImageIcon, MusicIcon, PaperclipIcon, Trash2Icon, VideoIcon } from "lucide-react";
@@ -57,7 +58,7 @@ export function NoteAttachments({
             className="gap-1.5 text-xs font-medium h-8"
           >
             <PaperclipIcon className="size-3.5 text-brand" />
-            Joindre des fichiers
+            {translate("Joindre des fichiers")}
           </Button>
 
           {/* Modal affichant le composant beUI FileUpload animé à la demande */}
@@ -66,18 +67,18 @@ export function NoteAttachments({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-base">
                   <PaperclipIcon className="size-4 text-brand" />
-                  Joindre des fichiers à la note
+                  {translate("Joindre des fichiers à la note")}
                 </DialogTitle>
                 <DialogDescription className="text-xs">
-                  Glissez-déposez vos fichiers ou parcourez votre ordinateur.
+                  {translate("Glissez-déposez vos fichiers ou parcourez votre ordinateur.")}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="pt-2">
                 <FileUpload
                   inputLabel="Fichiers à joindre"
-                  title="Glissez vos fichiers ici"
-                  description="Images, PDF, documents, audios ou vidéos"
+                  title={translate("Glissez vos fichiers ici")}
+                  description={translate("Images, PDF, documents, audios ou vidéos")}
                   browseLabel="Parcourir"
                   multiple
                   onFilesAdded={async (_items, files) => {
@@ -113,7 +114,7 @@ export function NoteAttachments({
                   onClick={() => setUploadModalOpen(false)}
                   className="text-xs"
                 >
-                  Fermer
+                  {translate("Fermer")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -144,7 +145,7 @@ export function NoteAttachments({
                   size="sm"
                   onClick={() => void handleDownload(file)}
                   className="size-7 p-0 text-fg-2 hover:text-fg"
-                  title="Télécharger"
+                  title={translate("Télécharger")}
                 >
                   <DownloadIcon className="size-3.5" />
                 </Button>
@@ -155,7 +156,7 @@ export function NoteAttachments({
                     size="sm"
                     onClick={() => onChange(attachments.filter((a) => a.id !== file.id))}
                     className="size-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-500/10"
-                    title="Supprimer"
+                    title={translate("Supprimer")}
                   >
                     <Trash2Icon className="size-3.5" />
                   </Button>

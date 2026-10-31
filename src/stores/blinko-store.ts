@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { workspaceStorage } from "@/lib/storage/workspace-storage";
+import { blobReplacer, workspaceStorage } from "@/lib/storage/workspace-storage";
 import type { BlinkoFilter, BlinkoNote, NoteAttachment, NoteType } from "./blinko-types";
 
 interface BlinkoState {
@@ -143,7 +143,7 @@ export const useBlinkoStore = create<BlinkoState>()(
     }),
     {
       name: "aura-blinko-notes-v1",
-      storage: createJSONStorage(() => workspaceStorage),
+      storage: createJSONStorage(() => workspaceStorage, { replacer: blobReplacer }),
       skipHydration: true,
     }
   )

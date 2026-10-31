@@ -148,7 +148,7 @@ export function Select({
   );
 }
 
-export function SelectTrigger({ className, children }: { className?: string; children: ReactNode }) {
+export function SelectTrigger({ className, children, "aria-label": ariaLabel }: { className?: string; children: ReactNode; "aria-label"?: string }) {
   const ctx = useSelectContext("SelectTrigger");
   const isTop = ctx.placement === "top";
   const nearRadius = useTransform(ctx.progress, [0, 0.2, 0.4, 1], [RADIUS, 0, 0, RADIUS]);
@@ -159,6 +159,7 @@ export function SelectTrigger({ className, children }: { className?: string; chi
       type="button"
       id={ctx.triggerId}
       disabled={ctx.disabled}
+      aria-label={ariaLabel}
       aria-haspopup="listbox"
       aria-expanded={ctx.open}
       aria-controls={ctx.listId}

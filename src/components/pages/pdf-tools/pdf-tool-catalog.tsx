@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useRef, useState } from "react";
 import { FileUpIcon, SearchIcon, XIcon } from "lucide-react";
@@ -73,10 +74,10 @@ export function PdfToolCatalog({ onSelectTool }: PdfToolCatalogProps) {
             <FileUpIcon className="size-7" />
           </div>
           <p className="mt-3 text-base font-semibold text-fg">
-            Déposez vos fichiers PDF ici
+            {translate("Déposez vos fichiers PDF ici")}
           </p>
           <p className="text-xs text-fg-2">
-            Ils seront automatiquement dirigés vers l&apos;outil adapté
+            {translate("Ils seront automatiquement dirigés vers l'outil adapté")}
           </p>
         </div>
       )}
@@ -126,7 +127,7 @@ export function PdfToolCatalog({ onSelectTool }: PdfToolCatalogProps) {
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher une opération..."
+              placeholder={translate("Rechercher une opération...")}
               className="h-8.5 w-full rounded-lg border border-hairline bg-surface pl-8.5 pr-8 text-xs text-fg outline-none focus:border-brand"
             />
             {searchQuery && (
@@ -148,7 +149,7 @@ export function PdfToolCatalog({ onSelectTool }: PdfToolCatalogProps) {
             className="gap-1.5 text-xs font-medium shrink-0"
           >
             <FileUpIcon className="size-3.5" />
-            Importer un PDF
+            {translate("Importer un PDF")}
           </Button>
         </div>
       </div>
@@ -176,10 +177,10 @@ export function PdfToolCatalog({ onSelectTool }: PdfToolCatalogProps) {
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-fg group-hover:text-brand transition-colors">
-                  {tool.title}
+                  {translate(tool.title)}
                 </h3>
                 <p className="mt-1 text-xs text-fg-2 line-clamp-2 leading-relaxed">
-                  {tool.hint}
+                  {translate(tool.hint)}
                 </p>
               </div>
             </button>

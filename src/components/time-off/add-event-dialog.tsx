@@ -1,4 +1,6 @@
 "use client";
+import { Dropdown } from "@/components/beui/dropdown";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { CalendarPlusIcon, PlusIcon } from "lucide-react";
@@ -24,6 +26,7 @@ import { useCalendarStore } from "@/stores/calendar-store";
 import { useEventCategories } from "@/stores/event-categories-store";
 import { EVENT_COLORS } from "@/components/calendar/event-colors";
 import type { EventColor } from "@/lib/types";
+import { toKey } from "@/lib/dates";
 
 interface AddEventDialogProps {
   open: boolean;
@@ -36,7 +39,7 @@ export function AddEventDialog({ open, onClose, defaultDate }: AddEventDialogPro
   const tr = useTranslate();
   const saveEvent = useAppStore((s) => s.saveEvent);
   const calendarDate = useCalendarStore((s) => s.date);
-  const targetDate = defaultDate || calendarDate || new Date().toISOString().slice(0, 10);
+  const targetDate = defaultDate || calendarDate || toKey(new Date());
   const { getAllCategories, addCategory } = useEventCategories();
   const categories = getAllCategories();
 
@@ -65,19 +68,19 @@ export function AddEventDialog({ open, onClose, defaultDate }: AddEventDialogPro
       setIsCreatingCat(false);
       toast.success(`Catégorie « ${newCatName.trim()} » créée`);
     } else {
-      toast.error("Cette catégorie existe déjà.");
+      toast.error(translate("Cette catégorie existe déjà."));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return toast.error("Veuillez saisir un titre pour l'événement.");
+    if (!title.trim()) return toast.error(translate("Veuillez saisir un titre pour l'événement."));
 
     const start = allDay ? 0 : timeToMinutes(startTime);
     const end = allDay ? 1440 : timeToMinutes(endTime);
 
     if (!allDay && end <= start) {
-      return toast.error("L'heure de fin doit être postérieure à l'heure de début.");
+      return toast.error(translate("L'heure de fin doit être postérieure à l'heure de début."));
     }
 
     saveEvent({
@@ -117,7 +120,7 @@ export function AddEventDialog({ open, onClose, defaultDate }: AddEventDialogPro
             <Label className="text-xs">{tr("Titre de l'événement")}</Label>
             <Input
               required
-              placeholder="Ex. Réunion client, Point projet, Appel..."
+              placeholder={translate("Ex. Réunion client, Point projet, Appel...")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="h-8 text-xs"
@@ -185,17 +188,7 @@ export function AddEventDialog({ open, onClose, defaultDate }: AddEventDialogPro
                 </Button>
               </div>
             ) : (
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="h-8 rounded-md border border-control bg-surface px-2.5 text-xs text-fg outline-none focus:border-brand"
-              >
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              <Dropdown triggerClassName="h-8" value={category} onChange={setCategory} options={categories.map((c) => ({ value: c, label: c }))} />
             )}
           </div>
 
@@ -221,7 +214,7 @@ export function AddEventDialog({ open, onClose, defaultDate }: AddEventDialogPro
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">{tr("Lieu ou lien")}</Label>
             <Input
-              placeholder="Ex. Bureau 3B, Google Meet, Zoom..."
+              placeholder={translate("Ex. Bureau 3B, Google Meet, Zoom...")}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="h-8 text-xs"
@@ -231,7 +224,7 @@ export function AddEventDialog({ open, onClose, defaultDate }: AddEventDialogPro
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">{tr("Notes")}</Label>
             <Textarea
-              placeholder="Ordre du jour, préparatifs..."
+              placeholder={translate("Ordre du jour, préparatifs...")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="h-14 text-xs"

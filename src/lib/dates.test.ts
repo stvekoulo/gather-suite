@@ -33,9 +33,9 @@ describe("dates", () => {
   });
 
   it("formats ranges within and across months", () => {
-    expect(formatRange("2026-11-08", "2026-11-14")).toBe("Nov 8 – 14");
-    expect(formatRange("2026-10-25", "2026-10-31")).toBe("Oct 25 – 31");
-    expect(formatRange("2026-11-29", "2026-12-05")).toBe("Nov 29 – Dec 5");
+    expect(formatRange("2026-11-08", "2026-11-14")).toBe("8 – 14 nov");
+    expect(formatRange("2026-10-25", "2026-10-31")).toBe("25 – 31 oct");
+    expect(formatRange("2026-11-29", "2026-12-05")).toBe("29 nov – 5 dec");
   });
 
   it("adds days and months without drifting", () => {

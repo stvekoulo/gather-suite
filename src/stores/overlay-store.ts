@@ -8,7 +8,8 @@ export type Overlay =
   | { kind: "event"; eventId?: string; date?: string; start?: number; end?: number; allDay?: boolean }
   | { kind: "shortcuts" }
   | { kind: "about" }
-  | { kind: "search" };
+  | { kind: "search" }
+  | { kind: "capture" };
 
 type OverlayStore = {
   overlay: Overlay;

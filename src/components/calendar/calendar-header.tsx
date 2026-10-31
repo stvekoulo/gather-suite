@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { motion } from "motion/react";
 import { Icon } from "@/components/icon";
@@ -71,7 +72,7 @@ export function CalendarHeader({ days }: { days: string[] }) {
         </div>
 
         <Button size="sm" className="shrink-0 max-md:h-8" onClick={() => setDate(today)} aria-keyshortcuts="T">
-          Aujourd'hui
+          {translate("Aujourd'hui")}
         </Button>
 
         <div className="flex h-[30px] shrink-0 items-center overflow-hidden rounded-lg border border-control bg-surface max-md:h-8">
@@ -86,7 +87,7 @@ export function CalendarHeader({ days }: { days: string[] }) {
                 <Icon name="arrow-left" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>Précédent</TooltipContent>
+            <TooltipContent>{translate("Précédent")}</TooltipContent>
           </Tooltip>
           <span className="h-full w-px bg-control" aria-hidden />
           <Tooltip>
@@ -100,14 +101,14 @@ export function CalendarHeader({ days }: { days: string[] }) {
                 <Icon name="arrow-right" className="-scale-x-100" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>Suivant</TooltipContent>
+            <TooltipContent>{translate("Suivant")}</TooltipContent>
           </Tooltip>
         </div>
       </div>
 
       <div
         role="tablist"
-        aria-label="Vue du calendrier"
+        aria-label={translate("Vue du calendrier")}
         className="relative flex h-[34px] w-full items-center gap-0.5 overflow-hidden rounded-lg bg-app p-0.5 md:h-[30px] md:w-auto"
       >
         {VIEWS.map((v) => {
@@ -135,7 +136,7 @@ export function CalendarHeader({ days }: { days: string[] }) {
               <span className="relative z-10">
                 {v.id === "week" ? (
                   <>
-                    <span className="md:hidden">3 jours</span>
+                    <span className="md:hidden">{translate("3 jours")}</span>
                     <span className="max-md:hidden">{v.label}</span>
                   </>
                 ) : (

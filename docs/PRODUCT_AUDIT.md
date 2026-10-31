@@ -1,24 +1,16 @@
 # Gather Suite — audit fonctionnel et validation
 
-Auteur du produit : **Steven KOULO**. Date : 30 octobre 2026.
-Statut : **bêta locale avancée sous Windows, parité fonctionnelle incomplète ; pas encore une version stable ni un SaaS prêt à commercialiser**.
-Les modifications qui existaient avant cet audit ont été conservées. Aucun push,
-déploiement cloud, envoi de message ou installation de production n'a été effectué.
+Auteur du produit : **Steven KOULO**. Date : 31 octobre 2026.
+Statut : **bêta avancée sous Windows, parité fonctionnelle incomplète**. Résultats dans [VALIDATION.md](./VALIDATION.md).
 
 ## Verdict de préparation à l’usage
 
 | Usage envisagé | Verdict | Justification |
 | --- | --- | --- |
-| Essais personnels locaux sous Windows | Oui, sur les usages couverts et avec sauvegardes | Édition, exports, persistance, isolation des espaces et principaux parcours testés |
-| Remplacement complet de Word/PowerPoint, Blinko ou Stirling-PDF | Non | Imports bureautiques et parité non IA encore partiels |
-| Documents signés dans un processus métier définitif | Validation supplémentaire nécessaire | Signature CMS réelle testée ; parcours interface, contrôle OpenSSL et lecture dans des validateurs PDF externes à exécuter |
-| Version stable installable sur toutes les machines/OS | Non validé | Exécutable QA Windows seulement ; installateurs, mises à jour, signature de l’application, macOS et Linux restent à vérifier |
-| SaaS commercial avec comptes et sauvegarde cloud | Non | Backend de comptes, synchronisation, abonnements et exploitation non réalisés |
-
-Le projet n’est donc **pas encore prêt au maximum pour être utilisé sans réserve**.
-Les résultats confirment les parcours testés ; ils ne démontrent ni l’absence de
-tous les bugs ni la parité complète demandée. Aucun pourcentage de complétude
-n’est avancé, car les fonctionnalités restantes ont des tailles très différentes.
+| Usage personnel local sous Windows | Oui | Build, 112 tests unitaires et 37 parcours E2E réussis, instantanés et récupération |
+| Compte et synchronisation | À valider | Isolation prouvée en SQL et fusion testée ; aucun essai avec un vrai compte sur deux PC |
+| Remplacement complet de Word/PowerPoint, Blinko ou Stirling-PDF | Non | Voir [PARITY_NON_AI.md](./PARITY_NON_AI.md) |
+| Diffusion publique | Non | Installateur non signé, pas de mises à jour automatiques, mot de passe oublié absent, macOS et Linux non testés |
 
 ## Références effectivement analysées
 
@@ -102,7 +94,7 @@ le parcours de signature numérique et les autres limites indiquées dans cet au
 | --- | --- | --- |
 | Identité | Gather / Gather Suite ; auteur Steven KOULO ; licence propriétaire des développements originaux | Audit de provenance nécessaire avant toute distribution commerciale de code hérité |
 | Apparence | Blanc/noir par défaut, thèmes clair/sombre, palettes enregistrées | Presets de couleurs ; pas de constructeur complet de design system |
-| Persistance | SQLite via Tauri ; IndexedDB en navigateur ; catalogue atomique contenant tous les espaces et modules ; migration des anciens états ; erreurs visibles | Le stockage reste constitué de snapshots JSON ; pas encore de graphe relationnel et de FTS5 |
+| Persistance | SQLite via Tauri ; IndexedDB en navigateur ; catalogue atomique contenant tous les espaces et modules ; migration des anciens états ; erreurs visibles | Catalogue JSON et pièces jointes stockées à part ; recherche par index en mémoire |
 | Documents | Édition Tiptap, tailles/couleurs, alignement, liens, recherche/remplacement, sauts de page, tableaux/images ; import DOCX ; vrai export DOCX avec marges, orientation, en-têtes, pieds, pagination et sommaire | L’éditeur à l’écran reste un flux continu ; import DOCX partiel, fonctions Word avancées et fidélité des objets complexes non complètes |
 | PDF des documents | Export riche avec pagination automatique, titres, styles, listes numérotées, tableaux, images, liens, sommaire, en-têtes et pieds de page | Pas une reproduction pixel à pixel de Word ; polices et certains tableaux fusionnés complexes restent à compléter |
 | Présentations | Création de decks, thèmes, titres, listes, métriques, notes ; objets texte/formes/images déplaçables et redimensionnables ; export PPTX valide | Import PPTX partiel : masques, groupes, graphiques, animations, polices et objets complexes non conservés intégralement ; mode présentateur à une fenêtre |
@@ -118,67 +110,17 @@ le parcours de signature numérique et les autres limites indiquées dans cet au
 | Sauvegarde | Tous les espaces et leurs trois modules, contrôle des formats avant restauration ; sélection de l’espace et données validées enregistrées dans un seul catalogue canonique | Les anciennes sauvegardes sans catalogue sont restaurées dans l’espace actif ; des copies de compatibilité des trois anciens magasins sont conservées |
 | Fermeture | Attente des écritures natives ; vidage de l'autosave du dessin ; confirmation sur éditeurs modifiés | Une panne matérielle avant validation d'une écriture ne peut pas être garantie sans perte |
 
-## Points empêchant encore une validation produit complète
+## Points restant avant une diffusion publique
 
-1. Terminer les fonctions PDF encore absentes de la parité complète, dont sécurité
-   par mot de passe, PDF/A et conversions bureautiques fidèles ; compléter la validation
-   et les fonctions avancées de la signature numérique déjà implémentée.
-   L’OCR français/anglais et ses ressources sont désormais embarqués et testés sans Internet.
-2. Terminer la parité non IA Blinko, en séparant clairement les fonctions purement
-   locales de celles qui nécessitent le futur backend de comptes.
-3. Compléter le moteur de pagination et la fidélité d'import/export bureautique.
-4. Ajouter le graphe relationnel, la recherche FTS5 et les flux intermodules restants.
-5. Réaliser les onglets multiples, le split-view universel, la réunion coordonnée,
-   Quick Capture global, le presse-papier OS, Pomodoro et la bibliothèque de snippets.
-6. L’isolation locale des espaces est implémentée et testée après redémarrage natif.
-   Les anciennes données partagées sont affectées à l’espace qui était actif lors
-   de la migration ; les autres anciennes étiquettes démarrent vides, car aucune
-   attribution historique fiable n’existait. Cela ne constitue pas une isolation
-   de comptes sur un serveur ; celle-ci appartient au chantier cloud.
-7. Le cloud reste à construire : authentification, isolation entre comptes, synchronisation
-   SQLite/serveur, conflits, quotas, sauvegardes distantes, restauration et abonnement.
-8. Vérifier installateurs, mises à jour, signature/notarisation et machines sans WebView2.
-9. Exécuter les builds et essais natifs macOS et Linux. Le workflow préparé ne vaut pas
-   exécution, et les tests Chromium ne prouvent pas le fonctionnement du WebKit de macOS.
-10. Vérifier la provenance du code hérité avant distribution. Le fichier LICENSE protège
-    les contributions originales de Steven KOULO, sans modifier les droits de tiers.
-
-## Priorités avant une diffusion stable
-
-1. Valider la signature numérique de bout en bout dans le navigateur et le nouvel
-   exécutable natif ; contrôler le fichier avec OpenSSL et des lecteurs PDF externes.
-2. Compléter les fonctions manquantes du périmètre convenu, suivies dans
-   [PARITY_NON_AI.md](./PARITY_NON_AI.md), sans assimiler une fonction partielle à une parité complète.
-3. Tester les migrations, restaurations et grosses pièces jointes sur des jeux de
-   données représentatifs et lors d’interruptions ; mesurer mémoire et latence du
-   catalogue JSON qui réenregistre les espaces.
-4. Effectuer la revue de sécurité de diffusion : la CSP Tauri est actuellement
-   désactivée (`csp: null`), les autorisations et dépendances doivent être revues.
-   L’audit npm actualisé signale 7 vulnérabilités faibles, aucune modérée/élevée/critique ;
-   cela ne constitue pas un audit de sécurité applicative complet.
-5. Construire et tester les installateurs, mises à jour et distributions natives
-   sur Windows, macOS et Linux, puis vérifier la provenance des composants distribués.
-
-Les comptes, la synchronisation et l’exploitation cloud sont nécessaires à l’offre
-SaaS ; ils ne sont pas nécessaires pour essayer les fonctions purement locales.
-
-## Architecture cloud envisagée, non déployée
-
-Garder SQLite comme stockage de travail local. Ajouter un compte optionnel avec
-Convex auto-hébergé, un stockage objet externe pour les documents et des sauvegardes
-versionnées hors VPS. La synchronisation et les conflits sont un chantier applicatif
-à part entière. Neon auto-hébergé ajoute une architecture distribuée peu adaptée à un
-premier serveur unique. Le dimensionnement OVH doit se faire sur la RAM/CPU réels et
-sur les services déjà présents, pas seulement sur l'intitulé VPS-1.
+1. Essayer la synchronisation réelle sur deux ordinateurs ([CLOUD.md](./CLOUD.md)).
+2. Ajouter mot de passe oublié et suppression de compte.
+3. Signer l'application et configurer les mises à jour : nécessite un certificat et une paire de clés.
+4. Réparer la CI (`startup_failure` avant le premier job), puis tester macOS et Linux.
+5. Publier les installateurs et corriger les liens de `landing-gather`, qui visent `/downloads/` encore vide.
+6. Synchroniser les fichiers, avec un stockage objet plutôt que Postgres.
+7. Terminer la parité suivie dans [PARITY_NON_AI.md](./PARITY_NON_AI.md) et la traduction anglaise des modules.
+8. Vérifier la provenance du code hérité avant distribution.
 
 ## Validation
 
-Les résultats datés des commandes et parcours sont consignés dans
-`docs/VALIDATION.md`. Les traces et fichiers QA restent dans `.qa/` et `test-results/`.
-
-Dernière vérification de cet audit : 47 tests unitaires réussis dans 18 fichiers,
-TypeScript et lint réussis (2 avertissements Open Graph). Le build frontend incluant
-la signature a réussi. Les 22 parcours E2E et le dernier test natif à deux espaces
-avaient réussi **avant** l’ajout du module de signature ; ils ne valident donc pas
-ce nouveau parcours. Le contrôle OpenSSL n’a pas encore été exécuté.
-
+Les résultats datés sont consignés dans [VALIDATION.md](./VALIDATION.md).

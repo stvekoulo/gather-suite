@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { PlusIcon } from "lucide-react";
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/beui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { EVENT_COLORS } from "@/components/calendar/event-colors";
-import { parseTime, timeInputValue } from "@/lib/dates";
+import { parseTime, timeInputValue, toKey } from "@/lib/dates";
 import { useTranslate } from "@/lib/i18n/ui-text";
 import type { CalEvent } from "@/lib/types";
 import { useAppStore } from "@/stores/app-store";
@@ -75,7 +76,7 @@ function EventForm({
   const saveEvent = useAppStore((s) => s.saveEvent);
   const deleteEvent = useAppStore((s) => s.deleteEvent);
   const duplicateEvent = useAppStore((s) => s.duplicateEvent);
-  const existing = eventId ? useAppStore((s) => s.events.find((e) => e.id === eventId)) : undefined;
+  const existing = useAppStore((s) => (eventId ? s.events.find((e) => e.id === eventId) : undefined));
 
   const customCategories = useEventCategories((s) => s.customCategories);
   const addCategory = useEventCategories((s) => s.addCategory);
@@ -86,7 +87,7 @@ function EventForm({
 
   const [draft, setDraft] = useState<Partial<CalEvent>>(() => ({
     title: "",
-    date: defaultDate ?? new Date().toISOString().slice(0, 10),
+    date: defaultDate ?? toKey(new Date()),
     start: defaultStart ?? 540,
     end: defaultEnd ?? 600,
     color: "green",
@@ -104,7 +105,7 @@ function EventForm({
     saveEvent({
       id: existing?.id,
       title: draft.title.trim(),
-      date: draft.date || new Date().toISOString().slice(0, 10),
+      date: draft.date || toKey(new Date()),
       start: draft.allDay ? 0 : draft.start ?? 540,
       end: draft.allDay ? 1440 : draft.end ?? 600,
       color: draft.color ?? "green",
@@ -129,7 +130,7 @@ function EventForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <DialogHeader>
         <DialogTitle className="t-18 font-bold">{tr(existing ? "Modifier l'événement" : "Nouvel événement")}</DialogTitle>
-        <DialogDescription className="sr-only">Formulaire d&apos;événement</DialogDescription>
+        <DialogDescription className="sr-only">{translate("Formulaire d'événement")}</DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-3">
@@ -138,7 +139,7 @@ function EventForm({
             id="ev-title"
             required
             autoFocus
-            placeholder="Ex. Réunion client, Point hebdomadaire..."
+            placeholder={translate("Ex. Réunion client, Point hebdomadaire...")}
             value={draft.title ?? ""}
             onChange={(e) => set("title", e.target.value)}
           />
@@ -232,7 +233,7 @@ function EventForm({
         <Field label={tr("Lieu ou lien")} htmlFor="ev-location">
           <Input
             id="ev-location"
-            placeholder="Lieu de rendez-vous ou lien visioconférence"
+            placeholder={translate("Lieu de rendez-vous ou lien visioconférence")}
             value={draft.location ?? ""}
             onChange={(e) => set("location", e.target.value)}
           />

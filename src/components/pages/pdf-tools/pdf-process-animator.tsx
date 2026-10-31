@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle2Icon, DownloadIcon, Loader2Icon, RefreshCwIcon, AlertCircleIcon, FileCheckIcon } from "lucide-react";
@@ -78,22 +79,22 @@ export function PdfProcessAnimator({
             <div className="grid grid-cols-3 gap-2 pt-1 text-[11px]">
               <div className="flex items-center gap-1.5 text-brand font-medium">
                 <span className="size-1.5 rounded-full bg-brand animate-ping" />
-                1. Analyse
+                {translate("1. Analyse")}
               </div>
               <div className={`flex items-center gap-1.5 ${progressPercent > 35 ? "text-brand font-medium" : "text-fg-2"}`}>
                 <span className={`size-1.5 rounded-full ${progressPercent > 35 ? "bg-brand" : "bg-hairline"}`} />
-                2. Transformation
+                {translate("2. Transformation")}
               </div>
               <div className={`flex items-center gap-1.5 ${progressPercent > 80 ? "text-brand font-medium" : "text-fg-2"}`}>
                 <span className={`size-1.5 rounded-full ${progressPercent > 80 ? "bg-brand" : "bg-hairline"}`} />
-                3. Exportation
+                {translate("3. Exportation")}
               </div>
             </div>
 
             {onCancel && (
               <div className="flex justify-end pt-1">
                 <Button variant="ghost" size="sm" onClick={onCancel} className="text-xs text-fg-2">
-                  Annuler l&apos;opération
+                  {translate("Annuler l'opération")}
                 </Button>
               </div>
             )}
@@ -111,12 +112,12 @@ export function PdfProcessAnimator({
         >
           <div className="flex items-center gap-2 font-semibold">
             <AlertCircleIcon className="size-4 shrink-0" />
-            <span>Erreur survenue lors du traitement</span>
+            <span>{translate("Erreur survenue lors du traitement")}</span>
           </div>
           <p className="leading-relaxed pl-6">{error}</p>
           <div className="flex justify-end">
             <Button size="sm" variant="outline" onClick={onReset} className="gap-1.5 text-xs">
-              <RefreshCwIcon className="size-3.5" /> Réessayer
+              <RefreshCwIcon className="size-3.5" /> {translate("Réessayer")}
             </Button>
           </div>
         </motion.div>
@@ -137,7 +138,7 @@ export function PdfProcessAnimator({
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-fg">
-                  Traitement terminé avec succès !
+                  {translate("Traitement terminé avec succès !")}
                 </h4>
                 <p className="text-xs text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">
                   {resultName}
@@ -145,17 +146,17 @@ export function PdfProcessAnimator({
               </div>
             </div>
             <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-              Prêt
+              {translate("Prêt")}
             </span>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-emerald-500/15">
             <Button variant="ghost" size="sm" onClick={onReset} className="text-xs">
-              Autre traitement
+              {translate("Autre traitement")}
             </Button>
             {onDownload && (
               <Button variant="brand" size="sm" onClick={onDownload} className="gap-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                <DownloadIcon className="size-4" /> Télécharger le fichier
+                <DownloadIcon className="size-4" /> {translate("Télécharger le fichier")}
               </Button>
             )}
           </div>

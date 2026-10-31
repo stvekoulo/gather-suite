@@ -1,10 +1,11 @@
 import { useAppStore } from "@/stores/app-store";
 import { DICT_EN_TO_FR } from "./dict-en-fr";
 import { DICT_FR_TO_EN_CUSTOM } from "./dict-fr-en";
+import { DICT_APP_EN_TO_FR, DICT_APP_FR_TO_EN } from "./dict-app";
 import type { Language } from "./types";
 
 // Table inversée automatique Français vers Anglais
-const DICT_FR_TO_EN: Record<string, string> = { ...DICT_FR_TO_EN_CUSTOM };
+const DICT_FR_TO_EN: Record<string, string> = { ...DICT_APP_FR_TO_EN, ...DICT_FR_TO_EN_CUSTOM };
 
 for (const [enKey, frVal] of Object.entries(DICT_EN_TO_FR)) {
   if (!DICT_FR_TO_EN[frVal]) {
@@ -24,7 +25,7 @@ export function translate(text: string, language?: Language | string): string {
     return DICT_FR_TO_EN[text] ?? text;
   }
 
-  return DICT_EN_TO_FR[text] ?? text;
+  return DICT_EN_TO_FR[text] ?? DICT_APP_EN_TO_FR[text] ?? text;
 }
 
 // Hook réactif pour les composants React s'adaptant instantanément aux changements de langue

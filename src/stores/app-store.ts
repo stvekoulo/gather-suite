@@ -18,7 +18,7 @@ import {
 } from "./app-history";
 import type { AppStore } from "./app-store-types";
 import { createWorkSlice } from "./app-work-slice";
-import { workspaceStorage } from "@/lib/storage/workspace-storage";
+import { blobReplacer, workspaceStorage } from "@/lib/storage/workspace-storage";
 
 export { uid };
 export type { Actions, AppStore, RequestInput } from "./app-store-types";
@@ -115,7 +115,7 @@ export const useAppStore = create<AppStore>()(
           });
           get().notify({
             title: `${req.type} request submitted`,
-            body: `${when} · ${req.duration}. Your manager has been notified.`,
+            body: `${when} · ${req.duration}`,
             href: "/time-off",
           });
           return req;
@@ -193,14 +193,14 @@ export const useAppStore = create<AppStore>()(
           const { workspaceId, workspaces } = get();
           set({ ...createSeed(), workspaceId, workspaces });
           const lang = get().settings?.language || "fr";
-          toast.success(translate("Données de démo restaurées", lang));
+          toast.success(translate("Données réinitialisées", lang));
         },
       };
     },
     {
       name: "calendar-app:state",
       version: STATE_VERSION,
-      storage: createJSONStorage(() => workspaceStorage),
+      storage: createJSONStorage(() => workspaceStorage, { replacer: blobReplacer }),
       skipHydration: true,
       migrate: (persisted, version) => {
         const s = persisted as AppState;

@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useMemo, useState } from "react";
 import {
@@ -76,7 +77,7 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
               panelTab === "day" ? "bg-surface text-fg shadow-xs" : "text-fg-2 hover:text-fg"
             }`}
           >
-            Agenda du jour
+            {translate("Agenda du jour")}
           </button>
           <button
             type="button"
@@ -85,12 +86,12 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
               panelTab === "deadlines" ? "bg-surface text-fg shadow-xs" : "text-fg-2 hover:text-fg"
             }`}
           >
-            Échéances ({upcomingDeadlines.length})
+            {translate("Échéances (")}{upcomingDeadlines.length})
           </button>
         </div>
 
         <Button variant="brand" size="sm" onClick={onAddEvent} className="h-7 gap-1 text-xs px-2.5 font-semibold">
-          <PlusIcon className="size-3.5 stroke-[2.5]" /> Événement
+          <PlusIcon className="size-3.5 stroke-[2.5]" /> {translate("Événement")}
         </Button>
       </div>
 
@@ -100,18 +101,18 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
         <div className="grid grid-cols-2 gap-2 shrink-0">
           <div className="flex flex-col rounded-xl border border-hairline bg-surface-2/30 p-2.5">
             <span className="flex items-center gap-1 text-[11px] font-medium text-fg-2">
-              <ClockIcon className="size-3 text-brand" /> Heures prévues
+              <ClockIcon className="size-3 text-brand" /> {translate("Heures prévues")}
             </span>
             <span className="mt-1 font-mono text-lg font-bold text-fg">{weeklyHours} h</span>
-            <span className="text-[10px] text-fg-2">cette semaine</span>
+            <span className="text-[10px] text-fg-2">{translate("cette semaine")}</span>
           </div>
 
           <div className="flex flex-col rounded-xl border border-hairline bg-surface-2/30 p-2.5">
             <span className="flex items-center gap-1 text-[11px] font-medium text-fg-2">
-              <CalendarIcon className="size-3 text-emerald-600" /> Rendez-vous
+              <CalendarIcon className="size-3 text-emerald-600" /> {translate("Rendez-vous")}
             </span>
             <span className="mt-1 font-mono text-lg font-bold text-fg">{dayEvents.length}</span>
-            <span className="text-[10px] text-fg-2">aujourd&apos;hui</span>
+            <span className="text-[10px] text-fg-2">{translate("aujourd'hui")}</span>
           </div>
         </div>
 
@@ -119,7 +120,7 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-fg-2">
-                Événements ({dayEvents.length})
+                {translate("Événements (")}{dayEvents.length})
               </h4>
               <span className="text-[11px] text-fg-2 font-mono">{selectedDate}</span>
             </div>
@@ -127,8 +128,8 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
             {dayEvents.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-hairline p-6 text-center text-xs text-fg-2">
                 <CalendarDaysIcon className="size-8 text-fg-3 stroke-1 mb-2" />
-                <p className="font-medium text-fg">Aucun rendez-vous prévu</p>
-                <p className="mt-1 text-[11px]">Cliquez sur « + Événement » pour planifier un créneau.</p>
+                <p className="font-medium text-fg">{translate("Aucun rendez-vous prévu")}</p>
+                <p className="mt-1 text-[11px]">{translate("Cliquez sur « + Événement » pour planifier un créneau.")}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
@@ -150,10 +151,10 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
                       size="sm"
                       onClick={() => {
                         deleteEvent(e.id);
-                        toast.success("Événement supprimé");
+                        toast.success(translate("Événement supprimé"));
                       }}
                       className="size-7 p-0 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                      title="Supprimer"
+                      title={translate("Supprimer")}
                     >
                       <Trash2Icon className="size-3.5" />
                     </Button>
@@ -166,15 +167,15 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
           /* Onglet Échéances interconnectées (Finances, Factures, Abonnements) */
           <div className="flex flex-col gap-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-fg-2">
-              Abonnements & Factures synchronisés
+              {translate("Abonnements & Factures synchronisés")}
             </h4>
 
             {upcomingDeadlines.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-hairline p-6 text-center text-xs text-fg-2">
                 <CreditCardIcon className="size-8 text-fg-3 stroke-1 mb-2" />
-                <p className="font-medium text-fg">Aucune échéance enregistrée</p>
+                <p className="font-medium text-fg">{translate("Aucune échéance enregistrée")}</p>
                 <p className="mt-1 text-[11px]">
-                  Ajoutez un abonnement ou une facture dans le module Finances pour le synchroniser ici.
+                  {translate("Ajoutez un abonnement ou une facture dans le module Finances pour le synchroniser ici.")}
                 </p>
               </div>
             ) : (
@@ -193,7 +194,7 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
                         )}
                         <span className="text-xs font-semibold text-fg truncate">{e.title}</span>
                       </div>
-                      <p className="text-[10px] text-fg-2 font-mono mt-1">Date prévue : {e.date}</p>
+                      <p className="text-[10px] text-fg-2 font-mono mt-1">{translate("Date prévue :")} {e.date}</p>
                       {e.note && <p className="text-[10px] text-fg-2 truncate mt-0.5">{e.note}</p>}
                     </div>
                   </div>
@@ -205,7 +206,7 @@ export function AgendaPanel({ onAddEvent }: AgendaPanelProps) {
             {pendingTasks.length > 0 && (
               <div className="mt-3 flex flex-col gap-2 border-t border-hairline pt-3">
                 <h5 className="text-[11px] font-semibold text-fg-2 uppercase tracking-wider">
-                  Tâches Kanban à planifier
+                  {translate("Tâches Kanban à planifier")}
                 </h5>
                 {pendingTasks.map((t) => (
                   <div key={t.id} className="flex items-center gap-2 rounded-lg bg-surface border border-hairline p-2 text-xs">

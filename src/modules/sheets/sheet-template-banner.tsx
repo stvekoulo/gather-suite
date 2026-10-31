@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { FileSpreadsheetIcon, PlusIcon } from "lucide-react";
 import { SHEET_TEMPLATES, type SheetTemplate } from "./sheet-templates";
@@ -14,10 +15,10 @@ export function SheetTemplateBanner({ onSelectTemplate }: SheetTemplateBannerPro
       <div className="mx-auto flex max-w-6xl flex-col gap-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-semibold text-fg">
-            Démarrer une nouvelle feuille de calcul
+            {translate("Démarrer une nouvelle feuille de calcul")}
           </h3>
           <span className="text-[11px] text-fg-2">
-            Modèles préconfigurés avec formules automatiques
+            {translate("Modèles préconfigurés avec formules automatiques")}
           </span>
         </div>
 
@@ -39,7 +40,7 @@ export function SheetTemplateBanner({ onSelectTemplate }: SheetTemplateBannerPro
                     <FileSpreadsheetIcon className="size-6 group-hover:scale-110 transition-transform" />
                     <div className="flex gap-1 text-[9px] font-mono opacity-60">
                       <span className="rounded bg-surface px-1">fx</span>
-                      <span className="rounded bg-surface px-1">SOMME</span>
+                      <span className="rounded bg-surface px-1">{translate("SOMME")}</span>
                     </div>
                   </div>
                 )}

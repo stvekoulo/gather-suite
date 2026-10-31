@@ -1,133 +1,125 @@
+// Builds and publishes one platform at a time, so a small VPS keeps its memory and disk,
+// and a failure on one platform still publishes the others.
 import { execSync } from "node:child_process";
-import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, statfsSync, statSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
-// Execute une commande shell en affichant la sortie directement dans le terminal
-function run(cmd, env = {}) {
+const pkg = JSON.parse(readFileSync("package.json", "utf-8"));
+const version = pkg.version;
+const tag = `v${version}`;
+const repo = process.env.RELEASE_REPO || "stvekoulo/gather-suite";
+const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+const signing = !!process.env.TAURI_SIGNING_PRIVATE_KEY;
+const TARGET = join("src-tauri", "target");
+const MIN_FREE_GB = 8;
+
+// Frontend is built once; the updater artifacts only exist when the signing key is present.
+const tauriConfig = JSON.stringify({ build: { beforeBuildCommand: "" }, bundle: { createUpdaterArtifacts: signing } });
+const configPath = "/tmp/gather-release.conf.json";
+writeFileSync(configPath, tauriConfig);
+
+function run(cmd) {
   console.log(`\n\x1b[36m▶ ${cmd}\x1b[0m`);
-  execSync(cmd, { stdio: "inherit", env: { ...process.env, ...env } });
+  execSync(cmd, { stdio: "inherit" });
 }
-
-// Recherche recursive des paquets generes en ignorant les dossiers intermediaires Cargo
-function findBundles(dir, extList) {
-  const results = [];
-  if (!existsSync(dir)) return results;
-  const skipDirs = new Set(["deps", "build", "incremental", ".fingerprint", "examples"]);
+const freeGb = () => { const s = statfsSync("."); return (s.bavail * s.bsize) / 1024 ** 3; };
+function report(step) {
+  console.log(`\n--- ${step}: ${freeGb().toFixed(1)} Go libres`);
+  try { execSync("free -m", { stdio: "inherit" }); } catch { /* informative only */ }
+}
+function find(dir, extensions, found = []) {
+  if (!existsSync(dir)) return found;
   for (const item of readdirSync(dir)) {
-    if (skipDirs.has(item)) continue;
     const full = join(dir, item);
-    if (statSync(full).isDirectory()) {
-      results.push(...findBundles(full, extList));
-    } else if (extList.some((ext) => item.toLowerCase().endsWith(ext))) {
-      results.push(full);
-    }
+    if (statSync(full).isDirectory()) find(full, extensions, found);
+    else if (extensions.some((e) => item.toLowerCase().endsWith(e))) found.push(full);
   }
-  return results;
+  return found;
 }
 
-// Pipeline de compilation VPS et publication automatique sur GitHub Releases
-async function main() {
-  const pkg = JSON.parse(readFileSync("package.json", "utf-8"));
-  const version = pkg.version || "0.2.0";
-  const tag = `v${version}`;
-  const ghToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  const repo = "stvekoulo/gather-suite";
+let releaseReady = false;
+function publish(files) {
+  if (!token) { console.log("GITHUB_TOKEN absent : publication ignorée."); return; }
+  const args = files.map((f) => `"${f}"`).join(" ");
+  if (!releaseReady) {
+    try { run(`gh release view ${tag} --repo ${repo}`); }
+    catch { run(`gh release create ${tag} --repo ${repo} --title "Gather ${tag}" --notes "Gather ${version}"${repo.endsWith("gather-suite") ? " --target main" : ""}`); }
+    releaseReady = true;
+  }
+  run(`gh release upload ${tag} ${args} --repo ${repo} --clobber`);
+}
 
-  console.log(`\x1b[32m=== Demarrage du pipeline de Release Gather Suite (${tag}) ===\x1b[0m`);
+const updaterPlatforms = {};
+function recordUpdater(platform, file) {
+  const signature = `${file}.sig`;
+  if (!signing || !existsSync(signature)) return;
+  updaterPlatforms[platform] = { signature: readFileSync(signature, "utf8"), url: `https://github.com/${repo}/releases/download/${tag}/${basename(file).replace(/ /g, ".")}` };
+}
 
-  // 1. Export statique Next.js
-  console.log("\n[1/4] Compilation du frontend Next.js...");
+const PLATFORMS = [
+  {
+    name: "Linux",
+    updater: "linux-x86_64",
+    args: "--bundles deb,appimage",
+    bundleDir: join(TARGET, "release", "bundle"),
+    extensions: [".deb", ".appimage"],
+    updaterFile: (files) => files.find((f) => f.toLowerCase().endsWith(".appimage")),
+    cacheDir: join(TARGET, "release"),
+  },
+  {
+    name: "Windows",
+    updater: "windows-x86_64",
+    args: "--runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis",
+    bundleDir: join(TARGET, "x86_64-pc-windows-msvc", "release", "bundle"),
+    extensions: ["-setup.exe"],
+    updaterFile: (files) => files[0],
+    cacheDir: join(TARGET, "x86_64-pc-windows-msvc"),
+  },
+];
+
+function buildPlatform(platform) {
+  report(`avant ${platform.name}`);
+  rmSync(platform.bundleDir, { recursive: true, force: true });
+  run(`npm run tauri:build -- ${platform.args} --config ${configPath}`);
+  const files = find(platform.bundleDir, platform.extensions);
+  if (!files.length) throw new Error(`Aucun installateur ${platform.name} produit.`);
+  const signatures = files.map((f) => `${f}.sig`).filter(existsSync);
+  publish([...files, ...signatures]);
+  const updaterFile = platform.updaterFile(files);
+  if (updaterFile) recordUpdater(platform.updater, updaterFile);
+  rmSync(platform.bundleDir, { recursive: true, force: true });
+  // The Rust cache speeds up the next run, but never at the cost of the next platform fitting.
+  if (freeGb() < MIN_FREE_GB) { console.log(`Moins de ${MIN_FREE_GB} Go libres : cache ${platform.name} supprimé.`); rmSync(platform.cacheDir, { recursive: true, force: true }); }
+  report(`après ${platform.name}`);
+}
+
+function main() {
+  console.log(`\x1b[32m=== Release Gather ${tag} vers ${repo} ===\x1b[0m`);
+  // macOS requires Apple's SDK and a Mac to sign and notarize: a Linux VPS cannot produce a usable app.
+  console.log("macOS n'est pas compilé ici : il faut un Mac.");
+  report("départ");
+  run("npm test");
   run("npm run build");
 
-  // 2. Compilation des installeurs Linux (.deb, .AppImage)
-  console.log("\n[2/4] Compilation des installeurs Linux (Tauri v2)...");
-  run("npm run tauri:build");
-
-  // 3. Cross-compilation Windows (.exe NSIS) si cargo-xwin est disponible
-  const hasXwin = existsSync("/usr/bin/nsis") || existsSync("/usr/bin/makensis") || process.platform === "win32";
-  if (hasXwin) {
-    try {
-      console.log("\n[3/5] Cross-compilation de l'installeur Windows (.exe via cargo-xwin)...");
-      run("npm run tauri:build -- --runner cargo-xwin --target x86_64-pc-windows-msvc");
-    } catch (err) {
-      console.warn("\x1b[33m! Cross-compilation Windows ignoree ou echouee :\x1b[0m", err.message);
-    }
-  } else {
-    console.log("\n[3/5] makensis introuvable : installeur Windows ignore sur cet hote.");
+  const failed = [];
+  for (const platform of PLATFORMS) {
+    try { buildPlatform(platform); }
+    catch (error) { failed.push(platform.name); console.error(`\x1b[31m✖ ${platform.name} : ${error.message}\x1b[0m`); }
   }
 
-  // 4. Cross-compilation macOS (.dmg / .app) via cargo-zigbuild et genisoimage
-  const hasZig = existsSync("/usr/local/bin/zig") || existsSync("/usr/bin/zig");
-  if (hasZig) {
-    try {
-      console.log("\n[4/5] Cross-compilation de l'application macOS (.app & .dmg)...");
-      run("npm run tauri:build -- --runner cargo-zigbuild --target aarch64-apple-darwin --bundles app");
-      const appDir = join("src-tauri", "target", "aarch64-apple-darwin", "release", "bundle", "macos");
-      if (existsSync(appDir)) {
-        const dmgPath = join(appDir, `GatherSuite-macOS-aarch64-${version}.dmg`);
-        run(`genisoimage -V "Gather Suite" -D -R -apple -no-pad -o "${dmgPath}" "${appDir}"`);
-        console.log(`\x1b[32m✔ DMG macOS genere : ${dmgPath}\x1b[0m`);
-      }
-    } catch (err) {
-      console.warn("\x1b[33m! Cross-compilation macOS ignoree ou echouee :\x1b[0m", err.message);
-    }
+  if (Object.keys(updaterPlatforms).length) {
+    const manifest = join(TARGET, "latest.json");
+    writeFileSync(manifest, JSON.stringify({ version, notes: `Gather ${version}`, pub_date: new Date().toISOString(), platforms: updaterPlatforms }, null, 2));
+    publish([manifest]);
+  } else if (!signing) {
+    console.log("TAURI_SIGNING_PRIVATE_KEY absente : pas de mise à jour automatique pour cette version.");
   }
 
-  // 5. Collecte et normalisation des artefacts generes
-  const targetDir = join("src-tauri", "target");
-  const targetExtensions = [".deb", ".appimage", ".exe", ".msi", ".dmg"];
-  const rawBundles = findBundles(targetDir, targetExtensions);
-  const normalizedMap = new Map();
-
-  for (const bundle of rawBundles) {
-    let finalPath = bundle;
-    const name = basename(bundle);
-    if (name === "app.exe") {
-      finalPath = join(targetDir, `Gather_${version}_x64.exe`);
-      copyFileSync(bundle, finalPath);
-    }
-    normalizedMap.set(basename(finalPath), finalPath);
-  }
-  const bundles = Array.from(normalizedMap.values());
-
-  console.log(`\n[5/5] ${bundles.length} artefact(s) d'installation trouve(s) :`);
-  bundles.forEach((b) => console.log(`  - ${b}`));
-
-  if (bundles.length === 0) {
-    throw new Error("Aucun artefact d'installation genere dans src-tauri/target.");
-  }
-
-  // 6. Publication de la Release et du tag sur GitHub
-  if (!ghToken) {
-    console.log("\n\x1b[33mVariable GITHUB_TOKEN absente. Televersement GitHub ignore.\x1b[0m");
-    return;
-  }
-
-  console.log(`\n\x1b[32mPublication de la Release ${tag} sur GitHub (${repo})...\x1b[0m`);
-  const filesArgs = bundles.map((p) => `"${p}"`).join(" ");
-
-  try {
-    run(`gh release create ${tag} ${filesArgs} --repo ${repo} --title "Gather Suite ${tag}" --notes "Version autonome officielle de Gather Suite." --target main`);
-  } catch {
-    console.log("Release existante detectee. Televersement et remplacement des fichiers...");
-    run(`gh release upload ${tag} ${filesArgs} --repo ${repo} --clobber`);
-  }
-  console.log(`\n\x1b[32m✔ Release ${tag} et installeurs publies avec succes sur GitHub !\x1b[0m`);
-
-  // 7. Nettoyage automatique des binaires pour liberer l'espace disque du VPS
-  console.log("\nNettoyage des binaires uploades pour preserver l'espace disque VPS...");
-  for (const bundle of bundles) {
-    try {
-      rmSync(bundle, { force: true });
-      console.log(`  - Supprime : ${bundle}`);
-    } catch {}
-  }
   rmSync("out", { recursive: true, force: true });
   rmSync(".next", { recursive: true, force: true });
-  console.log("\x1b[32m✔ Espace libere. Caches de compilation Rust et Docker preserves.\x1b[0m");
+  if (failed.length) throw new Error(`Échec : ${failed.join(", ")}.`);
+  console.log(`\n\x1b[32m✔ Release ${tag} publiée.\x1b[0m`);
 }
 
-main().catch((error) => {
-  console.error("\n\x1b[31m✖ Erreur lors du pipeline de release :\x1b[0m", error.message);
-  process.exit(1);
-});
+try { main(); }
+catch (error) { console.error(`\n\x1b[31m✖ ${error.message}\x1b[0m`); process.exit(1); }

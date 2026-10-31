@@ -1,14 +1,14 @@
 import { formatLong } from "@/lib/dates";
 import type { Invoice, InvoiceItem, InvoiceStatus, Profile } from "@/lib/types";
 
-export const CURRENCIES = ["USD", "EUR", "GBP", "INR"] as const;
+export const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD", "XOF", "XAF", "INR"] as const;
 
 const formatters = new Map<string, Intl.NumberFormat>();
 
 export function formatMoney(amount: number, currency: string): string {
   let f = formatters.get(currency);
   if (!f) {
-    f = new Intl.NumberFormat("en-US", { style: "currency", currency });
+    f = new Intl.NumberFormat("fr-FR", { style: "currency", currency });
     formatters.set(currency, f);
   }
   return f.format(amount);
@@ -17,8 +17,12 @@ export function formatMoney(amount: number, currency: string): string {
 export const lineTotal = (item: Pick<InvoiceItem, "quantity" | "rate">) =>
   Math.round((Number(item.quantity) || 0) * (Number(item.rate) || 0) * 100) / 100;
 
-export const invoiceTotal = (inv: Pick<Invoice, "items">) =>
+export const invoiceSubtotal = (inv: Pick<Invoice, "items">) =>
   Math.round(inv.items.reduce((n, i) => n + lineTotal(i), 0) * 100) / 100;
+export const invoiceTax = (inv: Pick<Invoice, "items" | "taxRate">) =>
+  Math.round(invoiceSubtotal(inv) * (inv.taxRate ?? 0)) / 100;
+export const invoiceTotal = (inv: Pick<Invoice, "items" | "taxRate">) =>
+  Math.round((invoiceSubtotal(inv) + invoiceTax(inv)) * 100) / 100;
 
 /** A sent invoice past its due date is shown as overdue even before the store says so. */
 export function effectiveStatus(inv: Invoice, today: string): InvoiceStatus {
@@ -40,12 +44,17 @@ export function nextInvoiceNumber(invoices: Invoice[], today: string): string {
 export function formatTotals(list: Invoice[]): string {
   const by = new Map<string, number>();
   for (const inv of list) by.set(inv.currency, (by.get(inv.currency) ?? 0) + invoiceTotal(inv));
-  if (!by.size) return formatMoney(0, "USD");
+  if (!by.size) return formatMoney(0, "EUR");
   return [...by.entries()].map(([c, n]) => formatMoney(n, c)).join(" · ");
 }
 
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+
+const identity = (from: Profile) => [from.company, from.name, from.email, from.address, from.siret && `SIRET : ${from.siret}`, from.vatNumber && `TVA : ${from.vatNumber}`].filter((v): v is string => !!v);
+const NO_VAT_MENTION = "TVA non applicable, art. 293 B du CGI";
+/** French sole traders (SIRET, no VAT number, no rate) must print the franchise mention. */
+const legalLines = (inv: Invoice, from: Profile) => [from.legalMentions, from.siret && !from.vatNumber && !inv.taxRate ? NO_VAT_MENTION : ""].filter((v): v is string => !!v);
 
 /** Standalone, print-ready HTML document for an invoice (used for Print and Download). */
 export function invoiceHtml(inv: Invoice, from: Profile): string {
@@ -61,7 +70,7 @@ export function invoiceHtml(inv: Invoice, from: Profile): string {
     )
     .join("");
   return `<!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="utf-8" />
 <title>${esc(inv.number)} · ${esc(inv.client)}</title>
@@ -90,38 +99,47 @@ export function invoiceHtml(inv: Invoice, from: Profile): string {
 <div class="doc">
   <header>
     <div>
-      <h1>Invoice</h1>
+      <h1>Facture</h1>
       <div class="muted">${esc(inv.number)}</div>
     </div>
     <div style="text-align:right">
-      <div><strong>${esc(from.name)}</strong></div>
-      <div class="muted">${esc(from.email)}</div>
-      <div class="muted">${esc(from.address)}</div>
+      ${identity(from).map((line, i) => i ? `<div class="muted">${esc(line)}</div>` : `<div><strong>${esc(line)}</strong></div>`).join("")}
     </div>
   </header>
   <section class="grid">
-    <div><div class="label">Bill to</div><strong>${esc(inv.client)}</strong></div>
-    <div><div class="label">Issued</div>${formatLong(inv.issueDate)}</div>
-    <div><div class="label">Due</div>${formatLong(inv.dueDate)}</div>
+    <div><div class="label">Facturé à</div><strong>${esc(inv.client)}</strong></div>
+    <div><div class="label">Émise le</div>${formatLong(inv.issueDate)}</div>
+    <div><div class="label">Échéance</div>${formatLong(inv.dueDate)}</div>
   </section>
   <table>
-    <thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+    <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Prix unitaire</th><th class="num">Montant</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
   <div class="totals">
-    <div><span class="muted">Subtotal</span><span class="num">${formatMoney(total, inv.currency)}</span></div>
-    <div class="grand"><span>Total due</span><span class="num">${formatMoney(total, inv.currency)}</span></div>
+    <div><span class="muted">Total HT</span><span class="num">${formatMoney(invoiceSubtotal(inv), inv.currency)}</span></div>
+    ${inv.taxRate ? `<div><span class="muted">TVA ${inv.taxRate} %</span><span class="num">${formatMoney(invoiceTax(inv), inv.currency)}</span></div>` : ""}
+    <div class="grand"><span>Total à payer</span><span class="num">${formatMoney(total, inv.currency)}</span></div>
   </div>
   ${inv.notes.trim() ? `<div class="notes"><div class="label">Notes</div>${esc(inv.notes)}</div>` : ""}
+  ${legalLines(inv, from).map((line) => `<div class="muted" style="margin-top:12px;font-size:12px">${esc(line)}</div>`).join("")}
 </div>
 </body>
 </html>`;
 }
 
+export async function invoicePdfBytes(inv: Invoice, from: Profile) {
+  const { createTextPdf } = await import("@/modules/pdf/text-pdf");
+  const lines = [...identity(from), "", "Client : " + inv.client, "Émission : " + inv.issueDate, "Échéance : " + inv.dueDate, "", ...inv.items.map((item) => item.description + " · " + item.quantity + " × " + formatMoney(item.rate, inv.currency) + " = " + formatMoney(lineTotal(item), inv.currency)), "", "Total HT : " + formatMoney(invoiceSubtotal(inv), inv.currency), ...(inv.taxRate ? [`TVA ${inv.taxRate} % : ` + formatMoney(invoiceTax(inv), inv.currency)] : []), "Total à payer : " + formatMoney(invoiceTotal(inv), inv.currency), "", inv.notes, ...legalLines(inv, from)];
+  return createTextPdf(inv.number, lines.join("\n"));
+}
 export async function downloadInvoice(inv: Invoice, from: Profile) {
-  const [{ createTextPdf }, { saveFile, safeFilename }] = await Promise.all([import("@/modules/pdf/text-pdf"), import("@/lib/files")]);
-  const lines = [from.name, from.email, "", "Client : " + inv.client, "Émission : " + inv.issueDate, "Échéance : " + inv.dueDate, "", ...inv.items.map((item) => item.description + " · " + item.quantity + " × " + formatMoney(item.rate, inv.currency) + " = " + formatMoney(lineTotal(item), inv.currency)), "", "Total : " + formatMoney(invoiceTotal(inv), inv.currency), "", inv.notes];
-  return saveFile(safeFilename(inv.number) + ".pdf", await createTextPdf(inv.number, lines.join("\n")), "application/pdf");
+  const { saveFile, safeFilename } = await import("@/lib/files");
+  return saveFile(safeFilename(inv.number) + ".pdf", await invoicePdfBytes(inv, from), "application/pdf");
+}
+/** Files the invoice PDF in the Documents library. */
+export async function fileInvoice(inv: Invoice, from: Profile) {
+  const { addToLibrary } = await import("@/lib/library");
+  await addToLibrary(`${inv.number}.pdf`, await invoicePdfBytes(inv, from), "application/pdf", "Factures");
 }
 
 /** Prints just the invoice document through a hidden iframe, so the app chrome stays out of the printout. */

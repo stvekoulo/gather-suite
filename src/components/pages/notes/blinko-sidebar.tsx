@@ -1,4 +1,5 @@
 "use client";
+import { Dropdown } from "@/components/beui/dropdown";
 
 import {
   ArchiveIcon,
@@ -91,7 +92,7 @@ export function BlinkoSidebar() {
       </div>
 
       {/* Tags Section */}
-      <select aria-label={translate("Filtrer les tags")} value={selectedTag ?? ""} onChange={(e) => setSelectedTag(e.target.value || null)} className="m-2 rounded border border-hairline bg-surface p-2 text-xs md:hidden"><option value="">{translate("Tous les tags")}</option>{uniqueTags.map((tag) => <option key={tag} value={tag}>#{tag}</option>)}</select>
+      <Dropdown aria-label={translate("Filtrer les tags")} className="m-2 md:hidden" value={selectedTag ?? ""} onChange={(tag) => setSelectedTag(tag || null)} options={[{ value: "", label: translate("Tous les tags") }, ...uniqueTags.map((tag) => ({ value: tag, label: `#${tag}` }))]} />
       <div className="flex-1 overflow-y-auto p-2 border-t border-hairline max-md:hidden">
         <span className="px-2 text-[11px] font-mono font-semibold uppercase tracking-wider text-fg-2/60">
           Tags

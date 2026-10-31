@@ -9,11 +9,15 @@ import { useToday } from "@/hooks/use-today";
 import { useCalendarStore } from "@/stores/calendar-store";
 import { openOverlay, useOverlayStore } from "@/stores/overlay-store";
 import { translate, useTranslate } from "@/lib/i18n/ui-text";
+import { flushStorage } from "@/lib/storage/workspace-storage";
 
+const MOD = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform) ? "⌘" : "Ctrl";
 export const SHORTCUTS: { keys: string[]; label: string }[] = [
-  { keys: ["⌘", "K"], label: "Search" },
-  { keys: ["⌘", "Z"], label: "Undo" },
-  { keys: ["⇧", "⌘", "Z"], label: "Redo" },
+  { keys: [MOD, "K"], label: "Search" },
+  { keys: [MOD, "Shift", "N"], label: "Capture rapide" },
+  { keys: [MOD, "S"], label: "Enregistrer" },
+  { keys: [MOD, "Z"], label: "Undo" },
+  { keys: [MOD, "Shift", "Z"], label: "Redo" },
   { keys: ["⌫"], label: "Delete selected event" },
   { keys: ["N"], label: "New event" },
   { keys: ["T"], label: "Go to today" },
@@ -39,6 +43,14 @@ export function KeyboardShortcuts() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        // An open editor may take over; otherwise pending changes are written right away.
+        if (window.dispatchEvent(new Event("gather-save", { cancelable: true }))) {
+          flushStorage().then(() => toast.success(translate("Enregistré"))).catch((error: unknown) => toast.error(String(error)));
+        }
+        return;
+      }
       if (isTyping(e.target)) return; // text fields keep their native undo/delete
 
       // ⌘Z / Ctrl+Z undo · ⇧⌘Z / Ctrl+Shift+Z / Ctrl+Y redo

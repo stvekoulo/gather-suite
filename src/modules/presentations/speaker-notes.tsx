@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, StickyNoteIcon } from "lucide-react";
@@ -23,7 +24,7 @@ export function SpeakerNotes({
       >
         <span className="flex items-center gap-2">
           <StickyNoteIcon className="size-3.5 text-orange-600" />
-          Notes du présentateur {notes?.trim() ? "•" : ""}
+          {translate("Notes du présentateur")} {notes?.trim() ? "•" : ""}
         </span>
         {open ? <ChevronDownIcon className="size-3.5" /> : <ChevronUpIcon className="size-3.5" />}
       </button>
@@ -33,7 +34,7 @@ export function SpeakerNotes({
           <Textarea
             value={notes ?? ""}
             onChange={(e) => onChangeNotes(e.target.value)}
-            placeholder="Ajoutez vos notes et repères oraux pour cette diapositive..."
+            placeholder={translate("Ajoutez vos notes et repères oraux pour cette diapositive...")}
             rows={3}
             className="text-xs resize-none bg-surface"
           />

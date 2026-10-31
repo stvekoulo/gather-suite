@@ -22,9 +22,9 @@ export function DownloadButton() {
   }, []);
 
   const buttonDetails: Record<Platform, { label: string; ext: string }> = {
-    windows: { label: "Download for Windows", ext: ".exe (64-bit)" },
-    mac: { label: "Download for macOS", ext: ".dmg (Universal)" },
-    linux: { label: "Download for Linux", ext: ".AppImage / .deb" },
+    windows: { label: "Gather for Windows", ext: "Coming soon" },
+    mac: { label: "Gather for macOS", ext: "On the way" },
+    linux: { label: "Gather for Linux", ext: "Coming soon" },
   };
 
   const current = buttonDetails[platform];
@@ -35,7 +35,7 @@ export function DownloadButton() {
         href="#downloads"
         className="apple-button inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-3.5 rounded-full text-xs sm:text-sm font-medium text-white bg-[#111113] hover:bg-black shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
       >
-        <span>{mounted ? current.label : "Download Gather"}</span>
+        <span>{mounted ? current.label : "Get Gather"}</span>
         <span className="text-[#a1a1aa] text-[11px] sm:text-xs font-normal">
           {mounted ? current.ext : ""}
         </span>

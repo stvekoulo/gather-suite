@@ -141,8 +141,8 @@ export function DynamicIsland({
         style={{ borderRadius: RADIUS }}
         className={cn(
           "relative inline-flex items-start justify-center overflow-hidden cursor-pointer select-none",
-          "bg-zinc-900 text-white dark:bg-zinc-900 dark:text-zinc-100",
-          "border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl",
+          "bg-surface text-fg",
+          "border border-control shadow-[0_8px_30px_rgba(0,0,0,0.14)] backdrop-blur-xl dark:shadow-[0_8px_30px_rgba(0,0,0,0.45)]",
           className
         )}
       >

@@ -1,7 +1,7 @@
 name: Gather desktop validation
+# Manual: billing refuses hosted runners. Releases are validated by the Openship workflow.
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

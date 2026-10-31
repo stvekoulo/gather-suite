@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UploadIcon } from "lucide-react";
@@ -17,8 +18,12 @@ import { DocReader } from "./doc-reader";
 import { RenameDialog } from "./rename-dialog";
 import { CategoryDialog } from "./category-dialog";
 import { WordStudio } from "@/modules/documents/word-studio";
+import { useHandoff } from "@/lib/handoff";
 import { extractDocumentHtml } from "@/modules/documents/doc-extract";
 import type { DocTemplate } from "@/modules/documents/templates-data";
+
+// ponytail: files live in memory while the app runs; raise this once they are read on demand.
+const MAX_IMPORT_BYTES = 200 * 1024 * 1024;
 
 // Page principale Documents avec interface Google Docs & Word Studio
 export function DocumentsPage() {
@@ -34,7 +39,9 @@ export function DocumentsPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [view, setView] = useState<"list" | "grid">("grid");
   const [renaming, setRenaming] = useState<DocumentFile | null>(null);
-  const [readingDoc, setReadingDoc] = useState<DocumentFile | null>(null);
+  const [readingDoc, setReadingDoc] = useState<DocumentFile | null>(() => {
+    try { return useAppStore.getState().documents.find((d) => d.id === localStorage.getItem("gather:reading-doc-id")) ?? null; } catch { return null; }
+  });
   const [editingDoc, setEditingDoc] = useState<DocumentFile | undefined>();
   const [initialContent, setInitialContent] = useState<string | undefined>();
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -65,12 +72,8 @@ export function DocumentsPage() {
       const activeId = localStorage.getItem("gather:active-doc-id");
       if (activeId) {
         const doc = useAppStore.getState().documents.find((d) => d.id === activeId);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- reopens the document left open at the last launch
         if (doc) { void handleEditDoc(doc); return; }
-      }
-      const readingId = localStorage.getItem("gather:reading-doc-id");
-      if (readingId) {
-        const doc = useAppStore.getState().documents.find((d) => d.id === readingId);
-        if (doc) setReadingDoc(doc);
       }
     } catch {}
   }, []);
@@ -83,6 +86,13 @@ export function DocumentsPage() {
     window.addEventListener("open-workspace-document", open);
     return () => window.removeEventListener("open-workspace-document", open);
   }, []);
+
+  useHandoff("document", (id) => {
+    const doc = useAppStore.getState().documents.find((d) => d.id === id);
+    if (!doc) return;
+    if (doc.editorContent || /\.(docx|txt|md)$/i.test(doc.name)) void handleEditDoc(doc);
+    else setReadingDoc(doc);
+  });
 
   const [dragging, setDragging] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -114,6 +124,7 @@ export function DocumentsPage() {
     try {
       for (const file of list) {
         const category = guessCategory(file.name, fallback);
+        if (file.size > MAX_IMPORT_BYTES) { toast.error(`« ${file.name} » dépasse la limite de 200 Mo.`); continue; }
         try {
           const dataUrl = await readAsDataUrl(file);
           addDocument({ name: file.name, category, size: file.size, dataUrl, starred: false });
@@ -239,8 +250,8 @@ export function DocumentsPage() {
       {dragging && (
         <div className="pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-brand bg-surface/90 duration-150 animate-in fade-in-0">
           <UploadIcon className="size-6 text-brand" />
-          <p className="text-sm font-semibold text-fg">Déposez vos fichiers pour les importer</p>
-          <p className="text-xs text-fg-2">Les fichiers restent entièrement sur cet ordinateur</p>
+          <p className="text-sm font-semibold text-fg">{translate("Déposez vos fichiers pour les importer")}</p>
+          <p className="text-xs text-fg-2">{translate("Les fichiers restent entièrement sur cet ordinateur")}</p>
         </div>
       )}
 

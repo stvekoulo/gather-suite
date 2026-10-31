@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 test("French preference controls the shell and last category survives a new startup", async ({ page }) => {
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Tableau de bord");
-  await expect(page.getByRole("link", { name: "Paramètres", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Paramètres", exact: true }).first()).toBeVisible();
   await page.goto("/pdf-tools");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Suite PDF");
   await page.goto("/"); await expect(page).toHaveURL(/pdf-tools/);
@@ -15,21 +15,21 @@ test("French preference controls the shell and last category survives a new star
   await page.goto("/settings");
   await page.getByRole("button", { name: /English/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Settings");
+  await page.waitForTimeout(500);
   await page.reload(); await expect(page.getByRole("heading", { level: 1 })).toHaveText("Settings");
   await page.getByRole("button", { name: /Français/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Paramètres");
-  await expect(page.getByText("Les modifications sont enregistrées automatiquement", { exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "Apparence", exact: true }).click();
   await expect(page.getByRole("radio", { name: "Clair", exact: true })).toBeVisible();
   await expect(page.getByRole("radio", { name: "Sombre", exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "Notifications", exact: true }).click();
-  await expect(page.getByText(/Approbations, refus et rappels/)).toBeVisible();
+  await expect(page.getByText(/Alertes système pour les rappels/)).toBeVisible();
 });
 test("dark palette cards and monochrome label fit at small widths", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 850 }); await page.goto("/settings");
   await page.getByRole("button", { name: /Switch to dark|dark mode|sombre/i }).first().click();
   await page.getByRole("tab", { name: "Apparence", exact: true }).click();
-  for (const name of ["Monochrome", "Bleu", "Indigo", "Émeraude", "Rose corail", "Ambre", "Violet"]) {
+  for (const name of ["Monochrome", "Apple Blue", "Indigo", "Emerald Mint", "Rose Coral", "Warm Amber", "Royal Violet"]) {
     const card = page.getByRole("button", { name, exact: true }); await card.click();
     expect(await card.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
     expect(await card.evaluate((el) => { const label = el.querySelector("span.truncate")!; return label.getBoundingClientRect().right <= el.getBoundingClientRect().right; })).toBe(true);

@@ -7,6 +7,7 @@ import { SPRING_PRESS } from "@/lib/ease";
 import { cn } from "@/lib/utils";
 import { parse, iso, monthOf, shiftMonth, ordered, DAY } from "./date-picker/date-utils";
 import type { DateRange, DateRangePickerProps } from "./date-picker/types";
+import { toKey } from "@/lib/dates";
 export type { DateRange, DateRangePreset, DateRangePickerProps } from "./date-picker/types";
 
 // Composant Sélecteur de Plage de Dates beUI animé avec calendrier mensuel
@@ -19,7 +20,7 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const [internal, setInternal] = useState<DateRange | null>(defaultValue);
   const current = value !== undefined ? value : internal;
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = toKey(new Date());
   const [month, setMonth] = useState(() => monthOf(current?.from || todayIso));
   const [open, setOpen] = useState(false);
 

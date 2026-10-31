@@ -183,7 +183,7 @@ export function BlinkoCard({ note, onEdit, selectable, selected, onToggleSelect 
               <button
                 type="button"
                 onClick={() => onEdit(note)}
-                title="Modifier"
+                title={translate("Modifier")}
                 className="flex size-7 items-center justify-center rounded-lg text-fg-2 hover:bg-hover hover:text-fg transition-colors"
               >
                 <Edit3Icon className="size-3.5" />
@@ -193,7 +193,7 @@ export function BlinkoCard({ note, onEdit, selectable, selected, onToggleSelect 
             <button
               type="button"
               onClick={() => restoreFromTrash(note.id)}
-              title="Restaurer"
+              title={translate("Restaurer")}
               className="flex size-7 items-center justify-center rounded-lg text-emerald-600 hover:bg-emerald-500/10 transition-colors"
             >
               <RotateCcwIcon className="size-3.5" />
@@ -205,7 +205,7 @@ export function BlinkoCard({ note, onEdit, selectable, selected, onToggleSelect 
           <button
             type="button"
             onClick={handleCopy}
-            title="Copier le texte"
+            title={translate("Copier le texte")}
             className="flex size-7 items-center justify-center rounded-lg text-fg-2 hover:bg-hover hover:text-fg transition-colors"
           >
             {copied ? <CheckIcon className="size-3.5 text-emerald-500" /> : <CopyIcon className="size-3.5" />}
@@ -214,7 +214,7 @@ export function BlinkoCard({ note, onEdit, selectable, selected, onToggleSelect 
             <button
               type="button"
               onClick={() => moveToTrash(note.id)}
-              title="Mettre à la corbeille"
+              title={translate("Mettre à la corbeille")}
               className="flex size-7 items-center justify-center rounded-lg text-fg-2 hover:bg-destructive/10 hover:text-destructive transition-colors"
             >
               <Trash2Icon className="size-3.5" />
@@ -223,7 +223,7 @@ export function BlinkoCard({ note, onEdit, selectable, selected, onToggleSelect 
             <button
               type="button"
               onClick={() => { if (window.confirm("Supprimer définitivement cette note ?")) deletePermanently(note.id); }}
-              title="Supprimer définitivement"
+              title={translate("Supprimer définitivement")}
               className="flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
             >
               <Trash2Icon className="size-3.5" />

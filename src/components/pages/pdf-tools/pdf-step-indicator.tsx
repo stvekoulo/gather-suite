@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -49,7 +50,7 @@ export function PdfStepIndicator({ steps, currentStep, completedSteps }: PdfStep
                 {step.title}
               </span>
               <span className="truncate text-[11px] text-fg-2">
-                {isCompleted ? "Terminé" : isCurrent ? "En cours" : "En attente"}
+                {isCompleted ? translate("Terminé") : isCurrent ? translate("En cours") : translate("En attente")}
               </span>
             </div>
 

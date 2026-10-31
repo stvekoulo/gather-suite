@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useState } from "react";
 import {
@@ -94,7 +95,7 @@ export function PresenterViewDialog({
       {/* Barre supérieure : Titre, horloge, chronomètre et boutons */}
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-800 px-4">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-orange-500 uppercase tracking-wider">Mode Présentateur</span>
+          <span className="text-xs font-semibold text-orange-500 uppercase tracking-wider">{translate("Mode Présentateur")}</span>
           <span className="text-zinc-600">|</span>
           <span className="text-xs font-medium text-zinc-300 truncate max-w-sm">{deck.title}</span>
         </div>
@@ -117,14 +118,14 @@ export function PresenterViewDialog({
             <button
               onClick={() => setTimerSeconds(0)}
               className="text-zinc-400 hover:text-white"
-              title="Réinitialiser le chronomètre"
+              title={translate("Réinitialiser le chronomètre")}
             >
               <RotateCcwIcon className="size-3" />
             </button>
           </div>
 
           <Button variant="ghost" size="sm" onClick={onClose} className="h-7 text-xs text-zinc-400 hover:text-white">
-            <XIcon className="size-4 mr-1" /> Quitter (Échap)
+            <XIcon className="size-4 mr-1" /> {translate("Quitter (Échap)")}
           </Button>
         </div>
       </header>
@@ -135,11 +136,11 @@ export function PresenterViewDialog({
         <div className="flex flex-[1.4] flex-col justify-center items-center rounded-xl bg-zinc-900/60 p-4 border border-zinc-800/80 relative overflow-hidden">
           {blackout === "black" ? (
             <div className="size-full bg-black flex items-center justify-center text-zinc-600 text-sm">
-              Écran masqué en noir (Appuyez sur B)
+              {translate("Écran masqué en noir (Appuyez sur B)")}
             </div>
           ) : blackout === "white" ? (
             <div className="size-full bg-white flex items-center justify-center text-zinc-400 text-sm">
-              Écran masqué en blanc (Appuyez sur W)
+              {translate("Écran masqué en blanc (Appuyez sur W)")}
             </div>
           ) : (
             <div className="relative aspect-video w-full max-h-[82vh] flex items-center justify-center">
@@ -153,7 +154,7 @@ export function PresenterViewDialog({
           {/* Diapositive suivante */}
           <div className="flex flex-col gap-1.5 rounded-xl bg-zinc-900/60 p-3 border border-zinc-800">
             <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-400">
-              <span>DIAPOSITIVE SUIVANTE</span>
+              <span>{translate("DIAPOSITIVE SUIVANTE")}</span>
               <span>{index + 2 <= slides.length ? `${index + 2} / ${slides.length}` : "Fin"}</span>
             </div>
             <div className="aspect-video w-full rounded-lg bg-zinc-950 flex items-center justify-center border border-zinc-800/60 overflow-hidden">
@@ -162,7 +163,7 @@ export function PresenterViewDialog({
                   <SlideCanvas slide={nextSlide} theme={deck.theme} isPresenter />
                 </div>
               ) : (
-                <span className="text-xs text-zinc-600">Fin du diaporama</span>
+                <span className="text-xs text-zinc-600">{translate("Fin du diaporama")}</span>
               )}
             </div>
           </div>
@@ -170,26 +171,26 @@ export function PresenterViewDialog({
           {/* Notes de l'orateur */}
           <div className="flex flex-1 flex-col rounded-xl bg-zinc-900/60 p-4 border border-zinc-800 min-h-0">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-2 text-xs font-semibold text-zinc-300">
-              <span>Notes de l&apos;orateur</span>
+              <span>{translate("Notes de l'orateur")}</span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setNotesFontSize((s) => Math.max(11, s - 1))}
                   className="rounded p-1 hover:bg-zinc-800 text-zinc-400 hover:text-white"
-                  title="Diminuer la taille"
+                  title={translate("Diminuer la taille")}
                 >
                   <ZoomOutIcon className="size-3" />
                 </button>
                 <button
                   onClick={() => setNotesFontSize((s) => Math.min(24, s + 1))}
                   className="rounded p-1 hover:bg-zinc-800 text-zinc-400 hover:text-white"
-                  title="Agrandir la taille"
+                  title={translate("Agrandir la taille")}
                 >
                   <ZoomInIcon className="size-3" />
                 </button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto pt-3 text-zinc-200 leading-relaxed scroll-thin whitespace-pre-wrap" style={{ fontSize: `${notesFontSize}px` }}>
-              {currentSlide.notes || <span className="text-zinc-600 italic">Aucune note pour cette diapositive.</span>}
+              {currentSlide.notes || <span className="text-zinc-600 italic">{translate("Aucune note pour cette diapositive.")}</span>}
             </div>
           </div>
         </div>
@@ -205,7 +206,7 @@ export function PresenterViewDialog({
             disabled={index === 0}
             className="h-8 gap-1 bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800"
           >
-            <ArrowLeftIcon className="size-3.5" /> Précédente
+            <ArrowLeftIcon className="size-3.5" /> {translate("Précédente")}
           </Button>
 
           <Button
@@ -215,20 +216,20 @@ export function PresenterViewDialog({
             disabled={index >= slides.length - 1}
             className="h-8 gap-1 bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800"
           >
-            Suivante <ArrowRightIcon className="size-3.5" />
+            {translate("Suivante")} <ArrowRightIcon className="size-3.5" />
           </Button>
 
           <span className="font-mono ml-2">
-            Diapositive {index + 1} sur {slides.length}
+            {translate("Diapositive")} {index + 1} {translate("sur")} {slides.length}
           </span>
         </div>
 
         <div className="flex items-center gap-3 text-[11px] text-zinc-500">
-          <span>Flèches / Espace : Naviguer</span>
+          <span>{translate("Flèches / Espace : Naviguer")}</span>
           <span>·</span>
-          <span>B : Écran noir</span>
+          <span>{translate("B : Écran noir")}</span>
           <span>·</span>
-          <span>W : Écran blanc</span>
+          <span>{translate("W : Écran blanc")}</span>
         </div>
       </footer>
     </div>

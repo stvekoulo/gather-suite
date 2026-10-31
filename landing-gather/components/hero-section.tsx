@@ -10,7 +10,7 @@ export function HeroSection() {
       {/* Surtitre en serif italique */}
       <div className="mb-4 sm:mb-6">
         <span className="font-serif italic text-xs sm:text-sm md:text-base text-[#71717a] tracking-wide">
-          A quieter way to think, plan, and write
+          One planner for your work and your life
         </span>
       </div>
 
@@ -38,7 +38,7 @@ export function HeroSection() {
 
       {/* Description lisible et bien proportionnee */}
       <p className="max-w-lg mx-auto text-xs sm:text-sm md:text-base text-[#52525b] font-normal leading-relaxed mt-5 sm:mt-8 mb-8 sm:mb-10 px-2">
-        A fast, distraction-free desktop app that puts your notes, calendar, and documents into one quiet space. No subscriptions, no cloud lock-in, and zero lag.
+        Gather keeps your calendar, tasks, notes, documents, invoices and money in one desktop app, and connects them. Schedule a task and it lands on your calendar. Track your hours and turn them into an invoice.
       </p>
 
       {/* Bouton de telechargement monochrome noir et blanc */}
@@ -46,7 +46,7 @@ export function HeroSection() {
 
       {/* Reassurances directes */}
       <p className="text-[11px] sm:text-xs text-[#a1a1aa] mt-5">
-        100% Offline · Native Rust & Tauri Speed · SQLite & Markdown locaux · Gratuit
+        Works offline · Free · Optional account to sync between computers
       </p>
     </section>
   );

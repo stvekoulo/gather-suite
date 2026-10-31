@@ -1,4 +1,6 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
+import { useHandoff } from "@/lib/handoff";
 
 import { useEffect, useState } from "react";
 import { FileTextIcon, WrenchIcon } from "lucide-react";
@@ -18,18 +20,12 @@ export function PdfToolsPage() {
       return "tools";
     }
   });
-  const [activeTool, setActiveTool] = useState<PdfToolItem | null>(null);
+  const [activeTool, setActiveTool] = useState<PdfToolItem | null>(() => {
+    try { return PDF_TOOLS.find((t) => t.id === localStorage.getItem("gather:pdf-active-tool")) ?? null; } catch { return null; }
+  });
   const [preloadedFiles, setPreloadedFiles] = useState<File[]>([]);
-
-  useEffect(() => {
-    try {
-      const savedToolId = localStorage.getItem("gather:pdf-active-tool");
-      if (savedToolId) {
-        const found = PDF_TOOLS.find((t) => t.id === savedToolId);
-        if (found) setActiveTool(found);
-      }
-    } catch {}
-  }, []);
+  const [transferred, setTransferred] = useState<File[]>([]);
+  useHandoff("pdf", (files) => { setTab("tools"); setActiveTool(null); setTransferred(files); });
 
   const handleSelectTab = (nextTab: "tools" | "viewer") => {
     setTab(nextTab);
@@ -42,7 +38,8 @@ export function PdfToolsPage() {
 
   const handleSelectTool = (tool: PdfToolItem, files?: File[]) => {
     setActiveTool(tool);
-    setPreloadedFiles(files ?? []);
+    setPreloadedFiles(files ?? transferred);
+    setTransferred([]);
     try { localStorage.setItem("gather:pdf-active-tool", tool.id); } catch {}
   };
 
@@ -55,8 +52,8 @@ export function PdfToolsPage() {
     <PageRoot className="relative flex h-full flex-col p-0 overflow-hidden bg-surface">
       <div className="p-6 pb-0 border-b border-hairline bg-surface">
         <PageHeader
-          title="Suite PDF"
-          description="Lecture, fusion, conversion, optimisation, OCR et signature — 100% local"
+          title={translate("Suite PDF")}
+          description={translate("Lecture, fusion, conversion, optimisation, OCR et signature — 100% local")}
           actions={
             <div className="flex items-center gap-1 rounded-xl border border-hairline bg-surface-2 p-1">
               <button
@@ -70,7 +67,7 @@ export function PdfToolsPage() {
                 )}
               >
                 <WrenchIcon className="size-3.5" />
-                <span>Outils & Conversion</span>
+                <span>{translate("Outils & Conversion")}</span>
               </button>
               <button
                 type="button"
@@ -83,7 +80,7 @@ export function PdfToolsPage() {
                 )}
               >
                 <FileTextIcon className="size-3.5" />
-                <span>Lecteur PDF</span>
+                <span>{translate("Lecteur PDF")}</span>
               </button>
             </div>
           }
@@ -99,7 +96,10 @@ export function PdfToolsPage() {
               onBack={handleBackTool}
             />
           ) : (
-            <PdfToolCatalog onSelectTool={handleSelectTool} />
+            <>
+              {transferred.length > 0 && <p role="status" className="mx-6 mt-4 rounded-lg bg-brand-tint p-3 text-sm text-fg">{transferred[0].name} {translate("est prêt : choisissez un outil.")}</p>}
+              <PdfToolCatalog onSelectTool={handleSelectTool} />
+            </>
           )
         ) : (
           <PdfViewerTool />

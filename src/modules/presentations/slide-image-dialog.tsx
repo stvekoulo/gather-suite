@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,9 +26,9 @@ export function SlideImageDialog({ open, onClose, onInsertImage }: SlideImageDia
       const dataUrl = await readAsDataUrl(file);
       onInsertImage(dataUrl);
       onClose();
-      toast.success("Image insérée sur la diapositive");
+      toast.success(translate("Image insérée sur la diapositive"));
     } catch {
-      toast.error("Impossible de lire le fichier image");
+      toast.error(translate("Impossible de lire le fichier image"));
     }
   };
 
@@ -36,7 +37,7 @@ export function SlideImageDialog({ open, onClose, onInsertImage }: SlideImageDia
     onInsertImage(url.trim());
     setUrl("");
     onClose();
-    toast.success("Image insérée depuis l'URL");
+    toast.success(translate("Image insérée depuis l'URL"));
   };
 
   return (
@@ -45,7 +46,7 @@ export function SlideImageDialog({ open, onClose, onInsertImage }: SlideImageDia
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm font-semibold text-fg">
             <ImageIcon className="size-4 text-orange-600" />
-            Insérer une image sur la diapositive
+            {translate("Insérer une image sur la diapositive")}
           </DialogTitle>
         </DialogHeader>
 
@@ -54,15 +55,15 @@ export function SlideImageDialog({ open, onClose, onInsertImage }: SlideImageDia
           <label className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hairline bg-surface-2/40 p-6 cursor-pointer hover:border-orange-500 hover:bg-orange-500/5 transition-all text-center">
             <UploadIcon className="size-6 text-orange-600" />
             <div>
-              <p className="text-xs font-semibold text-fg">Choisir une image sur votre ordinateur</p>
-              <p className="text-[11px] text-fg-3">PNG, JPG, WebP ou SVG</p>
+              <p className="text-xs font-semibold text-fg">{translate("Choisir une image sur votre ordinateur")}</p>
+              <p className="text-[11px] text-fg-3">{translate("PNG, JPG, WebP ou SVG")}</p>
             </div>
             <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </label>
 
           <div className="flex items-center gap-2 text-[11px] text-fg-3">
             <div className="h-px flex-1 bg-hairline" />
-            <span>OU PAR LIEN WEB</span>
+            <span>{translate("OU PAR LIEN WEB")}</span>
             <div className="h-px flex-1 bg-hairline" />
           </div>
 
@@ -79,14 +80,14 @@ export function SlideImageDialog({ open, onClose, onInsertImage }: SlideImageDia
               />
             </div>
             <Button variant="outline" size="sm" onClick={handleUrlInsert} disabled={!url.trim()} className="h-8 text-xs">
-              Insérer
+              {translate("Insérer")}
             </Button>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">
-            Annuler
+            {translate("Annuler")}
           </Button>
         </div>
       </DialogContent>

@@ -1,4 +1,8 @@
 "use client";
+import { Dropdown } from "@/components/beui/dropdown";
+import { translate } from "@/lib/i18n/ui-text";
+import { useAppStore } from "@/stores/app-store";
+import { CURRENCIES, formatMoney } from "@/components/pages/invoice/invoice-utils";
 
 import { useState } from "react";
 import { CalendarIcon, CheckIcon, PlusCircleIcon } from "lucide-react";
@@ -14,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslate } from "@/lib/i18n/ui-text";
 import { useFinanceCategories } from "@/stores/finance-categories-store";
+import { toKey } from "@/lib/dates";
 import {
   RECURRENCE_LABELS, type FinanceTransaction, type TransactionRecurrence, type TransactionType,
 } from "./types";
@@ -35,8 +40,10 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
   const [type, setType] = useState<TransactionType>("income");
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
+  const preferred = useAppStore((s) => s.settings.currency ?? "EUR");
+  const [currency, setCurrency] = useState(preferred);
   const [category, setCategory] = useState<string>(() => getIncomeCategories()[0] || "Facture client");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => toKey(new Date()));
   const [methodLabel, setMethodLabel] = useState("Compte Bancaire Pro");
   const [recurrence, setRecurrence] = useState<TransactionRecurrence>("none");
   const [syncCalendar, setSyncCalendar] = useState(true);
@@ -59,7 +66,7 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
     if (!trimmed) return;
     const added = type === "income" ? addIncomeCategory(trimmed) : addExpenseCategory(trimmed);
     if (!added) {
-      toast.info("Cette catégorie existe déjà.");
+      toast.info(translate("Cette catégorie existe déjà."));
     } else {
       toast.success(`Catégorie « ${trimmed} » ajoutée`);
     }
@@ -71,14 +78,15 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseFloat(amount.replace(",", "."));
-    if (!title.trim()) return toast.error("Veuillez saisir un libellé.");
-    if (isNaN(parsedAmount) || parsedAmount <= 0) return toast.error("Veuillez saisir un montant valide supérieur à 0.");
+    if (!title.trim()) return toast.error(translate("Veuillez saisir un libellé."));
+    if (isNaN(parsedAmount) || parsedAmount <= 0) return toast.error(translate("Veuillez saisir un montant valide supérieur à 0."));
 
     const created: FinanceTransaction = {
       id: `tx-${crypto.randomUUID()}`,
       type,
       title: title.trim(),
       amount: parsedAmount,
+      currency,
       category,
       date,
       methodLabel: methodLabel.trim() || undefined,
@@ -89,7 +97,7 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
     };
 
     onAdd(created);
-    toast.success(`${type === "income" ? "Revenu" : "Dépense"} de ${parsedAmount} € enregistré(e)`);
+    toast.success(`${type === "income" ? "Revenu" : "Dépense"} de ${formatMoney(parsedAmount, currency)} enregistré(e)`);
     setTitle("");
     setAmount("");
     setNotes("");
@@ -103,10 +111,10 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 t-16">
             <PlusCircleIcon className="size-4.5 text-brand" />
-            Nouvelle écriture financière
+            {translate("Nouvelle écriture financière")}
           </DialogTitle>
           <DialogDescription className="t-14">
-            Enregistrez une entrée de trésorerie ou une charge dans votre grand livre Gather.
+            {translate("Enregistrez une entrée de trésorerie ou une charge dans votre grand livre Gather.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -141,7 +149,7 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
             <Label className="text-xs">{tr("Libellé de l'opération")}</Label>
             <Input
               required
-              placeholder="Ex. Règlement client, Loyer bureau, Abonnement cloud..."
+              placeholder={translate("Ex. Règlement client, Loyer bureau, Abonnement cloud...")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="h-8 text-xs"
@@ -150,17 +158,20 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs">{tr("Montant")} (€)</Label>
-              <Input
-                required
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="h-8 text-xs font-mono font-semibold"
-              />
+              <Label className="text-xs">{tr("Montant")}</Label>
+              <div className="flex gap-1.5">
+                <Input
+                  required
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="h-8 min-w-0 flex-1 text-xs font-mono font-semibold"
+                />
+                <Dropdown aria-label={translate("Devise")} className="w-24 shrink-0" triggerClassName="h-8" value={currency} onChange={setCurrency} options={CURRENCIES.map((c) => ({ value: c, label: c }))} />
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -202,43 +213,32 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
                   </Button>
                 </div>
               ) : (
-                <select
+                <Dropdown
+                  aria-label={tr("Catégorie")}
+                  triggerClassName="h-8"
                   value={category}
-                  onChange={(e) => {
-                    if (e.target.value === "__create__") {
-                      setIsCreatingCat(true);
-                    } else {
-                      setCategory(e.target.value);
-                    }
-                  }}
-                  className="h-8 rounded-lg border border-hairline bg-surface px-2 text-xs font-medium text-fg outline-none"
-                >
-                  {availableCategories.map((c) => (
-                    <option key={c} value={c}>{tr(c)}</option>
-                  ))}
-                  <option value="__create__">+ {tr("Nouvelle catégorie")}…</option>
-                </select>
+                  onChange={(next) => { if (next === "__create__") setIsCreatingCat(true); else setCategory(next); }}
+                  options={[...availableCategories.map((c) => ({ value: c, label: tr(c) })), { value: "__create__", label: `+ ${tr("Nouvelle catégorie")}…` }]}
+                />
               )}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs">{tr("Périodicité")}</Label>
-              <select
+              <Dropdown
+                aria-label={tr("Périodicité")}
+                triggerClassName="h-8"
                 value={recurrence}
-                onChange={(e) => setRecurrence(e.target.value as TransactionRecurrence)}
-                className="h-8 rounded-lg border border-hairline bg-surface px-2 text-xs font-medium text-fg outline-none"
-              >
-                {(Object.keys(RECURRENCE_LABELS) as TransactionRecurrence[]).map((r) => (
-                  <option key={r} value={r}>{tr(RECURRENCE_LABELS[r])}</option>
-                ))}
-              </select>
+                onChange={(next) => setRecurrence(next as TransactionRecurrence)}
+                options={(Object.keys(RECURRENCE_LABELS) as TransactionRecurrence[]).map((r) => ({ value: r, label: tr(RECURRENCE_LABELS[r]) }))}
+              />
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">{tr("Compte / Mode de paiement")}</Label>
             <Input
-              placeholder="Ex. Compte Pro, Carte..."
+              placeholder={translate("Ex. Compte Pro, Carte...")}
               value={methodLabel}
               onChange={(e) => setMethodLabel(e.target.value)}
               className="h-8 text-xs"
@@ -261,7 +261,7 @@ export function AddTransactionDialog({ open, onClose, onAdd }: AddTransactionDia
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">{tr("Notes")}</Label>
             <Textarea
-              placeholder="Informations complémentaires, TVA, référence..."
+              placeholder={translate("Informations complémentaires, TVA, référence...")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="h-16 text-xs"

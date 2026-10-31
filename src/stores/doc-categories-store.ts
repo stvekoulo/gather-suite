@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { workspaceStorage } from "@/lib/storage/workspace-storage";
 import type { DocumentFile } from "@/lib/types";
 
 export const DEFAULT_CATEGORIES = [
@@ -44,7 +45,8 @@ export const useCategoryStore = create<CategoryState>()(
     }),
     {
       name: "gather-document-categories",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => workspaceStorage),
+      skipHydration: true,
     }
   )
 );

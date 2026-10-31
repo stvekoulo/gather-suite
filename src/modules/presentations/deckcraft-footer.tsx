@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import {
   GridIcon,
@@ -44,7 +45,7 @@ export function DeckcraftFooter({
       {/* Côté gauche : Index, ratio et thème */}
       <div className="flex items-center gap-3">
         <span className="font-medium text-fg">
-          Diapositive {activeSlideIndex + 1} sur {totalSlides}
+          {translate("Diapositive")} {activeSlideIndex + 1} {translate("sur")} {totalSlides}
         </span>
         <span>·</span>
         <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-fg-2">
@@ -55,7 +56,7 @@ export function DeckcraftFooter({
         {deck.transition && deck.transition !== "none" && (
           <>
             <span>·</span>
-            <span className="text-fg-3">Transition : {deck.transition}</span>
+            <span className="text-fg-3">{translate("Transition :")} {deck.transition}</span>
           </>
         )}
       </div>
@@ -66,7 +67,7 @@ export function DeckcraftFooter({
           type="button"
           onClick={onToggleNotes}
           className="flex items-center gap-1 hover:text-fg cursor-pointer text-fg-2"
-          title="Afficher / Masquer les notes de l'orateur"
+          title={translate("Afficher / Masquer les notes de l'orateur")}
         >
           <StickyNoteIcon className="size-3" />
           <span>Notes {showNotes ? "on" : "off"}</span>
@@ -76,10 +77,10 @@ export function DeckcraftFooter({
           type="button"
           onClick={onToggleGrid}
           className="flex items-center gap-1 hover:text-fg cursor-pointer text-fg-2"
-          title="Afficher / Masquer les repères d'alignement"
+          title={translate("Afficher / Masquer les repères d'alignement")}
         >
           <GridIcon className="size-3" />
-          <span>Grille</span>
+          <span>{translate("Grille")}</span>
         </button>
 
         <div className="h-3 w-px bg-hairline" />
@@ -88,20 +89,20 @@ export function DeckcraftFooter({
           type="button"
           onClick={onPlayFromStart}
           className="flex items-center gap-1 hover:text-orange-600 cursor-pointer text-fg-2 font-medium"
-          title="Lancer le diaporama (F5)"
+          title={translate("Lancer le diaporama (F5)")}
         >
           <PlayIcon className="size-3 text-orange-600 fill-current" />
-          <span>Diaporama</span>
+          <span>{translate("Diaporama")}</span>
         </button>
 
         <button
           type="button"
           onClick={onOpenPresenterView}
           className="flex items-center gap-1 hover:text-orange-600 cursor-pointer text-fg-2"
-          title="Ouvrir le mode présentateur double écran"
+          title={translate("Ouvrir le mode présentateur double écran")}
         >
           <TvIcon className="size-3" />
-          <span>Présentateur</span>
+          <span>{translate("Présentateur")}</span>
         </button>
 
         <div className="h-3 w-px bg-hairline" />
@@ -114,7 +115,7 @@ export function DeckcraftFooter({
             onClick={() => onChangeZoom(Math.max(50, zoom - 10))}
             disabled={zoom <= 50}
             className="size-5 p-0"
-            title="Zoom arrière"
+            title={translate("Zoom arrière")}
           >
             <ZoomOutIcon className="size-3" />
           </Button>
@@ -123,7 +124,7 @@ export function DeckcraftFooter({
             type="button"
             onClick={() => onChangeZoom(100)}
             className="w-9 text-center font-mono hover:text-fg cursor-pointer text-[10px]"
-            title="Réinitialiser à 100%"
+            title={translate("Réinitialiser à 100%")}
           >
             {zoom}%
           </button>
@@ -134,7 +135,7 @@ export function DeckcraftFooter({
             onClick={() => onChangeZoom(Math.min(150, zoom + 10))}
             disabled={zoom >= 150}
             className="size-5 p-0"
-            title="Zoom avant"
+            title={translate("Zoom avant")}
           >
             <ZoomInIcon className="size-3" />
           </Button>

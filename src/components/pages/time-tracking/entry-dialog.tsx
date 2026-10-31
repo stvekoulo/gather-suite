@@ -109,7 +109,7 @@ function EntryForm({
             id="te-task"
             required
             autoFocus={!entry}
-            placeholder="Sur quoi avez-vous travaillé ?"
+            placeholder={translate("Sur quoi avez-vous travaillé ?")}
             value={task}
             onChange={(e) => setTask(e.target.value)}
           />
@@ -142,7 +142,7 @@ function EntryForm({
         <label className="flex items-center justify-between gap-3 rounded-lg border border-control bg-app px-3 py-2.5">
           <span className="grid gap-1">
             <span className="t-14 text-fg">{translate("Billable")}</span>
-            <span className="t-12 text-fg-2">Pris en compte dans les factures client</span>
+            <span className="t-12 text-fg-2">{translate("Pris en compte dans les factures client")}</span>
           </span>
           <Switch checked={billable} onCheckedChange={setBillable} />
         </label>

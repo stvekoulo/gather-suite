@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
@@ -83,7 +84,7 @@ export default function ExcalidrawEditor() {
       const scene = await loadFromBlob(file, null, null);
       api.updateScene({ elements: scene.elements, appState: scene.appState });
       if (scene.files) api.addFiles(Object.values(scene.files));
-      toast.success("Fichier importé avec succès dans Infinite Canvas", { id: "import-canvas" });
+      toast.success(translate("Fichier importé avec succès dans Infinite Canvas"), { id: "import-canvas" });
     } catch (error) {
       toast.error(`Erreur d'importation : ${String(error)}`, { id: "import-canvas" });
     }
@@ -91,15 +92,15 @@ export default function ExcalidrawEditor() {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface">
-      <input ref={fileInputRef} type="file" accept=".excalidraw" className="hidden" onChange={handleImportFile} />
+      <input ref={fileInputRef} type="file" aria-label={translate("Importer un dessin")} accept=".excalidraw" className="hidden" onChange={handleImportFile} />
 
       {/* Barre d'en-tête épurée Infinite Canvas */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-2 bg-surface">
         <div className="flex items-center gap-2">
           <PaletteIcon className="size-4 text-brand" />
-          <span className="text-xs font-semibold text-fg">Infinite Canvas</span>
+          <span className="text-xs font-semibold text-fg">{translate("Infinite Canvas")}</span>
           <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] text-fg-2">
-            Sauvegarde automatique
+            {translate("Sauvegarde automatique")}
           </span>
         </div>
 
@@ -110,7 +111,7 @@ export default function ExcalidrawEditor() {
             onClick={() => fileInputRef.current?.click()}
             className="h-7 gap-1.5 text-xs text-fg-2 hover:text-fg"
           >
-            <FileUpIcon className="size-3.5" /> Importer
+            <FileUpIcon className="size-3.5" /> {translate("Importer")}
           </Button>
           <div className="h-3.5 w-px bg-hairline" />
           <Button
@@ -119,7 +120,7 @@ export default function ExcalidrawEditor() {
             onClick={() => void exportScene("png")}
             className="h-7 gap-1 text-xs"
           >
-            <DownloadIcon className="size-3" /> Exporter PNG
+            <DownloadIcon className="size-3" /> {translate("Exporter PNG")}
           </Button>
           <Button
             size="sm"

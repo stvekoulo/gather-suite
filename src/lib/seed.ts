@@ -33,5 +33,6 @@ export function createSeed(): AppState {
     withdrawalMethods: SEED_WITHDRAWAL_METHODS,
     benefits: SEED_BENEFITS,
     financeTransactions: [],
+    clients: [],
   };
 }

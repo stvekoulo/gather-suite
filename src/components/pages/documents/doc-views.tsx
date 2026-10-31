@@ -1,4 +1,5 @@
 "use client";
+import { handOff } from "@/lib/handoff";
 
 import { translate } from "@/lib/i18n/ui-text";
 import { BookmarkIcon, DownloadIcon, EyeIcon, FileTextIcon, FolderInputIcon, MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react";
@@ -39,6 +40,12 @@ export function StarButton({ doc, className }: { doc: DocumentFile; className?: 
 }
 
 // Menu contextuel d'actions pour chaque document
+async function sendToPdfTools(doc: DocumentFile) {
+  const blob = await (await fetch(doc.dataUrl!)).blob();
+  handOff("pdf", [new File([blob], doc.name, { type: "application/pdf" })]);
+  window.dispatchEvent(new CustomEvent("gather-navigate", { detail: "/pdf-tools" }));
+}
+
 export function RowMenu({
   doc,
   onRename,
@@ -72,12 +79,17 @@ export function RowMenu({
       <DropdownMenuContent align="end" className="w-52" onClick={(e) => e.stopPropagation()}>
         {onEditDoc && (
           <DropdownMenuItem className={MENU_ITEM} onSelect={() => onEditDoc(doc)}>
-            <PencilIcon /> Éditer le document
+            <PencilIcon /> {translate("Éditer le document")}
           </DropdownMenuItem>
         )}
         {onOpenReader && (
           <DropdownMenuItem className={MENU_ITEM} onSelect={() => onOpenReader(doc)}>
-            <EyeIcon /> Lire / Aperçu direct
+            <EyeIcon /> {translate("Lire / Aperçu direct")}
+          </DropdownMenuItem>
+        )}
+        {doc.dataUrl && /\.pdf$/i.test(doc.name) && (
+          <DropdownMenuItem className={MENU_ITEM} onSelect={() => void sendToPdfTools(doc)}>
+            {translate("Ouvrir dans la Suite PDF")}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem className={MENU_ITEM} onSelect={() => downloadDoc(doc)}>
@@ -88,7 +100,7 @@ export function RowMenu({
         </DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className={cn("t-14 salt gap-1.5 [&_svg]:text-icon", MENU_ITEM)}>
-            <FolderInputIcon className="size-3.5" /> Déplacer vers
+            <FolderInputIcon className="size-3.5" /> {translate("Déplacer vers")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-40">
             <DropdownMenuRadioGroup
@@ -115,7 +127,7 @@ export function RowMenu({
                   }
                 }}
               >
-                + Créer une catégorie…
+                {translate("+ Créer une catégorie…")}
               </DropdownMenuItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
@@ -184,7 +196,7 @@ export function DocumentGrid({ docs, today, onRename, onSelectDoc, onEditDoc }: 
                       onEditDoc(d);
                     }}
                   >
-                    <PencilIcon className="size-3" /> Éditer
+                    <PencilIcon className="size-3" /> {translate("Éditer")}
                   </Button>
                 )}
                 <Button
@@ -196,7 +208,7 @@ export function DocumentGrid({ docs, today, onRename, onSelectDoc, onEditDoc }: 
                     onSelectDoc(d);
                   }}
                 >
-                  <EyeIcon className="size-3" /> Aperçu
+                  <EyeIcon className="size-3" /> {translate("Aperçu")}
                 </Button>
               </div>
             </div>
@@ -252,7 +264,7 @@ export function DocumentList({ docs, today, onRename, onSelectDoc, onEditDoc }: 
                   {d.name}
                 </span>
                 <span className="text-[11px] text-fg-2">
-                  {formatSize(d.size)} · Modifié {uploadedLabel(d.uploadedAt, today)}
+                  {formatSize(d.size)} {translate("· Modifié")} {uploadedLabel(d.uploadedAt, today)}
                 </span>
               </div>
             </div>
@@ -262,11 +274,11 @@ export function DocumentList({ docs, today, onRename, onSelectDoc, onEditDoc }: 
               <StarButton doc={d} />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" onClick={() => downloadDoc(d)} aria-label="Télécharger">
+                  <Button variant="ghost" size="icon-sm" onClick={() => downloadDoc(d)} aria-label={translate("Télécharger")}>
                     <DownloadIcon className="size-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Télécharger</TooltipContent>
+                <TooltipContent>{translate("Télécharger")}</TooltipContent>
               </Tooltip>
               <RowMenu doc={d} onRename={onRename} onOpenReader={onSelectDoc} onEditDoc={onEditDoc} />
             </div>

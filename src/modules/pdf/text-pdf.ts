@@ -1,7 +1,12 @@
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 
+// French number formatting uses thin and no-break spaces, which fonts often lack.
+const plainSpaces = (value: string) => value.replace(/[\u00A0\u2007\u2009\u202F]/g, " ");
+
 export async function createTextPdf(title: string, text: string, fontBytes?: Uint8Array) {
+  title = plainSpaces(title);
+  text = plainSpaces(text);
   const doc = await PDFDocument.create();
   doc.setTitle(title);
   doc.registerFontkit(fontkit);

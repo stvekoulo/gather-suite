@@ -11,9 +11,9 @@ import { useToday } from "@/hooks/use-today";
 import { useAppStore } from "@/stores/app-store";
 import { EntriesSection } from "./entries-list";
 import { EntryDialog } from "./entry-dialog";
-import { BILLABLE_COLOR, formatHours, NON_BILLABLE_COLOR, sumMinutes } from "./shared";
-import { TimerBar, TimerCard } from "./timer-card";
+import { BILLABLE_COLOR, formatHours, NON_BILLABLE_COLOR, projectColor, sumMinutes } from "./shared";
 import { DynamicIslandTimer } from "./dynamic-island-timer";
+import { PageHeader, PageRoot } from "@/components/pages/shared/page-chrome";
 import { ChartLegend, WeekChart, type DayTotal } from "./week-chart";
 import { BillTimeButton } from "@/modules/invoices/bill-time-button";
 
@@ -58,6 +58,12 @@ export function TimeTrackingPage() {
     return [...byDay.entries()].sort((a, b) => b[0].localeCompare(a[0]));
   }, [weekEntries]);
 
+  const byProject = useMemo(() => {
+    const totalsByProject = new Map<string, number>();
+    for (const e of weekEntries) totalsByProject.set(e.project, (totalsByProject.get(e.project) ?? 0) + e.minutes);
+    return [...totalsByProject].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  }, [weekEntries]);
+
   const totals = sumMinutes(weekEntries);
   const todayMinutes = useMemo(
     () => entries.reduce((n, e) => (e.date === today ? n + e.minutes : n), 0),
@@ -73,76 +79,71 @@ export function TimeTrackingPage() {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto scroll-thin bg-app">
-      <div className="flex justify-end p-3"><BillTimeButton /></div>
-      <header className="z-10 flex shrink-0 flex-col gap-3 border-b border-hairline bg-surface px-4 py-3 md:sticky md:top-0 md:h-[68px] md:flex-row md:items-center md:py-0">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <h2 className="t-16 text-fg">{isCurrentWeek ? translate("This week") : `Semaine ${isoWeek(weekStart)}`}</h2>
-          <p className="t-14 truncate text-fg-2">
-            {formatRange(weekStart, weekEnd)} · {formatHours(totals.total)} enregistrés
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <Button
-              size="icon"
-              className="max-md:size-10"
-              aria-label={translate("Previous week")}
-              onClick={() => setOffset((o) => o - 1)}
-            >
-              <Icon name="arrow-left" />
-            </Button>
-            <Button className="max-md:h-10" disabled={isCurrentWeek} onClick={() => setOffset(0)}>
-              {translate("This week")}
-            </Button>
-            <Button
-              size="icon"
-              className="max-md:size-10"
-              aria-label={translate("Next week")}
-              onClick={() => setOffset((o) => o + 1)}
-            >
-              <Icon name="arrow-left" className="rotate-180" />
-            </Button>
-          </div>
-          <div className="h-4 w-px bg-hairline max-md:hidden" aria-hidden />
-          <Button variant="brand" className="max-md:ml-auto max-md:h-10" onClick={() => openDialog()}>
-            <PlusIcon />{translate("Add entry")}
-          </Button>
-        </div>
-      </header>
+    <PageRoot>
+      <PageHeader
+        title={isCurrentWeek ? translate("This week") : `${translate("Semaine")} ${isoWeek(weekStart)}`}
+        description={`${formatRange(weekStart, weekEnd)} · ${formatHours(totals.total)} ${translate("enregistrés")}`}
+        actions={
+          <>
+            <div className="flex items-center gap-1">
+              <Button size="icon" aria-label={translate("Previous week")} onClick={() => setOffset((o) => o - 1)}><Icon name="arrow-left" /></Button>
+              <Button disabled={isCurrentWeek} onClick={() => setOffset(0)}>{translate("This week")}</Button>
+              <Button size="icon" aria-label={translate("Next week")} onClick={() => setOffset((o) => o + 1)}><Icon name="arrow-left" className="rotate-180" /></Button>
+            </div>
+            <BillTimeButton />
+            <Button variant="brand" onClick={() => openDialog()}><PlusIcon />{translate("Add entry")}</Button>
+          </>
+        }
+      />
 
       <div className="flex flex-1 flex-col gap-4 p-4">
-        <DynamicIslandTimer projects={projects} todayMinutes={todayMinutes} />
-        <TimerCard projects={projects} todayMinutes={todayMinutes} />
+        <DynamicIslandTimer todayMinutes={todayMinutes} />
 
-        <section className="grid grid-cols-1 overflow-hidden rounded-xl border border-hairline bg-surface md:grid-cols-[1fr_260px]">
-          <div className="flex min-w-0 flex-col gap-5 p-4">
+        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Stat label={translate("Total")} value={formatHours(totals.total)} />
+          <Stat label={translate("Billable")} value={formatHours(totals.billable)} color={BILLABLE_COLOR} />
+          <Stat label={translate("Non-billable")} value={formatHours(totals.nonBillable)} color={NON_BILLABLE_COLOR} />
+          <div className="flex flex-col justify-between gap-3 rounded-2xl border border-hairline bg-surface p-4">
+            <dt className="t-12 flex justify-between text-fg-2">{translate("Billable ratio")}</dt>
+            <dd className="flex flex-col gap-2">
+              <span className="text-[22px] leading-none font-medium tracking-[-0.4px] text-fg tabular-nums">{billablePct}%</span>
+              <span className="flex h-1.5 gap-[2px] overflow-hidden rounded-full bg-app" aria-hidden>
+                {totals.billable > 0 && <span className="h-full" style={{ width: `${billablePct}%`, background: BILLABLE_COLOR }} />}
+                {totals.nonBillable > 0 && <span className="h-full flex-1" style={{ background: NON_BILLABLE_COLOR }} />}
+              </span>
+            </dd>
+          </div>
+        </dl>
+
+        <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <section className="flex min-w-0 flex-col gap-5 rounded-2xl border border-hairline bg-surface p-4">
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-              <h3 className="t-14 text-fg">{translate("Hours per day")}</h3>
+              <h3 className="t-14 font-medium text-fg">{translate("Hours per day")}</h3>
               <ChartLegend />
             </div>
             <WeekChart days={days} today={today} onSelectDay={scrollToDay} />
-          </div>
-          <dl className="grid grid-cols-3 border-t border-hairline md:flex md:flex-col md:border-t-0 md:border-l">
-            <Stat label={translate("Total")} value={formatHours(totals.total)} />
-            <Stat label={translate("Billable")} value={formatHours(totals.billable)} color={BILLABLE_COLOR} />
-            <Stat label={translate("Non-billable")} value={formatHours(totals.nonBillable)} color={NON_BILLABLE_COLOR} />
-            <div className="col-span-3 mt-auto flex flex-col gap-2 border-t border-hairline p-4">
-              <div className="flex items-center justify-between">
-                <span className="t-12 text-fg-2">{translate("Billable ratio")}</span>
-                <span className="t-12 text-fg tabular-nums">{billablePct}%</span>
-              </div>
-              <div className="flex h-1.5 gap-[2px] overflow-hidden rounded-full bg-app">
-                {totals.billable > 0 && (
-                  <span className="h-full" style={{ width: `${billablePct}%`, background: BILLABLE_COLOR }} />
-                )}
-                {totals.nonBillable > 0 && (
-                  <span className="h-full flex-1" style={{ background: NON_BILLABLE_COLOR }} />
-                )}
-              </div>
-            </div>
-          </dl>
-        </section>
+          </section>
+          <section className="flex min-w-0 flex-col gap-3 rounded-2xl border border-hairline bg-surface p-4">
+            <h3 className="t-14 font-medium text-fg">{translate("Par projet")}</h3>
+            {byProject.length === 0 ? (
+              <p className="t-14 my-auto py-6 text-center text-fg-2">{translate("Aucun temps cette semaine.")}</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {byProject.map(([project, minutes]) => (
+                  <li key={project} className="flex flex-col gap-1.5">
+                    <span className="t-14 flex items-baseline justify-between gap-3">
+                      <span className="min-w-0 truncate text-fg">{project}</span>
+                      <span className="t-12 shrink-0 text-fg-2 tabular-nums">{formatHours(minutes)}</span>
+                    </span>
+                    <span className="h-1.5 overflow-hidden rounded-full bg-app" aria-hidden>
+                      <span className="block h-full rounded-full" style={{ width: `${(minutes / byProject[0][1]) * 100}%`, background: `var(--event-${projectColor(project)}-fg)` }} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
 
         <EntriesSection
           weekEntriesCount={weekEntries.length}
@@ -156,8 +157,6 @@ export function TimeTrackingPage() {
         />
       </div>
 
-      <TimerBar todayMinutes={todayMinutes} />
-
       <EntryDialog
         open={dialog.open}
         session={dialog.session}
@@ -166,18 +165,18 @@ export function TimeTrackingPage() {
         projects={projects}
         onClose={() => setDialog((d) => ({ ...d, open: false }))}
       />
-    </div>
+    </PageRoot>
   );
 }
 
 function Stat({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 border-hairline px-4 py-3.5 not-nth-3:border-r max-md:px-3 md:border-b md:not-nth-3:border-r-0">
-      <dt className="t-12 flex items-center gap-1.5 whitespace-nowrap text-fg-2">
-        {color && <span className="size-2 shrink-0 rounded-[2px] max-[359px]:hidden" style={{ background: color }} />}
+    <div className="flex min-w-0 flex-col justify-between gap-3 rounded-2xl border border-hairline bg-surface p-4">
+      <dt className="t-12 flex items-center gap-1.5 text-fg-2">
+        {color && <span className="size-2 shrink-0 rounded-[2px]" style={{ background: color }} />}
         {label}
       </dt>
-      <dd className="text-[20px] leading-none font-medium tracking-[-0.4px] text-fg tabular-nums">{value}</dd>
+      <dd className="text-[22px] leading-none font-medium tracking-[-0.4px] text-fg tabular-nums">{value}</dd>
     </div>
   );
 }

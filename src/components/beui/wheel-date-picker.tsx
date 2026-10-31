@@ -5,6 +5,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { WheelPicker } from "@/components/beui/wheel-picker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toKey } from "@/lib/dates";
 
 const MONTHS = [
   { label: "Janvier", value: "01" },
@@ -49,7 +50,7 @@ export function WheelDatePicker({
 }: WheelDatePickerProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = toKey(new Date());
   const controlled = value !== undefined;
   const [internal, setInternal] = useState(defaultValue ?? todayIso);
   const current = controlled ? (value || todayIso) : internal;

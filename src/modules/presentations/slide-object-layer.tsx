@@ -1,4 +1,5 @@
 "use client";
+import { translate } from "@/lib/i18n/ui-text";
 
 import { useRef } from "react";
 import type { SlideElement } from "@/stores/workspace-types";
@@ -187,7 +188,7 @@ export function SlideObjectLayer({
 
             {onChange && isSelected && (
               <button
-                aria-label="Redimensionner l’objet"
+                aria-label={translate("Redimensionner l’objet")}
                 data-resize="true"
                 className="absolute -right-1.5 -bottom-1.5 size-3.5 cursor-se-resize rounded-full border-2 border-white bg-orange-600 shadow-xs"
               />
