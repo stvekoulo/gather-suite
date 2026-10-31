@@ -115,7 +115,7 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-2">
               <h3 className="text-sm font-semibold text-fg">{translate("Retrouvez vos données partout")}</h3>
               <p className="text-xs text-fg-2">{translate("Créez un compte pour sauvegarder et synchroniser vos notes, tâches, finances et préférences. C’est facultatif : Gather fonctionne aussi sans compte.")}</p>
-              {cloudUser ? <p role="status" className="rounded-lg bg-brand-tint p-3 text-sm text-fg">{translate("Connecté :")} {cloudUser.email}{translate(". Terminez pour commencer.")}</p> : <AccountForm />}
+              {cloudUser ? <p role="status" className="rounded-lg bg-brand-tint p-3 text-sm text-fg">{translate("Connecté :")} {cloudUser.email}{translate(". Terminez pour commencer.")}</p> : <AccountForm name={name} email={email} />}
             </div>
           )}
           {step === 1 && (

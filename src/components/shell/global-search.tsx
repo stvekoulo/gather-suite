@@ -122,12 +122,13 @@ export function GlobalSearch() {
       onOpenChange={(v) => !v && close()}
       title={translate("Search")}
       description={translate("Rechercher dans tous les modules et fichiers")}
-      className="data-open:animate-none data-closed:animate-none sm:max-w-[620px] max-sm:top-2 max-sm:bottom-auto max-sm:left-2 max-sm:w-[calc(100%-1rem)] max-sm:max-h-[70dvh] max-sm:rounded-2xl max-sm:pb-0"
+      className="data-open:animate-none data-closed:animate-none top-1/2 -translate-y-1/2 sm:max-w-[620px] max-sm:top-2 max-sm:bottom-auto max-sm:left-2 max-sm:w-[calc(100%-1rem)] max-sm:max-h-[70dvh] max-sm:rounded-2xl max-sm:pb-0"
     >
       {/* Ranking comes from the index, so cmdk's own filter stays off. */}
       <Command shouldFilter={false}>
         <CommandInput value={query} onValueChange={setQuery} placeholder={translate("Nom de fichier, note, client, facture, contenu…")} />
-        <CommandList className="max-h-[440px]">
+        {/* A fixed height keeps the centered palette from moving as results change. */}
+        <CommandList className="h-[min(440px,65dvh)] max-h-none">
           <CommandEmpty className="t-14 text-fg-2">{translate("Aucun résultat.")}</CommandEmpty>
           {searching && hits.length > 0 && (
             <CommandGroup heading="Résultats">

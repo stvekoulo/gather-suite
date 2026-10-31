@@ -1,7 +1,7 @@
 "use client";
 import { translate } from "@/lib/i18n/ui-text";
 
-import { CalendarCheckIcon, CalendarIcon, CalendarPlusIcon, ChevronDownIcon, ListChecksIcon, PlayIcon, StickyNoteIcon, Trash2Icon, XIcon } from "lucide-react";
+import { CalendarCheckIcon, CalendarIcon, CalendarPlusIcon, ChevronDownIcon, GripVerticalIcon, ListChecksIcon, PlayIcon, StickyNoteIcon, Trash2Icon, XIcon } from "lucide-react";
 import { handOff } from "@/lib/handoff";
 import { taskNote } from "@/lib/links";
 import { useState } from "react";
@@ -61,10 +61,13 @@ export function TaskCard({ task, today }: { task: Task; today: string }) {
       onDragStart={(e) => {
         e.dataTransfer.setData("application/x-gather-task", task.id);
         e.dataTransfer.setData("application/x-kargul-task", task.id);
+        e.dataTransfer.effectAllowed = "move";
       }}
-      className={cn("group rounded-xl border border-hairline bg-surface p-2.5 shadow-2xs transition-shadow hover-fine:shadow-xs", task.status === "done" && "opacity-70")}
+      className={cn("group cursor-grab rounded-xl active:cursor-grabbing border border-hairline bg-surface p-2.5 shadow-2xs transition-shadow hover-fine:shadow-xs", task.status === "done" && "opacity-70")}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-1.5">
+        {/* The fields select text when pressed: the grip and the card's edges start the drag. */}
+        <GripVerticalIcon className="mt-1.5 -ml-1 size-4 shrink-0 text-icon" aria-hidden />
         <span className={cn("mt-2.5 size-2 shrink-0 rounded-full", PRIORITY_DOT[task.priority])} title={translate("Priorité")} aria-hidden />
         <div className="min-w-0 flex-1">
           <input

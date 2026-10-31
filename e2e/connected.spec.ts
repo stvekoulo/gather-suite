@@ -170,7 +170,7 @@ test("PDF steps only finish when they are really done, and block the next one", 
   const file = { name: "a.pdf", mimeType: "application/pdf", buffer: Buffer.from(await doc.save()) };
   await page.goto("/pdf-tools");
   await page.getByRole("button", { name: /Signature numérique/ }).click();
-  await expect(page.getByRole("button", { name: /^Lancer/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Vérifier les signatures" })).toBeDisabled();
   await expect(page.getByText("Terminé")).toHaveCount(0);
   await page.getByRole("button", { name: "Retour aux outils" }).click();
   await page.getByRole("button", { name: /^Fusionner/ }).click();
@@ -234,4 +234,51 @@ test("the floating island stays usable above an open dialog, in the light theme"
   const { top, background } = await island.evaluate((el) => { const box = el.getBoundingClientRect(); const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2); return { top: el.contains(hit), background: getComputedStyle(el.firstElementChild!).backgroundColor }; });
   expect(top).toBe(true);
   expect(background).not.toBe("rgb(24, 24, 27)");
+});
+
+test("a task can be dragged to another column", async ({ page }) => {
+  await page.goto("/tasks");
+  await page.getByRole("heading", { level: 1 }).waitFor();
+  await page.getByRole("button", { name: "Nouvelle tâche" }).click();
+  const todo = page.getByRole("region", { name: "À faire" }), progress = page.getByRole("region", { name: "En cours" });
+  await expect(todo.locator("article")).toHaveCount(1);
+  await todo.locator("article svg").first().dragTo(progress);
+  await expect(progress.locator("article")).toHaveCount(1);
+  await expect(todo.locator("article")).toHaveCount(0);
+});
+
+test("the search palette is centered in the window", async ({ page }) => {
+  await page.goto("/dashboard");
+  await page.getByRole("heading", { level: 1 }).waitFor();
+  await page.keyboard.press("Control+k");
+  const box = (await page.getByRole("dialog").boundingBox())!, view = page.viewportSize()!;
+  expect(Math.abs(box.x + box.width / 2 - view.width / 2)).toBeLessThan(2);
+  expect(Math.abs(box.y + box.height / 2 - view.height / 2)).toBeLessThan(2);
+});
+
+test("images to PDF asks for images, not for a PDF", async ({ page }) => {
+  await page.goto("/pdf-tools");
+  await page.getByRole("button", { name: /Images vers PDF/ }).click();
+  await expect(page.getByText("Formats PNG et JPEG acceptés")).toBeVisible();
+  await expect(page.getByText(/document PDF|Format PDF/)).toHaveCount(0);
+  await expect(page.getByLabel("Images", { exact: true })).toHaveAttribute("accept", "image/png,image/jpeg");
+});
+
+test("onboarding asks for the name and e-mail only once", async ({ page }) => {
+  await page.addInitScript(({ version }) => {
+    if (sessionStorage.getItem("fresh")) return;
+    sessionStorage.setItem("fresh", "1");
+    const saved = JSON.parse(localStorage.getItem("calendar-app:state")!);
+    saved.state.settings.hasCompletedOnboarding = false; saved.version = version;
+    localStorage.setItem("calendar-app:state", JSON.stringify(saved));
+  }, { version: STATE_VERSION });
+  await page.goto("/dashboard");
+  const next = page.getByRole("button", { name: "Continuer" });
+  await next.click();
+  await page.locator('input[type="email"]').fill("sam@example.invalid");
+  await next.click(); await next.click(); await next.click();
+  await expect(page.getByText("sam@example.invalid")).toBeVisible();
+  await expect(page.getByLabel("E-mail du compte")).toHaveCount(0);
+  await expect(page.getByLabel("Votre nom")).toHaveCount(0);
+  await expect(page.getByLabel("Mot de passe du compte")).toBeVisible();
 });

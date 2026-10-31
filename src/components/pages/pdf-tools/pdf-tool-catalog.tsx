@@ -37,7 +37,10 @@ export function PdfToolCatalog({ onSelectTool }: PdfToolCatalogProps) {
           ? PDF_TOOLS.find((t) => t.id === "merge")!
           : PDF_TOOLS.find((t) => t.id === "compress")!;
       onSelectTool(defaultTool, valid);
+      return;
     }
+    const images = files.filter((f) => /\.(png|jpe?g)$/i.test(f.name));
+    if (images.length > 0) onSelectTool(PDF_TOOLS.find((t) => t.id === "images")!, images);
   };
 
   const handleDrop = (e: React.DragEvent) => {

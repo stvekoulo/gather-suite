@@ -45,6 +45,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           RELEASE_REPO: ${{ vars.RELEASE_REPO }}
           OSXCROSS_ROOT: ${{ vars.OSXCROSS_ROOT }}
+          RELEASE_PLATFORMS: ${{ vars.RELEASE_PLATFORMS }}
         run: |
           set -uo pipefail
           cd /home/ubuntu/gather-suite
@@ -73,6 +74,7 @@ jobs:
             -e TAURI_SIGNING_PRIVATE_KEY="${TAURI_SIGNING_PRIVATE_KEY:-}" \
             -e TAURI_SIGNING_PRIVATE_KEY_PASSWORD="" \
             -e RELEASE_REPO="${RELEASE_REPO:-}" \
+            -e RELEASE_PLATFORMS="${RELEASE_PLATFORMS:-}" \
             -e CARGO_TERM_COLOR=never -e CARGO_TERM_PROGRESS_WHEN=never -e NO_COLOR=1 \
             gather-builder 2>&1 | tee -a "$LOG" | grep --line-buffered -E "$KEY"; then show_end; exit 1; fi
           show_end

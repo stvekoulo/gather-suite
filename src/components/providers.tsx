@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { StorageGate } from "@/components/storage-gate";
 import { NativePersistenceGuard } from "@/components/native-persistence-guard";
@@ -17,6 +18,13 @@ import { LocaleBoundary } from "./locale-boundary";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
+  // A file dropped outside a drop zone would otherwise replace the app with that file.
+  useEffect(() => {
+    const block = (e: DragEvent) => { if (e.dataTransfer?.types.includes("Files")) e.preventDefault(); };
+    window.addEventListener("dragover", block);
+    window.addEventListener("drop", block);
+    return () => { window.removeEventListener("dragover", block); window.removeEventListener("drop", block); };
+  }, []);
   return (
     <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
       <StorageGate><LocaleBoundary><ThemePaletteProvider>

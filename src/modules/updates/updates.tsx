@@ -35,7 +35,11 @@ export function UpdateButton() {
       check().then(async (update) => {
         if (!update) { toast.success(translate("Gather est à jour.")); return; }
         if (window.confirm(`${translate("Nouvelle version disponible")} : ${update.version}. ${translate("Installer et redémarrer")} ?`)) await install(update);
-      }).catch((error: unknown) => toast.error(translate("Vérification impossible"), { description: String(error) })).finally(() => setBusy(false));
+      }).catch((error: unknown) => {
+        // The updater reports a missing manifest the same way as an unreachable server.
+        if (String(error).includes("valid release JSON")) toast.info(translate("Aucune mise à jour n’est disponible pour le moment."), { description: translate("Le service de mise à jour est injoignable ou aucune version n’y est publiée.") });
+        else toast.error(translate("Vérification impossible"), { description: String(error) });
+      }).finally(() => setBusy(false));
     }}>{translate("Vérifier")}</Button>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAppStore } from "@/stores/app-store";
 import { requestPasswordReset, resetPassword } from "./auth";
 import { confirmMerge, deleteAccount, logIn, logOut, register, syncNow, useCloud } from "./cloud-sync";
 
@@ -11,10 +12,13 @@ type Mode = "signup" | "signin" | "forgot" | "reset";
 const message = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
 /** Sign-in or sign-up form, used by the first-launch assistant and by the settings. */
-export function AccountForm({ onDone }: { onDone?: () => void }) {
+export function AccountForm({ onDone, name: givenName, email: givenEmail }: { onDone?: () => void; name?: string; email?: string }) {
+  // Name and e-mail are asked once, in the first-launch profile step.
+  const profile = useAppStore((s) => s.profile);
+  const name = givenName ?? profile.name;
   const [mode, setMode] = useState<Mode>("signup");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(givenEmail ?? profile.email ?? "");
+  const [editingEmail, setEditingEmail] = useState(!email.trim());
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,8 +50,14 @@ export function AccountForm({ onDone }: { onDone?: () => void }) {
   const submitLabel = { signup: "Créer mon compte", signin: "Me connecter", forgot: "Recevoir un code", reset: "Changer le mot de passe" }[mode];
   return (
     <form className="flex flex-col gap-2.5" onSubmit={(e) => void submit(e)}>
-      {mode === "signup" && <Input aria-label={translate("Votre nom")} placeholder={translate("Votre nom")} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />}
-      <Input aria-label={translate("E-mail du compte")} type="email" required placeholder="E-mail" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      {editingEmail ? (
+        <Input aria-label={translate("E-mail du compte")} type="email" required placeholder="E-mail" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      ) : (
+        <p className="flex items-center justify-between gap-2 text-sm text-fg">
+          <span className="min-w-0 truncate">{email}</span>
+          <button type="button" className="shrink-0 text-xs text-fg-2 underline" onClick={() => setEditingEmail(true)}>{translate("Changer")}</button>
+        </p>
+      )}
       {mode === "reset" && <Input aria-label={translate("Code reçu par e-mail")} required inputMode="numeric" autoComplete="one-time-code" placeholder={translate("Code reçu par e-mail")} value={code} onChange={(e) => setCode(e.target.value)} />}
       {mode !== "forgot" && <Input aria-label={translate(mode === "reset" ? "Nouveau mot de passe" : "Mot de passe du compte")} type="password" required minLength={8} placeholder={translate(mode === "reset" ? "Nouveau mot de passe" : "Mot de passe (8 caractères minimum)")} autoComplete={mode === "signin" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} />}
       {error && <p role="alert" className="text-xs text-danger">{error}</p>}

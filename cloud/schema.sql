@@ -1,10 +1,7 @@
 -- Gather cloud sync. Clients reach this table through the Neon Data API with the
 -- signed-in user's JWT: row-level security is the only thing separating accounts.
+-- Enable the Data API first: it creates the authenticated role and refuses to run if one exists.
 create extension if not exists pg_session_jwt;
-
-do $$ begin
-  if not exists (select from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
-end $$;
 
 create or replace function public.gather_uid() returns text language plpgsql stable as $$
 declare uid text;

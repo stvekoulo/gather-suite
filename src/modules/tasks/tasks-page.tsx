@@ -60,6 +60,7 @@ export function TasksPage() {
               onDragOver={(e) => { if (TASK_TYPES.some((type) => e.dataTransfer.types.includes(type))) { e.preventDefault(); setDropTarget(status); } }}
               onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropTarget(null); }}
               onDrop={(e) => {
+                e.preventDefault();
                 setDropTarget(null);
                 const id = TASK_TYPES.map((type) => e.dataTransfer.getData(type)).find(Boolean);
                 if (id) setTasks(tasks.map((t) => (t.id === id ? { ...t, status } : t)));

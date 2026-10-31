@@ -1,5 +1,13 @@
 // Textes des modules, du français vers l'anglais.
 export const DICT_APP_FR_TO_EN: Record<string, string> = {
+  "Aucune mise à jour n’est disponible pour le moment.": "No update is available right now.", "Le service de mise à jour est injoignable ou aucune version n’y est publiée.": "The update service is unreachable or no version has been published.",
+  "Changer": "Change", "Images": "Images", "Largeur": "Width", "Hauteur": "Height", "Personnalisé": "Custom", "Format de page": "Page size", "Sélectionner": "Select", "Traitement en cours…": "Processing…",
+  "Seules les images PNG et JPEG sont acceptées.": "Only PNG and JPEG images are accepted.", "Seuls les fichiers PDF sont acceptés.": "Only PDF files are accepted.",
+  "Sélectionnez les images à assembler, dans l’ordre voulu": "Select the images to combine, in the order you want", "Sélectionnez les PDF à fusionner, dans l’ordre voulu": "Select the PDFs to merge, in the order you want", "Sélectionnez le document PDF": "Select the PDF document",
+  "Ajouter d'autres fichiers": "Add more files", "Remplacer le fichier": "Replace the file", "Choisir des images": "Choose images", "Choisir des fichiers": "Choose files", "Choisir un fichier": "Choose a file",
+  "Cliquez ici ou déposez vos images": "Click here or drop your images", "Cliquez ici ou déposez vos documents PDF": "Click here or drop your PDF documents", "Cliquez ici ou déposez un document PDF": "Click here or drop a PDF document", "Formats PNG et JPEG acceptés": "PNG and JPEG accepted",
+  "Ajoutez au moins une image à l’étape 1 pour continuer.": "Add at least one image in step 1 to continue.", "Optionnel — Laisser vide pour vérification seule": "Optional — leave empty to verify only", "Signer le document": "Sign the document", "Vérifier les signatures": "Check signatures",
+  "Pages à conserver, dans l’ordre voulu (ex. 3, 1-2)": "Pages to keep, in the order you want (e.g. 3, 1-2)", "Pages à supprimer (ex. 1-3, 5)": "Pages to delete (e.g. 1-3, 5)", "Pages à annoter (ex. 1-3, 5)": "Pages to annotate (e.g. 1-3, 5)", "Pages à masquer (ex. 1-3, 5)": "Pages to redact (e.g. 1-3, 5)",
   "Événements de la journée": "Events of the day", "Aujourd'hui": "Today", "Précédent": "Previous", "Suivant": "Next", "Vue du calendrier": "Calendar view", "3 jours": "3 days",
   "Formulaire d'événement": "Event form", "Ex. Réunion client, Point hebdomadaire...": "e.g. Client meeting, weekly check-in...", "Lieu de rendez-vous ou lien visioconférence": "Meeting place or video link",
   "Fermeture annulée : sauvegarde impossible": "Close cancelled: could not save", "Détectée automatiquement selon votre système d'exploitation.": "Detected automatically from your operating system.", "Système en français": "System in French",

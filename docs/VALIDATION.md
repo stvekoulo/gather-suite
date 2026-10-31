@@ -20,6 +20,9 @@ Résultats obtenus sur ce poste Windows. Une ligne absente n'a pas été vérifi
 | `npm audit --omit=dev` | 4 vulnérabilités faibles, aucune modérée ou plus |
 | Isolation entre comptes (SQL sur Neon) | Un autre compte ne voit rien, ne modifie rien, ne peut pas écrire au nom d'autrui ; sans jeton, aucune ligne |
 
+La Data API Neon n'était pas activée (erreur 503 à la synchronisation) ; elle l'est depuis le
+31 octobre, avant `cloud/schema.sql`, qui ne crée plus le rôle `authenticated`.
+
 La synchronisation est couverte par les tests du moteur de fusion et par un parcours E2E avec
 serveur simulé.
 

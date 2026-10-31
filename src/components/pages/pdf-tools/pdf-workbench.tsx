@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { saveFile } from "@/lib/files";
 import { addToLibrary } from "@/lib/library";
 import { Checkbox } from "@/components/beui/checkbox";
+import { Dropdown } from "@/components/beui/dropdown";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useBlinkoStore } from "@/stores/blinko-store";
 import type { PdfOperationJob } from "@/stores/workspace-types";
@@ -28,6 +29,13 @@ interface PdfWorkbenchProps {
   onBack: () => void;
 }
 
+const PAGES_LABEL: Record<string, string> = {
+  split: "Pages à conserver, dans l’ordre voulu (ex. 3, 1-2)",
+  remove: "Pages à supprimer (ex. 1-3, 5)",
+  annotate: "Pages à annoter (ex. 1-3, 5)",
+  redact: "Pages à masquer (ex. 1-3, 5)",
+};
+const PAGE_FORMATS = [{ value: "595.28x841.89", label: "A4" }, { value: "841.89x1190.55", label: "A3" }, { value: "612x792", label: "Lettre" }];
 const PAGE_RANGES = /^\s*\d+(\s*-\s*\d+)?(\s*,\s*\d+(\s*-\s*\d+)?)*\s*$/;
 /** What still blocks step 2, or null when the tool can run. */
 export function pdfOptionsProblem(toolId: string, { pages, watermark, options, rasterOptions, certificate, password }: { pages: string; watermark: string; options: PdfOptions; rasterOptions: RasterOptions; certificate?: File; password: string }): string | null {
@@ -80,9 +88,14 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
   // Any change after a run makes its result stale: the last step is no longer finished.
   const resetResult = () => { setResultName(null); setLastBlob(null); setExtractedText(null); setSignatureReports(null); setError(""); };
 
-  const handleAddFiles = (newFiles: File[]) => {
-    setFiles((prev) => (tool.multipleFiles ? [...prev, ...newFiles] : newFiles));
-    setError(""); setResultName(null); setExtractedText(null); setLastBlob(null);
+  const isImages = tool.id === "images";
+  const handleAddFiles = (added: File[]) => {
+    // A dropped file skips the file picker's filter.
+    const newFiles = added.filter((f) => (isImages ? /\.(png|jpe?g)$/i : /\.pdf$/i).test(f.name));
+    if (newFiles.length < added.length) toast.error(translate(isImages ? "Seules les images PNG et JPEG sont acceptées." : "Seuls les fichiers PDF sont acceptés."));
+    if (!newFiles.length) return;
+    setFiles((prev) => (tool.multipleFiles ? [...prev, ...newFiles] : newFiles.slice(0, 1)));
+    resetResult();
   };
 
   async function execute() {
@@ -164,7 +177,7 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
-      <input ref={fileInputRef} type="file" aria-label={translate("Fichiers PDF")} accept={tool.acceptTypes ?? "application/pdf,.pdf"} multiple={tool.multipleFiles} className="hidden" onChange={(e) => e.target.files && handleAddFiles(Array.from(e.target.files))} />
+      <input ref={fileInputRef} type="file" aria-label={translate(isImages ? "Images" : "Fichiers PDF")} accept={tool.acceptTypes ?? "application/pdf,.pdf"} multiple={tool.multipleFiles} className="hidden" onChange={(e) => { if (e.target.files) handleAddFiles(Array.from(e.target.files)); e.target.value = ""; }} />
       <input ref={certInputRef} type="file" accept=".p12,.pfx" className="hidden" onChange={(e) => setCertificate(e.target.files?.[0])} />
 
       {/* Header */}
@@ -174,29 +187,29 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
         </Button>
         <div className="flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-lg bg-brand-tint text-brand"><tool.icon className="size-4" /></div>
-          <h2 className="text-base font-semibold text-fg">{tool.title}</h2>
+          <h2 className="text-base font-semibold text-fg">{translate(tool.title)}</h2>
         </div>
       </div>
 
       <PdfStepIndicator steps={[{ id: 1, title: "Fichiers source", subtitle: "Sélection" }, { id: 2, title: "Options", subtitle: "Configuration" }, { id: 3, title: "Exécution", subtitle: "Traitement" }]} currentStep={currentStep} completedSteps={completedSteps} />
 
       {/* Step 1: Source Files */}
-      <div className="rounded-2xl border border-hairline bg-surface p-5 shadow-xs">
+      <div className="rounded-2xl border border-hairline bg-surface p-5 shadow-xs" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); handleAddFiles(Array.from(e.dataTransfer.files)); }}>
         <div className="flex items-center justify-between pb-3 border-b border-hairline">
           <div>
             <h3 className="text-sm font-semibold text-fg">{translate("Étape 1 : Fichiers source")}</h3>
-            <p className="text-xs text-fg-2">{tool.multipleFiles ? "Sélectionnez les PDF à combiner ou traiter" : "Sélectionnez le document PDF"}</p>
+            <p className="text-xs text-fg-2">{translate(isImages ? "Sélectionnez les images à assembler, dans l’ordre voulu" : tool.multipleFiles ? "Sélectionnez les PDF à fusionner, dans l’ordre voulu" : "Sélectionnez le document PDF")}</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="gap-1.5 text-xs">
-            <FilePlus2Icon className="size-3.5" /> {files.length > 0 ? "Ajouter d'autres fichiers" : "Choisir un fichier"}
+            <FilePlus2Icon className="size-3.5" /> {translate(files.length > 0 ? (tool.multipleFiles ? "Ajouter d'autres fichiers" : "Remplacer le fichier") : isImages ? "Choisir des images" : tool.multipleFiles ? "Choisir des fichiers" : "Choisir un fichier")}
           </Button>
         </div>
 
         {files.length === 0 ? (
           <div onClick={() => fileInputRef.current?.click()} className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-hairline p-6 hover:border-brand/40 bg-surface-2/30 transition-colors">
             <FilePlus2Icon className="size-8 text-fg-2/60" />
-            <p className="mt-2 text-xs font-semibold text-fg">{translate("Cliquez ici pour choisir un document PDF")}</p>
-            <p className="text-[11px] text-fg-2">{translate("Format PDF accepté")}</p>
+            <p className="mt-2 text-xs font-semibold text-fg">{translate(isImages ? "Cliquez ici ou déposez vos images" : tool.multipleFiles ? "Cliquez ici ou déposez vos documents PDF" : "Cliquez ici ou déposez un document PDF")}</p>
+            <p className="text-[11px] text-fg-2">{translate(isImages ? "Formats PNG et JPEG acceptés" : "Format PDF accepté")}</p>
           </div>
         ) : (
           <ol className="mt-3 divide-y divide-hairline rounded-xl border border-hairline bg-surface-2/30">
@@ -232,14 +245,14 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
         </div>
 
         {!isStep1Done ? (
-          <p className="text-xs text-fg-2 italic py-2">{translate(minFiles > 1 ? "Ajoutez au moins deux fichiers à l’étape 1 pour continuer." : "Veuillez sélectionner au moins un fichier à l’étape 1 pour débloquer les options de traitement.")}</p>
+          <p className="text-xs text-fg-2 italic py-2">{translate(minFiles > 1 ? "Ajoutez au moins deux fichiers à l’étape 1 pour continuer." : isImages ? "Ajoutez au moins une image à l’étape 1 pour continuer." : "Veuillez sélectionner au moins un fichier à l’étape 1 pour débloquer les options de traitement.")}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {tool.id === "signature" && (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between rounded-xl border border-hairline p-3 bg-surface-2/40">
-                  <div><p className="text-xs font-semibold text-fg">{translate("Certificat numérique (.p12/.pfx)")}</p><p className="text-[11px] text-fg-2">{certificate ? certificate.name : "Optionnel — Laisser vide pour vérification seule"}</p></div>
-                  <Button size="sm" variant="outline" onClick={() => certInputRef.current?.click()}>{certificate ? "Changer" : "Sélectionner"}</Button>
+                  <div><p className="text-xs font-semibold text-fg">{translate("Certificat numérique (.p12/.pfx)")}</p><p className="text-[11px] text-fg-2">{certificate ? certificate.name : translate("Optionnel — Laisser vide pour vérification seule")}</p></div>
+                  <Button size="sm" variant="outline" onClick={() => certInputRef.current?.click()}>{translate(certificate ? "Changer" : "Sélectionner")}</Button>
                 </div>
                 {certificate && (
                   <>
@@ -250,7 +263,7 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
               </div>
             )}
             {["split", "remove", "annotate", "redact"].includes(tool.id) && (
-              <label className="text-xs font-medium text-fg">{translate("Plage de pages à traiter (ex. 1-3, 5)")}<Input value={pages} onChange={(e) => setPages(e.target.value)} className="mt-1" /></label>
+              <label className="text-xs font-medium text-fg">{translate(PAGES_LABEL[tool.id])}<Input value={pages} onChange={(e) => setPages(e.target.value)} className="mt-1" /></label>
             )}
             {tool.id === "watermark" && (
               <label className="text-xs font-medium text-fg">{translate("Texte du filigrane")}<Input value={watermark} onChange={(e) => setWatermark(e.target.value)} className="mt-1" /></label>
@@ -266,10 +279,13 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
               </div>
             )}
             {tool.id === "resize" && (
-              <div className="grid grid-cols-2 gap-3">
-                {(["width", "height"] as const).map((key) => (
-                  <label key={key} className="text-xs font-medium text-fg">{key === "width" ? "Largeur" : "Hauteur"} (points)<Input type="number" min="72" max="14400" value={options[key]} onChange={(e) => setOptions({ ...options, [key]: Number(e.target.value) })} className="mt-1" /></label>
-                ))}
+              <div className="flex flex-col gap-3">
+                <Dropdown aria-label={translate("Format de page")} value={`${options.width}x${options.height}`} onChange={(v) => { const [width, height] = v.split("x").map(Number); if (height) setOptions({ ...options, width, height }); }} options={[...PAGE_FORMATS.map((f) => ({ ...f, label: translate(f.label) })), ...(PAGE_FORMATS.some((f) => f.value === `${options.width}x${options.height}`) ? [] : [{ value: `${options.width}x${options.height}`, label: translate("Personnalisé") }])]} />
+                <div className="grid grid-cols-2 gap-3">
+                  {(["width", "height"] as const).map((key) => (
+                    <label key={key} className="text-xs font-medium text-fg">{translate(key === "width" ? "Largeur" : "Hauteur")} (points)<Input type="number" min="72" max="14400" value={options[key]} onChange={(e) => setOptions({ ...options, [key]: Number(e.target.value) })} className="mt-1" /></label>
+                  ))}
+                </div>
               </div>
             )}
             {tool.id === "crop" && (
@@ -307,7 +323,7 @@ export function PdfWorkbench({ tool, initialFiles = [], onBack }: PdfWorkbenchPr
         <h3 className="text-sm font-semibold text-fg border-b border-hairline pb-2.5">{translate("Étape 3 : Exécution")}</h3>
         <div className="flex items-center gap-3">
           <Button variant="brand" size="lg" disabled={busy || !isStep2Done} onClick={() => void execute()} className="gap-2">
-            <PlayIcon className="size-4 fill-current" /> {busy ? "Traitement en cours…" : `Lancer : ${tool.title}`}
+            <PlayIcon className="size-4 fill-current" /> {busy ? translate("Traitement en cours…") : tool.id === "signature" ? translate(certificate ? "Signer le document" : "Vérifier les signatures") : `${translate("Lancer")} : ${translate(tool.title)}`}
           </Button>
         </div>
 

@@ -171,8 +171,10 @@ function main() {
   run("npm run build");
 
   const failed = [];
-  for (const platform of PLATFORMS) {
-    if (platform.triple && !(process.env.OSXCROSS_ROOT && existsSync(join(process.env.OSXCROSS_ROOT, "target", "bin")))) {
+  // RELEASE_PLATFORMS=macos rebuilds one family without touching what is already published.
+  const only = process.env.RELEASE_PLATFORMS?.toLowerCase();
+  for (const platform of PLATFORMS.filter((p) => !only || p.name.toLowerCase().includes(only))) {
+    if (platform.triple &&!(process.env.OSXCROSS_ROOT && existsSync(join(process.env.OSXCROSS_ROOT, "target", "bin")))) {
       console.log(`--- ${platform.name} ignoré : osxcross n'est pas installé sur ce serveur.`);
       continue;
     }

@@ -52,7 +52,10 @@ export async function imagesToPdf(files: { bytes: Uint8Array; type: string }[]) 
   if (!files.length) throw new Error("Choisissez des images PNG/JPEG.");
   const pdf = await PDFDocument.create();
   for (const file of files) {
-    const image = file.type === "image/png" ? await pdf.embedPng(file.bytes) : await pdf.embedJpg(file.bytes);
+    // Read from the file's signature: the system does not always report a type.
+    const isPng = file.bytes[0] === 0x89, isJpeg = file.bytes[0] === 0xff;
+    if (!isPng && !isJpeg) throw new Error("Choisissez des images PNG/JPEG.");
+    const image = isPng ? await pdf.embedPng(file.bytes) : await pdf.embedJpg(file.bytes);
     const page = pdf.addPage([595.28, 841.89]); const scale = Math.min(555 / image.width, 801 / image.height);
     page.drawImage(image, { x: (page.getWidth() - image.width * scale) / 2, y: (page.getHeight() - image.height * scale) / 2, width: image.width * scale, height: image.height * scale });
   }
