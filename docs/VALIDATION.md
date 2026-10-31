@@ -18,7 +18,7 @@ Résultats obtenus sur ce poste Windows. Une ligne absente n'a pas été vérifi
 | Build VPS Openship (run n°9, 1 h 12) | Tests réussis dans le conteneur ; `Gather_0.3.0_amd64.AppImage` (127 Mo), `.deb` (49 Mo) et `Gather_0.3.0_x64-setup.exe` (45 Mo) publiés sur la release `v0.3.0`. Aucun n'est installé ni lancé. macOS ignoré : `osxcross` absent du VPS. Sans `TAURI_SIGNING_PRIVATE_KEY`, pas de `latest.json` |
 | Build VPS Openship (run n°12, 1 h 37) | Release `v0.3.1` : Linux (AppImage, `.deb`), Windows (`setup.exe`), macOS Apple Silicon et Intel (`.dmg`, `.app.tar.gz`). Binaires macOS vérifiés au format Mach-O, arm64 avec signature locale. Aucun installateur n'a été lancé |
 | Build VPS Openship (run n°13, 1 h 45) | Release `v0.3.2` signée pour la mise à jour : `latest.json` couvre Linux, Windows et macOS (les deux architectures), et ses quatre liens répondent. Identifiant de clé des signatures comparé à la clé publique de l’application. Installation d’une mise à jour jamais essayée |
-| `next build` de `landing-gather` | Réussi ; téléchargements affichés « Coming soon » tant que `DOWNLOADS_LIVE` est à `false` |
+| `next build` de `landing-gather` | Réussi ; liens de téléchargement actifs vers les releases de `gather-suite`. Site non déployé |
 | `npm audit --omit=dev` | 4 vulnérabilités faibles, aucune modérée ou plus |
 | Isolation entre comptes (SQL sur Neon) | Un autre compte ne voit rien, ne modifie rien, ne peut pas écrire au nom d'autrui ; sans jeton, aucune ligne |
 
