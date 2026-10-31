@@ -23,4 +23,12 @@ La clé privée de mise à jour ne doit jamais entrer dans le dépôt, et sa per
 
 Le VPS construit macOS (Apple Silicon et Intel) avec `osxcross`, monté depuis l'hôte. Le workflow le cherche dans la variable `OSXCROSS_ROOT`, puis dans les emplacements habituels, et affiche le chemin retenu. Sans `osxcross`, macOS est ignoré et Linux et Windows sont publiés quand même.
 
+`clang` 14 et 15 évaluent à tort les tests `exclave*` de `TargetConditionals.h` du SDK 14.5 : macOS n'est alors jamais activé. Après l'installation d'`osxcross`, désactivez-les une fois sur le VPS :
+
+```sh
+sudo sed -i -E 's/\(__is_target_vendor\(apple\) && __is_target_environment\(exclave(core|kit)\)\)/(0)/' /home/ubuntu/osxcross/target/SDK/MacOSX14.5.sdk/usr/include/TargetConditionals.h
+```
+
+La variable `RELEASE_PLATFORMS` du workflow limite un build à une famille (`linux`, `windows` ou `macos`).
+
 Le `.app` est assemblé par `scripts/vps-release.mjs`, car le bundler de Tauri ne le fait que sur un Mac. L'application n'est ni signée avec un compte Apple Developer ni notarisée : au premier lancement, macOS la bloque comme venant d'un développeur non identifié (`xattr -cr /Applications/Gather.app` la débloque). Il faut un compte Apple Developer pour lever ce blocage.

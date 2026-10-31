@@ -11,7 +11,7 @@ interface PlatformPackage {
 
 // Turn on once the installers are published in this public repository.
 const DOWNLOADS_LIVE = false;
-const VERSION = "0.3.0";
+const VERSION = "0.3.1";
 const RELEASES = `https://github.com/stvekoulo/gather-releases/releases/download/v${VERSION}`;
 
 const packages: PlatformPackage[] = [
