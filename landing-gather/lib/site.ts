@@ -3,7 +3,7 @@ export const SITE_TITLE = "Gather: desktop planner for work and personal life";
 export const SITE_DESCRIPTION =
   "Gather is a desktop planner for Windows, macOS and Linux. Keep your calendar, tasks, notes, documents, invoices and money in one app that works offline.";
 
-export const VERSION = "0.3.1";
+export const VERSION = "0.3.2";
 export const RELEASES_PAGE = "https://github.com/stvekoulo/gather-suite/releases";
 const RELEASE = `${RELEASES_PAGE}/download/v${VERSION}`;
 
