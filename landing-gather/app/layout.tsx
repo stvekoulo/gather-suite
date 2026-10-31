@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL, VERSION } from "@/lib/site";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -8,44 +9,24 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gather.stevenkoulo.com"),
-  title: "Gather: plan your work and your life in one place",
-  description:
-    "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: "Gather",
   authors: [{ name: "Steven KOULO" }],
-  keywords: [
-    "planner app",
-    "personal planner",
-    "work and life planner",
-    "calendar and tasks",
-    "invoicing",
-    "expense tracking",
-    "notes",
-    "offline desktop app",
-  ],
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Gather: plan your work and your life in one place",
-    description:
-      "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
-    url: "https://gather.stevenkoulo.com",
-    siteName: "gather.",
-    images: [
-      {
-        url: "/gather-logo.png",
-        width: 1024,
-        height: 1024,
-        alt: "Gather Suite Desktop Logo",
-      },
-    ],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: "Gather",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gather: plan your work and your life in one place",
-    description:
-      "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
-    images: ["/gather-logo.png"],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 };
 
@@ -58,11 +39,15 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Gather Suite",
+    name: "Gather",
+    alternateName: "Gather Suite",
+    url: SITE_URL,
+    image: `${SITE_URL}/gather-logo.png`,
+    softwareVersion: VERSION,
+    downloadUrl: `${SITE_URL}/#downloads`,
     operatingSystem: "Windows, macOS, Linux",
     applicationCategory: "ProductivityApplication",
-    description:
-      "Gather is a desktop planner that keeps your calendar, tasks, notes, documents, invoices and money in one app, and connects them to each other.",
+    description: SITE_DESCRIPTION,
     author: {
       "@type": "Person",
       name: "Steven KOULO",

@@ -2,7 +2,7 @@
 
 La release passe par le workflow Openship `.openship/workflows/gather-release.yml`, sur le VPS (GitHub Actions n'est pas utilisable).
 
-1. Monter la version dans `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` et `landing-gather/components/platform-downloads.tsx`.
+1. Monter la version dans `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` et `landing-gather/lib/site.ts`.
 2. Pousser sur `main`, puis lancer le workflow dans Openship.
 
 Le workflow nettoie ce que Gather a laissé, limite le conteneur à 2,2 Go de RAM pour protéger les autres services du serveur, puis construit Linux, Windows et macOS l'un après l'autre.
@@ -14,9 +14,9 @@ Chaque plateforme est publiée dès qu'elle est prête, donc l'échec de l'une n
 | --- | --- |
 | `RELEASE_GITHUB_TOKEN` | Clone du dépôt et publication |
 | `TAURI_SIGNING_PRIVATE_KEY` | Contenu de `~/.tauri/gather-updater.key`. Sans lui, pas de mise à jour automatique |
-| `RELEASE_REPO` | Dépôt public qui reçoit les installateurs, `stvekoulo/gather-releases` |
+| `RELEASE_REPO` | Dépôt qui reçoit les installateurs. Par défaut `stvekoulo/gather-suite` |
 
-Le dépôt du code étant privé, ses releases ne sont pas téléchargeables par le public : l'application et la landing visent `gather-releases`.
+Le dépôt `gather-suite` est public : l'application et la landing (`landing-gather/lib/site.ts`) visent ses releases. S'il redevient privé, les téléchargements et les mises à jour cesseront de fonctionner.
 La clé privée de mise à jour ne doit jamais entrer dans le dépôt, et sa perte empêcherait de mettre à jour les installations existantes.
 
 ## macOS

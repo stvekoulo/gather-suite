@@ -30,12 +30,31 @@ const items: QuestionItem[] = [
     q: "How much does Gather cost?",
     a: "Gather is free to download and use.",
   },
+  {
+    q: "Which computers does Gather run on?",
+    a: "Windows 10 and 11, macOS 11 or newer on Apple Silicon and Intel, and Linux with an AppImage or a .deb package.",
+  },
+  {
+    q: "Why does my computer warn me when I install Gather?",
+    a: "The installers are not code-signed yet. Windows may show a SmartScreen warning, and macOS blocks the first launch. The download section explains how to continue on each system.",
+  },
 ];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
 
 // Section FAQ avec typographie sobre conforme a l'esthetique Apple
 export function FaqSection() {
   return (
     <section id="faq" className="w-full max-w-4xl mx-auto px-6 sm:px-10 py-16 sm:py-24 border-t border-black/[0.04]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="text-center mb-12 sm:mb-16">
         <span className="text-xs font-semibold text-[#111113] uppercase tracking-wider">
           Questions

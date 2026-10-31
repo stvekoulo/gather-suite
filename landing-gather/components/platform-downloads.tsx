@@ -1,43 +1,35 @@
-"use client";
+import { DOWNLOADS, RELEASES_PAGE, VERSION } from "@/lib/site";
 
 interface PlatformPackage {
   os: string;
-  badge: string;
-  filename: string;
-  downloadUrl: string;
   requirements: string;
-  arch: string;
+  note?: string;
+  files: { label: string; href: string }[];
 }
-
-// Turn on once the installers are published in this public repository.
-const DOWNLOADS_LIVE = false;
-const VERSION = "0.3.1";
-const RELEASES = `https://github.com/stvekoulo/gather-releases/releases/download/v${VERSION}`;
 
 const packages: PlatformPackage[] = [
   {
     os: "Windows",
-    badge: "Installer",
-    filename: `Gather_${VERSION}_x64-setup.exe`,
-    downloadUrl: `${RELEASES}/Gather_${VERSION}_x64-setup.exe`,
-    requirements: "Windows 10 / 11 (64-bit)",
-    arch: "x86_64",
+    requirements: "Windows 10 or 11, 64-bit",
+    note: "Windows may show a SmartScreen warning because the installer is not code-signed yet. Choose More info, then Run anyway.",
+    files: [{ label: "Download .exe", href: DOWNLOADS.windows }],
   },
   {
     os: "macOS",
-    badge: "Disk image",
-    filename: `Gather_${VERSION}_aarch64.dmg`,
-    downloadUrl: `${RELEASES}/Gather_${VERSION}_aarch64.dmg`,
     requirements: "macOS 11 Big Sur or newer",
-    arch: "Apple Silicon (Intel build also available)",
+    note: "Not notarized yet, so macOS blocks the first launch. Move Gather to Applications, then run: xattr -cr /Applications/Gather.app",
+    files: [
+      { label: "Apple Silicon (M1 and newer)", href: DOWNLOADS.macSilicon },
+      { label: "Intel", href: DOWNLOADS.macIntel },
+    ],
   },
   {
     os: "Linux",
-    badge: "AppImage",
-    filename: `Gather_${VERSION}_amd64.AppImage`,
-    downloadUrl: `${RELEASES}/Gather_${VERSION}_amd64.AppImage`,
-    requirements: "Ubuntu 22.04 or newer",
-    arch: "x86_64",
+    requirements: "Ubuntu 22.04 or newer, x86_64",
+    files: [
+      { label: "Download .AppImage", href: DOWNLOADS.linuxAppImage },
+      { label: "Download .deb", href: DOWNLOADS.linuxDeb },
+    ],
   },
 ];
 
@@ -47,53 +39,45 @@ export function PlatformDownloads() {
     <section id="downloads" className="w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 py-14 sm:py-24 border-t border-black/[0.04]">
       <div className="max-w-xl mb-10 sm:mb-16">
         <span className="text-xs font-semibold text-[#111113] uppercase tracking-wider">
-          Direct Downloads
+          Download · Version {VERSION}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#111113] tracking-tight mt-2">
-          Choose your computer.
+          Download Gather for your computer.
         </h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-        {packages.map((pkg, i) => (
+        {packages.map((pkg) => (
           <div
-            key={i}
+            key={pkg.os}
             className="flex flex-col justify-between p-6 sm:p-8 rounded-[24px] sm:rounded-[28px] bg-white border border-black/[0.08] shadow-[0_8px_24px_rgba(0,0,0,0.02)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.06)] transition-all"
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg sm:text-xl font-semibold text-[#111113]">
-                  {pkg.os}
-                </h3>
-                <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#f4f4f5] text-[#52525b]">
-                  {pkg.badge}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm font-mono text-[#18181b] bg-[#f9f9fa] p-2.5 rounded-lg border border-black/[0.04] mb-4 break-all">
-                {pkg.filename}
-              </p>
+              <h3 className="text-lg sm:text-xl font-semibold text-[#111113] mb-4">
+                Gather for {pkg.os}
+              </h3>
               <p className="text-xs text-[#71717a] mb-2">
                 <span className="font-medium text-[#111113]">Requirements:</span>{" "}
                 {pkg.requirements}
               </p>
-              <p className="text-xs text-[#71717a]">
-                <span className="font-medium text-[#111113]">Architecture:</span>{" "}
-                {pkg.arch}
-              </p>
+              {pkg.note && <p className="text-xs leading-relaxed text-[#71717a] break-words">{pkg.note}</p>}
             </div>
 
-            <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-black/[0.04]">
-              {DOWNLOADS_LIVE ? (
-                <a href={pkg.downloadUrl} download className="apple-button w-full inline-flex items-center justify-center py-3 rounded-full text-xs font-medium text-white bg-[#111113] hover:bg-black shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
-                  Download for {pkg.os}
+            <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-black/[0.04] flex flex-col gap-2">
+              {pkg.files.map((file) => (
+                <a key={file.href} href={file.href} className="apple-button w-full inline-flex items-center justify-center py-3 rounded-full text-xs font-medium text-white bg-[#111113] hover:bg-black shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
+                  {file.label}
                 </a>
-              ) : (
-                <p className="w-full py-3 text-center text-xs font-medium text-[#71717a]">Coming soon</p>
-              )}
+              ))}
             </div>
           </div>
         ))}
       </div>
+
+      <p className="mt-8 text-xs text-[#71717a]">
+        Looking for an older version?{" "}
+        <a href={RELEASES_PAGE} className="underline underline-offset-2 hover:text-[#111113]">See all releases</a>.
+      </p>
     </section>
   );
 }

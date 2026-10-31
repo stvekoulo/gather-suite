@@ -9,13 +9,13 @@ export function HeroSection() {
     <section className="w-full max-w-7xl mx-auto flex flex-col items-center justify-center pt-8 sm:pt-14 pb-16 sm:pb-24 px-4 text-center select-none overflow-hidden">
       {/* Surtitre en serif italique */}
       <div className="mb-4 sm:mb-6">
-        <span className="font-serif italic text-xs sm:text-sm md:text-base text-[#71717a] tracking-wide">
-          One planner for your work and your life
-        </span>
+        <h1 className="font-serif italic font-normal text-xs sm:text-sm md:text-base text-[#71717a] tracking-wide">
+          <span className="sr-only">Gather: </span>One planner for your work and your life
+        </h1>
       </div>
 
       {/* Titre monumental agrandi encadrant le logo 3D fixe */}
-      <div className="relative flex items-center justify-center w-full max-w-6xl xl:max-w-7xl mx-auto my-2 sm:my-4">
+      <div aria-hidden className="relative flex items-center justify-center w-full max-w-6xl xl:max-w-7xl mx-auto my-2 sm:my-4">
         <span className="text-[62px] min-[380px]:text-[76px] min-[450px]:text-[94px] sm:text-[145px] md:text-[210px] lg:text-[280px] xl:text-[310px] font-black tracking-[-0.04em] text-[#1c1c1e] leading-none">
           gat
         </span>
@@ -24,7 +24,7 @@ export function HeroSection() {
         <div className="relative z-10 mx-[-10px] min-[380px]:mx-[-14px] sm:mx-[-24px] md:mx-[-38px] lg:mx-[-50px] xl:mx-[-58px] w-[84px] h-[84px] min-[380px]:w-[102px] min-[380px]:h-[102px] min-[450px]:w-[126px] min-[450px]:h-[126px] sm:w-[190px] sm:h-[190px] md:w-[270px] md:h-[270px] lg:w-[350px] lg:h-[350px] xl:w-[390px] xl:h-[390px] flex-shrink-0">
           <Image
             src="/gather-logo.png"
-            alt="Gather Suite Logo"
+            alt=""
             fill
             priority
             className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.22)]"

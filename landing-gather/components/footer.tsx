@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 
-// Pied de page autonome sans liens vers des depots prives
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -39,6 +38,9 @@ export function Footer() {
           </a>
           <a href="/privacy" className="hover:text-[#111113] transition-colors">
             Privacy
+          </a>
+          <a href="https://github.com/stvekoulo/gather-suite" className="hover:text-[#111113] transition-colors">
+            GitHub
           </a>
           <a
             href="mailto:contact@stevenkoulo.com"

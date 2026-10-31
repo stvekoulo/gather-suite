@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Privacy | gather.", description: "What Gather stores, where, and who can see it." };
+export const metadata: Metadata = { title: "Privacy | Gather", description: "What Gather stores, where, and who can see it.", alternates: { canonical: "/privacy" } };
 
 const sections: [string, string[]][] = [
   ["Without an account", ["Everything you create in Gather stays in a database on your computer. We receive none of it. Gather has no analytics or tracking."]],

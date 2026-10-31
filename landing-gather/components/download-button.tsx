@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DOWNLOADS, VERSION } from "@/lib/site";
 
 type Platform = "windows" | "mac" | "linux";
+
+const BUTTONS: Record<Platform, { label: string; ext: string; href: string }> = {
+  windows: { label: "Download for Windows", ext: ".exe", href: DOWNLOADS.windows },
+  // A browser cannot reliably tell Apple Silicon from Intel, so Mac visitors choose below.
+  mac: { label: "Download for macOS", ext: ".dmg", href: "#downloads" },
+  linux: { label: "Download for Linux", ext: ".AppImage", href: DOWNLOADS.linuxAppImage },
+};
 
 // Bouton monochrome Apple avec retour tactile immediat et detection d'OS
 export function DownloadButton() {
@@ -21,23 +29,17 @@ export function DownloadButton() {
     setMounted(true);
   }, []);
 
-  const buttonDetails: Record<Platform, { label: string; ext: string }> = {
-    windows: { label: "Gather for Windows", ext: "Coming soon" },
-    mac: { label: "Gather for macOS", ext: "Coming soon" },
-    linux: { label: "Gather for Linux", ext: "Coming soon" },
-  };
-
-  const current = buttonDetails[platform];
+  const current = BUTTONS[platform];
 
   return (
     <div className="flex flex-col items-center gap-3 w-full px-4 select-none">
       <a
-        href="#downloads"
+        href={mounted ? current.href : "#downloads"}
         className="apple-button inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-3.5 rounded-full text-xs sm:text-sm font-medium text-white bg-[#111113] hover:bg-black shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
       >
-        <span>{mounted ? current.label : "Get Gather"}</span>
+        <span>{mounted ? current.label : "Download Gather"}</span>
         <span className="text-[#a1a1aa] text-[11px] sm:text-xs font-normal">
-          {mounted ? current.ext : ""}
+          {mounted ? `${current.ext} · v${VERSION}` : ""}
         </span>
       </a>
 
