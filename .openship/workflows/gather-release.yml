@@ -33,9 +33,10 @@ jobs:
           docker image rm gather-builder 2>/dev/null || true
           docker image prune -f
           docker builder prune -f --filter "until=72h"
-          rm -rf /home/ubuntu/gather-suite/src-tauri/target/*/release/bundle /home/ubuntu/gather-suite/src-tauri/target/release/bundle
+          # Build outputs come from the container, so they belong to root.
+          sudo -n rm -rf /home/ubuntu/gather-suite/src-tauri/target/*/release/bundle /home/ubuntu/gather-suite/src-tauri/target/release/bundle
           FREE_GB=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
-          if [ "$FREE_GB" -lt 14 ]; then echo "Peu de disque : cache Rust supprime"; rm -rf /home/ubuntu/gather-suite/src-tauri/target/*; fi
+          if [ "$FREE_GB" -lt 16 ]; then echo "Peu de disque : cache Rust supprime"; sudo -n rm -rf /home/ubuntu/gather-suite/src-tauri/target/*; fi
           echo "--- Apres nettoyage"; free -m; df -h /
       - name: Compilation et publication des releases
         shell: bash
