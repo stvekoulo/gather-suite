@@ -1,20 +1,97 @@
-# Gather — Gather Suite
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Gather: one planner for your work and your life. A task is scheduled on the calendar, hours become an invoice, and text from a PDF becomes a note.">
+</p>
 
-Suite de productivité personnelle développée par **Steven KOULO**.
-Interface blanche et noire par défaut, mode sombre et palettes configurables.
-Les développements originaux sont propriétaires ; le produit n'est pas publié sous MIT.
+<p align="center">
+  <a href="https://github.com/stvekoulo/gather-suite/releases/latest"><strong>Download the latest version</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#install">Install</a>
+  &nbsp;·&nbsp;
+  <a href="#build-from-source">Build from source</a>
+</p>
 
-## Développement
+<p align="center">
+  <img src="./assets/readme/kanban.png" width="100%" alt="Gather's Tasks and Kanban page with sample tasks in four columns, beside the menu listing every module.">
+</p>
+<p align="center"><sub>Sample data. Drag a card between columns, or schedule it on your calendar.</sub></p>
 
-Prérequis : Node.js 24 LTS ou 26, Rust >= 1.90 et dépendances système Tauri v2.
+## What is Gather?
+
+Gather is a desktop app that keeps your calendar, tasks, notes, documents, invoices and money in one place. It works offline, and your data stays on your computer unless you choose to create an account.
+
+You can keep separate spaces, for example one for work and one for home.
+
+## Your modules talk to each other
+
+Most tools make you copy things from one app to the next. In Gather, the next step is a click away:
+
+- **Task to calendar:** schedule a task, and it takes a slot in your calendar.
+- **Hours to invoice:** track your time, then bill it.
+- **PDF to note:** extract the text of a PDF, then keep it as a note.
+- **Search everything:** `Ctrl+K` finds file names and the words inside your notes, tasks, invoices and clients as you type.
+- **Capture from anywhere:** `Ctrl+Shift+Space` drops a note, task or event into Gather without leaving what you are doing.
+
+## What's inside
+
+| Plan | Create | Run your business |
+| --- | --- | --- |
+| Calendar | Notes and wiki | Clients |
+| Tasks and Kanban | Documents | Invoices |
+| Time tracking | Spreadsheets | Income and expenses, with live exchange rates |
+| Dashboard and analytics | Presentations | |
+| | Infinite canvas | |
+
+The PDF suite has 21 tools that run on your computer, including merge, split, OCR, redaction and digital signatures.
+
+<p align="center">
+  <img src="./assets/readme/pdf-tools.png" width="100%" alt="Six of the PDF suite's tools: merge, extract and reorder, remove pages, reverse pages, rotate, and split into files.">
+</p>
+
+## Install
+
+Download the file for your system from the [latest release](https://github.com/stvekoulo/gather-suite/releases/latest).
+
+| System | File | Requires |
+| --- | --- | --- |
+| Windows | `_x64-setup.exe` | Windows 10 or 11, 64-bit |
+| macOS, Apple Silicon | `_aarch64.dmg` | macOS 11 or newer |
+| macOS, Intel | `_x64.dmg` | macOS 11 or newer |
+| Linux | `.AppImage` or `.deb` | Ubuntu 22.04 or newer, x86_64 |
+
+The installers are not code-signed yet, so your system will warn you:
+
+- **Windows:** on the SmartScreen warning, choose **More info**, then **Run anyway**.
+- **macOS:** move Gather to Applications, then run:
+
+  ```sh
+  xattr -cr /Applications/Gather.app
+  ```
+
+## Your data
+
+- **On your computer:** everything is stored in a local database, with a daily snapshot kept for 7 days. You can export and restore all your spaces from **Settings > Data**.
+- **Optional account:** notes, tasks, events, finances, invoices and preferences sync between your computers. Each account can only reach its own data. Read [how sync works](docs/CLOUD.md).
+- **AI assistants:** Gather has no AI built in. You can connect your own assistant through a [local MCP server](docs/MCP.md), which is off by default.
+- **Online requests:** without an account, Gather only contacts `open.er-api.com` for exchange rates and `date.nager.at` for public holidays, plus any image you insert by web address.
+
+## Known limits
+
+- Imported files and attachments do not sync. Their names and details do, and so do documents you write in Gather.
+- The macOS and Linux builds have not yet been tested on real machines.
+- Part of the interface still appears in French when the language is set to English.
+
+Test results are in [docs/VALIDATION.md](docs/VALIDATION.md). The project documents in `docs/` are written in French.
+
+## Build from source
+
+You need Node.js 24 LTS or 26, Rust 1.90 or newer, and the [Tauri v2 system dependencies](https://tauri.app/start/prerequisites/).
 
 ```sh
 npm ci
-npm run dev
 npm run tauri:dev
 ```
 
-## Vérifications
+Run the checks with:
 
 ```sh
 npm test
@@ -22,37 +99,10 @@ npm run typecheck
 npm run lint
 npm run build
 npm run test:e2e
-npm run tauri:build
-npm run test:native -- CHEMIN_ABSOLU_DE_L_EXE_QA
 ```
 
-`npm start` sert l'export statique sur http://127.0.0.1:3000.
-Les scripts Tauri utilisent la chaîne Rust du système et les variables standard
-CARGO_HOME / RUSTUP_HOME. Le cache Windows existant est détecté s'il est disponible.
-Le workflow `.github/workflows/desktop-validation.yml` prépare les vérifications sur
-Windows, macOS et Linux ; sa présence ne prouve pas leur exécution.
+To build the installers, run `npm run tauri:build`. Releases are described in [docs/RELEASE.md](docs/RELEASE.md).
 
-## Données
+## License
 
-- Application native : SQLite local, fichier `workspace.db` dans le répertoire de configuration Tauri.
-- Navigateur : IndexedDB, avec reprise des anciens enregistrements localStorage.
-- Les pièces jointes sont stockées à part du catalogue. Un instantané quotidien est conservé 7 jours, et un
-  écran de récupération s'affiche si les données ne peuvent pas s'ouvrir.
-- Chaque espace conserve ses propres données. Paramètres > Données : export et restauration de tous les espaces.
-- Les moteurs OCR et les langues français/anglais sont copiés localement par `prebuild`.
-- Compte et synchronisation multi-appareils facultatifs : voir [CLOUD.md](docs/CLOUD.md).
-- Agents IA : serveur MCP local, désactivé par défaut, voir [MCP.md](docs/MCP.md).
-- En ligne, sans clé : taux de change (open.er-api.com) et jours fériés (date.nager.at). La CSP n'autorise
-  aucune autre destination réseau, hors images insérées par URL.
-- L'identifiant natif `app.aura.workspace` est conservé : le changer rendrait les données existantes inaccessibles.
-
-## État du produit
-
-Voir [l'audit fonctionnel](docs/PRODUCT_AUDIT.md) pour les fonctions présentes, leurs
-limites et les étapes qui empêchent encore de déclarer Gather prêt à 100 %.
-Ne pas confondre les bibliothèques intégrées avec la totalité des applications
-Blinko, Excalidraw.com ou Stirling-PDF.
-
-Le détail de la cible complète sans IA et des écarts restants se trouve dans
-[PARITY_NON_AI.md](docs/PARITY_NON_AI.md). Les résultats sont dans
-[VALIDATION.md](docs/VALIDATION.md).
+Copyright © 2026 Steven KOULO. All rights reserved. Gather is proprietary software: the source is visible here, but it is not open source. See [LICENSE](LICENSE). Third-party components keep their own licenses.
