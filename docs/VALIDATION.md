@@ -1,51 +1,48 @@
-# Gather — validation du 31 octobre 2026
+# Gather: validation results
 
-Résultats obtenus sur ce poste Windows. Une ligne absente n'a pas été vérifiée.
+Results obtained on this Windows machine unless stated otherwise. A missing line means it was not checked. Last updated November 1, 2026.
 
-## Contrôles
+## Checks
 
-| Contrôle | Résultat |
+| Check | Result |
 | --- | --- |
-| `npm run typecheck` | Réussi |
-| `npm run lint` | 0 erreur, 69 avertissements (imports inutilisés et `<img>`) |
-| `npm test` | 112 tests réussis, 31 fichiers |
-| `npm run build` | Réussi |
-| `npm run test:e2e` | 37 parcours réussis sur 37, sur Edge/Chromium |
-| `cargo check` et build QA Tauri | Réussis |
-| `npm run test:native` (exécutable QA) | Tableau blanc, lecteur PDF, démarrage OCR, taux en ligne, accès à Neon Auth, blocage d'un domaine non autorisé, persistance après redémarrage |
-| Serveur MCP (exécutable QA) | Sans jeton : 401. Depuis une page web : 403. 30 outils listés ; une tâche créée par un client externe apparaît dans l'application |
-| Installateur Windows de production | `Gather_0.3.0_x64-setup.exe` construit (42,6 Mo), non signé, non installé sur une machine vierge |
-| Build VPS Openship (run n°9, 1 h 12) | Tests réussis dans le conteneur ; `Gather_0.3.0_amd64.AppImage` (127 Mo), `.deb` (49 Mo) et `Gather_0.3.0_x64-setup.exe` (45 Mo) publiés sur la release `v0.3.0`. Aucun n'est installé ni lancé. macOS ignoré : `osxcross` absent du VPS. Sans `TAURI_SIGNING_PRIVATE_KEY`, pas de `latest.json` |
-| Build VPS Openship (run n°12, 1 h 37) | Release `v0.3.1` : Linux (AppImage, `.deb`), Windows (`setup.exe`), macOS Apple Silicon et Intel (`.dmg`, `.app.tar.gz`). Binaires macOS vérifiés au format Mach-O, arm64 avec signature locale. Aucun installateur n'a été lancé |
-| Build VPS Openship (run n°13, 1 h 45) | Release `v0.3.2` signée pour la mise à jour : `latest.json` couvre Linux, Windows et macOS (les deux architectures), et ses quatre liens répondent. Identifiant de clé des signatures comparé à la clé publique de l’application. Installation d’une mise à jour jamais essayée |
-| `next build` de `landing-gather` | Réussi ; liens de téléchargement actifs vers les releases de `gather-suite`. Site non déployé |
-| `npm audit --omit=dev` | 4 vulnérabilités faibles, aucune modérée ou plus |
-| Isolation entre comptes (SQL sur Neon) | Un autre compte ne voit rien, ne modifie rien, ne peut pas écrire au nom d'autrui ; sans jeton, aucune ligne |
+| `npm run typecheck` | Pass |
+| `npm run lint` | 0 errors, 69 warnings (unused imports and `<img>`) |
+| `npm test` | 115 tests pass, 32 files |
+| `npm run build` | Pass |
+| `e2e/english.spec.ts` | All 16 pages show no detected French text in English mode, with empty data |
+| `cargo check` and Tauri QA build | Pass |
+| `npm run test:native` (QA executable) | Whiteboard, PDF reader, OCR start, online rates, Neon Auth access, blocking an unauthorized domain, persistence after restart |
+| MCP server (QA executable) | Without token: 401. From a web page: 403. 30 tools listed; a task created by an external client appears in the app |
+| VPS build on Openship (run 9, 1 h 12) | Tests pass in the container; `v0.3.0` Linux and Windows published. macOS skipped because `osxcross` was missing from the VPS |
+| VPS build on Openship (run 12, 1 h 37) | `v0.3.1`: Linux, Windows, macOS Apple Silicon and Intel. macOS binaries checked as Mach-O, arm64 with a local signature |
+| VPS build on Openship (run 13, 1 h 45) | `v0.3.2` signed for updates: `latest.json` covers Linux, Windows and both macOS architectures, and its four links respond. Signature key ID compared with the app's public key. Installing an update has never been tried |
+| Linux `.deb` and AppImage `v0.3.2` (clean Ubuntu 22.04 container on the VPS, virtual display) | Downloaded from GitHub; `.deb` installs; both open a `Gather` window and stay running. With the `.deb`, the welcome screen renders and `workspace.db` is created. Not tried on a physical machine |
+| `next build` of the landing page | Pass; download links active. Site not deployed |
+| `npm audit --omit=dev` | 4 low vulnerabilities, none moderate or higher |
+| Account isolation (SQL on Neon) | Another account sees nothing, changes nothing, cannot write on someone else's behalf; without a token, no rows |
 
-La Data API Neon n'était pas activée (erreur 503 à la synchronisation) ; elle l'est depuis le
-31 octobre, avant `cloud/schema.sql`, qui ne crée plus le rôle `authenticated`.
+The Neon Data API was not enabled (a 503 error on sync). It has been since October 31. Enable it before applying `cloud/schema.sql`, which no longer creates the `authenticated` role.
 
-La synchronisation est couverte par les tests du moteur de fusion et par un parcours E2E avec
-serveur simulé.
+Sync is covered by merge engine tests and an E2E journey with a simulated server.
 
-## Non vérifié
+## Not checked
 
-- **Synchronisation avec un vrai compte Neon** : aucune inscription réelle n'a été faite pendant
-  ces tests. À faire avec un compte, sur deux ordinateurs.
-- Barre système, raccourci global Ctrl+Maj+Espace et lancement au démarrage : compilés, non
-  manipulés à la main.
-- macOS, Linux, machine vierge, WebView2 absent. Le SDK macOS vient d'une archive tierce (`joseluisq/macosx-sdks`, SHA-256 `6e146275d19f027faa2e8354da5e0267513abf013b8f16ad65a231653a2b1c5d`).
-- Glisser-déposer des tâches : testé dans un navigateur, pas encore dans l'application installée.
-- Signature numérique PDF contrôlée par OpenSSL ou Adobe.
-- CI GitHub : refusée pour un problème de paiement ; les releases passent par le VPS.
+- **Sync with a real Neon account:** no real sign-up was made during these tests. To do with an account on two computers.
+- System tray, the global `Ctrl+Shift+Space` shortcut and launch at startup: compiled, not tried by hand.
+- macOS: nothing has been launched on a Mac. The macOS SDK comes from a third-party archive (`joseluisq/macosx-sdks`, SHA-256 `6e146275d19f027faa2e8354da5e0267513abf013b8f16ad65a231653a2b1c5d`).
+- A clean Windows machine, or one without WebView2.
+- Task drag and drop: tested in a browser, not in the installed app.
+- PDF digital signature checked with OpenSSL or Adobe.
+- GitHub CI: refused because of a billing issue, so releases go through the VPS.
 
-## Reproduire
+## Reproduce
 
 ```sh
 npm run build
 npm run test:e2e
 npm run tauri:build -- --debug --no-bundle --config src-tauri/tauri.qa.conf.json
-npm run test:native -- CHEMIN_ABSOLU_DE_L_EXE
+npm run test:native -- ABSOLUTE_PATH_TO_EXE
 ```
 
-`test:native` refuse de s'exécuter hors du profil `app.stevenkoulo.gather.qa`.
+`test:native` refuses to run outside the `app.stevenkoulo.gather.qa` profile.

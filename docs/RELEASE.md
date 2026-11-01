@@ -1,34 +1,34 @@
-# Publier une version
+# Publishing a version
 
-La release passe par le workflow Openship `.openship/workflows/gather-release.yml`, sur le VPS (GitHub Actions n'est pas utilisable).
+Releases go through the Openship workflow `.openship/workflows/gather-release.yml`, on the VPS (GitHub Actions cannot be used).
 
-1. Monter la version dans `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`, puis dans `lib/site.ts` du dépôt `gather-landing`.
-2. Pousser sur `main`, puis lancer le workflow dans Openship.
+1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, then in `lib/site.ts` of the `gather-landing` repository.
+2. Push to `main`, then run the workflow in Openship.
 
-Le workflow nettoie ce que Gather a laissé, limite le conteneur à 2,2 Go de RAM pour protéger les autres services du serveur, puis construit Linux, Windows et macOS l'un après l'autre.
-Chaque plateforme est publiée dès qu'elle est prête, donc l'échec de l'une n'empêche pas l'autre. Openship garde 8 Mo de journal par job : le job n'affiche que les lignes clés et la fin, le journal complet est dans `/home/ubuntu/gather-release.log` sur le VPS.
+The workflow cleans up what Gather left behind, limits the container to 2.2 GB of RAM to protect the server's other services, then builds Linux, Windows and macOS one after another. Each platform is published as soon as it is ready, so one failing does not stop the others. Openship keeps 8 MB of log per job: the job only shows key lines and the end, and the full log is in `/home/ubuntu/gather-release.log` on the VPS.
 
-## Secrets et variables Openship
+## Openship secrets and variables
 
-| Nom | Rôle |
+| Name | Purpose |
 | --- | --- |
-| `RELEASE_GITHUB_TOKEN` | Clone du dépôt et publication |
-| `TAURI_SIGNING_PRIVATE_KEY` | Contenu de `~/.tauri/gather-updater.key`. Sans lui, pas de mise à jour automatique |
-| `RELEASE_REPO` | Dépôt qui reçoit les installateurs. Par défaut `stvekoulo/gather-suite` |
+| `RELEASE_GITHUB_TOKEN` | Cloning the repository and publishing |
+| `TAURI_SIGNING_PRIVATE_KEY` | Contents of `~/.tauri/gather-updater.key`. Without it, no automatic updates |
+| `RELEASE_REPO` | Repository that receives the installers. Defaults to `stvekoulo/gather-suite` |
 
-Le dépôt `gather-suite` est public : l'application et la landing (dépôt privé `gather-landing`) visent ses releases. S'il redevient privé, les téléchargements et les mises à jour cesseront de fonctionner.
-La clé privée de mise à jour ne doit jamais entrer dans le dépôt, et sa perte empêcherait de mettre à jour les installations existantes.
+The `gather-suite` repository is public: the app and the landing page (private `gather-landing` repository) point to its releases. If it goes private again, downloads and updates stop working.
+
+The private update key must never enter the repository. Losing it would make it impossible to update existing installations.
 
 ## macOS
 
-Le VPS construit macOS (Apple Silicon et Intel) avec `osxcross`, monté depuis l'hôte. Le workflow le cherche dans la variable `OSXCROSS_ROOT`, puis dans les emplacements habituels, et affiche le chemin retenu. Sans `osxcross`, macOS est ignoré et Linux et Windows sont publiés quand même.
+The VPS builds macOS (Apple Silicon and Intel) with `osxcross`, mounted from the host. The workflow looks for it in the `OSXCROSS_ROOT` variable, then in the usual locations, and prints the path it picks. Without `osxcross`, macOS is skipped and Linux and Windows are still published.
 
-`clang` 14 et 15 évaluent à tort les tests `exclave*` de `TargetConditionals.h` du SDK 14.5 : macOS n'est alors jamais activé. Après l'installation d'`osxcross`, désactivez-les une fois sur le VPS :
+`clang` 14 and 15 wrongly evaluate the `exclave*` tests in the 14.5 SDK's `TargetConditionals.h`, so macOS is never enabled. After installing `osxcross`, disable them once on the VPS:
 
 ```sh
 sudo sed -i -E 's/\(__is_target_vendor\(apple\) && __is_target_environment\(exclave(core|kit)\)\)/(0)/' /home/ubuntu/osxcross/target/SDK/MacOSX14.5.sdk/usr/include/TargetConditionals.h
 ```
 
-La variable `RELEASE_PLATFORMS` du workflow limite un build à une famille (`linux`, `windows` ou `macos`).
+The workflow's `RELEASE_PLATFORMS` variable limits a build to one family (`linux`, `windows` or `macos`).
 
-Le `.app` est assemblé par `scripts/vps-release.mjs`, car le bundler de Tauri ne le fait que sur un Mac. L'application n'est ni signée avec un compte Apple Developer ni notarisée : au premier lancement, macOS la bloque comme venant d'un développeur non identifié (`xattr -cr /Applications/Gather.app` la débloque). Il faut un compte Apple Developer pour lever ce blocage.
+`scripts/vps-release.mjs` assembles the `.app`, because Tauri's bundler only does so on a Mac. The app is neither signed with an Apple Developer account nor notarized, so macOS blocks the first launch as coming from an unidentified developer (`xattr -cr /Applications/Gather.app` unblocks it). Lifting this requires an Apple Developer account.

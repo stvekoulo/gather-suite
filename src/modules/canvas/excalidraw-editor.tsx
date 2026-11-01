@@ -7,6 +7,7 @@ import { DownloadIcon, FileUpIcon, PaletteIcon } from "lucide-react";
 import { Excalidraw, exportToBlob, exportToSvg, loadFromBlob, serializeAsJSON, convertToExcalidrawElements } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI, ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
 import { Button } from "@/components/ui/button";
+import { useAppStore } from "@/stores/app-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { saveFile } from "@/lib/files";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ if (typeof window !== "undefined") Object.assign(window, { EXCALIDRAW_ASSET_PATH
 // Intégration Infinite Canvas avec sauvegarde locale et export à la demande
 export default function ExcalidrawEditor() {
   const { resolvedTheme } = useTheme();
+  const language = useAppStore((s) => s.settings.language);
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [initialData] = useState<ExcalidrawInitialDataState>(() => {
@@ -147,7 +149,7 @@ export default function ExcalidrawEditor() {
           excalidrawAPI={setApi}
           initialData={initialData}
           theme={resolvedTheme === "dark" ? "dark" : "light"}
-          langCode="fr-FR"
+          langCode={language === "en" ? "en" : "fr-FR"}
           onLibraryChange={(items) => {
             if (mounted.current) useWorkspaceStore.getState().saveDrawingLibrary(JSON.stringify(items));
           }}

@@ -1,126 +1,94 @@
-# Gather Suite — audit fonctionnel et validation
+# Gather Suite: functional audit and validation
 
-Auteur du produit : **Steven KOULO**. Date : 31 octobre 2026.
-Statut : **bêta avancée sous Windows, parité fonctionnelle incomplète**. Résultats dans [VALIDATION.md](./VALIDATION.md).
+Product author: **Steven KOULO**. Written October 31, 2026, updated November 1, 2026.
 
-## Verdict de préparation à l’usage
+Status: **advanced beta on Windows, incomplete feature parity**. Results are in [VALIDATION.md](./VALIDATION.md).
 
-| Usage envisagé | Verdict | Justification |
+## Readiness verdict
+
+| Intended use | Verdict | Reason |
 | --- | --- | --- |
-| Usage personnel local sous Windows | Oui | Build, 112 tests unitaires et 37 parcours E2E réussis, instantanés et récupération |
-| Compte et synchronisation | À valider | Isolation prouvée en SQL et fusion testée ; aucun essai avec un vrai compte sur deux PC |
-| Remplacement complet de Word/PowerPoint, Blinko ou Stirling-PDF | Non | Voir [PARITY_NON_AI.md](./PARITY_NON_AI.md) |
-| Diffusion publique | Non | Installateur non signé, pas de mises à jour automatiques, mot de passe oublié absent, macOS et Linux non testés |
+| Personal local use on Windows | Yes | Build, unit tests and E2E journeys pass, with snapshots and recovery |
+| Account and sync | To validate | Isolation proven in SQL and merging tested; never tried with a real account on two PCs |
+| Full replacement for Word/PowerPoint, Blinko or Stirling-PDF | No | See [PARITY_NON_AI.md](./PARITY_NON_AI.md) |
+| Public distribution | Not yet | Unsigned installers, automatic update never tried end to end, macOS untested |
 
-## Références effectivement analysées
+## References analyzed
 
-Le skill `reverse-engineer-anything` a été lu. Il prescrit les outils de dépôt
-ordinaires pour des sources complètes ; aucune décompilation d'un binaire n'était
-nécessaire. Les clones de référence sont isolés dans `.reference/`, hors compilation.
+The `reverse-engineer-anything` skill was read. It prescribes ordinary repository tools for complete sources, so no binary needed decompiling. Reference clones are isolated in `.reference/`, outside the build.
 
-- Blinko : `stvekoulo/blinko`, révision `b2586d03fddb796252f050a96922879bf4a41fad`.
-  Analyse de `prisma/schema.prisma`, `server/routerTrpc/note.ts`, `tag.ts`,
-  `attachment.ts`, `server/jobs/dbjob.ts` et des éditeurs, ressources et paramètres.
-- Excalidraw : révision `e7b534668a60add7f725531f3c9abf32508c7b4e`.
-  Analyse du catalogue README, de `packages/excalidraw/data/json.ts`, `library.ts`,
-  des actions et de la couche distincte `excalidraw-app/collab/Collab.tsx`.
-  Le composant embarqué est `@excalidraw/excalidraw@0.18.1`, pas une copie de toute
-  l'application hébergée ni une garantie d'équivalence avec la révision de référence.
-- Stirling-PDF : révision `025f763f015243327d0de9079403c0436a8504e2`.
-  Analyse du catalogue des outils du frontend et des contrôleurs OCR, conversion,
-  compression et sécurité du backend. `OCRController` dépend d'OCRmyPDF/Tesseract ;
-  `ConvertPDFToOffice` délègue à un service de conversion ou à LibreOffice.
-  Aucun backend Stirling-PDF n'est embarqué dans Gather.
+- Blinko: `stvekoulo/blinko`, revision `b2586d03fddb796252f050a96922879bf4a41fad`. Analyzed `prisma/schema.prisma`, `server/routerTrpc/note.ts`, `tag.ts`, `attachment.ts`, `server/jobs/dbjob.ts`, and the editors, resources and settings.
+- Excalidraw: revision `e7b534668a60add7f725531f3c9abf32508c7b4e`. Analyzed the README catalog, `packages/excalidraw/data/json.ts`, `library.ts`, the actions, and the separate `excalidraw-app/collab/Collab.tsx` layer. The embedded component is `@excalidraw/excalidraw@0.18.1`, not a copy of the whole hosted app, and not a guarantee of equivalence with the reference revision.
+- Stirling-PDF: revision `025f763f015243327d0de9079403c0436a8504e2`. Analyzed the frontend tool catalog and the backend's OCR, conversion, compression and security controllers. `OCRController` depends on OCRmyPDF/Tesseract, and `ConvertPDFToOffice` delegates to a conversion service or LibreOffice. No Stirling-PDF backend is embedded in Gather.
 
-Le code de Blinko et Stirling-PDF n'a pas été copié dans les modules Gather.
-Ils servent ici de références fonctionnelles. Le moteur Excalidraw est une dépendance.
+Blinko and Stirling-PDF code was not copied into Gather's modules. They serve here as functional references. The Excalidraw engine is a dependency.
 
-## Défauts reproduits et corrigés
+## Defects reproduced and fixed
 
-- Les opérations PDF signalaient un succès après une temporisation sans traiter de fichier.
-- Le lecteur PDF affichait un faux document de quatre pages.
-- Le document créé ne sauvegardait que ses métadonnées ; son texte était perdu.
-- L'export Word était du Markdown renommé en `.doc`.
-- Les fichiers importés au-delà de 1,5 Mo perdaient leur contenu.
-- L'écran Présentations était vide au premier lancement, sans possibilité de création.
-- Les identifiants fondés uniquement sur l'heure entraient en collision lors d'ajouts rapides.
-- La suppression de la dernière slide produisait un diaporama inutilisable.
-- Une demande de congé rouverte ne recréait pas ses événements.
-- Un second lancement de chronomètre effaçait la session active.
-- Les tags retirés du contenu restaient attachés aux notes ; les références étaient dupliquées.
-- L'export des paramètres omettait les notes et les données des autres studios.
-- Les préférences de palette ne modifiaient pas toutes les variables CSS réellement utilisées.
-- Le calendrier démarrait sur une date de démonstration fixe.
-- Le chargeur CSS personnalisé faisait planter Turbopack ; remplacement par PostCSS.
-- Sous Windows, l'export Next.js produisait certains segments RSC dans des sous-dossiers,
-  alors que le routeur demandait un nom aplati. Un postbuild ajoute les chemins attendus.
-  Le serveur local doit également servir les `.txt` avec un type `text/plain` correct.
-- La fenêtre native imposait 960 px minimum ; elle descend désormais à 360 × 480
-  et sa taille initiale est limitée à la zone disponible du moniteur. Les marges
-  et barres d'outils du document s'adaptent aux petites fenêtres.
-- Le menu de profil annonçait une fausse déconnexion. Il indique désormais
-  explicitement un profil local, sans simuler une session cloud.
-- La fermeture native exigeait une permission de destruction de fenêtre manquante ;
-  elle a été corrigée et le cycle fermeture/redémarrage avec relecture SQLite testé.
+- PDF operations reported success after a delay without processing any file.
+- The PDF reader showed a fake four-page document.
+- A created document only saved its metadata, and its text was lost.
+- The Word export was Markdown renamed to `.doc`.
+- Files imported above 1.5 MB lost their content.
+- The Presentations screen was empty on first launch, with no way to create anything.
+- IDs based only on the time collided during fast additions.
+- Deleting the last slide produced an unusable deck.
+- A reopened leave request did not recreate its events.
+- Starting a second timer erased the active session.
+- Tags removed from content stayed attached to notes, and references were duplicated.
+- The settings export left out notes and the other studios' data.
+- Palette preferences did not change all the CSS variables in use.
+- The calendar started on a fixed demo date.
+- The custom CSS loader crashed Turbopack; it was replaced by PostCSS.
+- On Windows, the Next.js export produced some RSC segments in subfolders while the router asked for a flattened name. A postbuild step adds the expected paths. The local server must also serve `.txt` with a correct `text/plain` type.
+- The native window required a 960 px minimum. It now goes down to 360 × 480, and its initial size is limited to the monitor's available area. Document margins and toolbars adapt to small windows.
+- The profile menu announced a fake sign-out. It now states plainly that the profile is local, without simulating a cloud session.
+- Native closing needed a missing window-destroy permission. This was fixed, and the close/restart cycle with SQLite re-read was tested.
 
-## Fonctions locales présentes
+## Local features present
 
-### Corrections de préférences et d’ergonomie — 30 octobre 2026
+### Preference and usability fixes, October 30, 2026
 
-- La langue enregistrée dans les paramètres pilote désormais la navigation, les
-  paramètres et les principaux libellés autrefois écrits directement en anglais.
-  La bascule français/anglais et son maintien après rechargement sont testés.
-- Le lancement à la racine reprend la dernière rubrique valide ; une ouverture
-  directe sur une rubrique précise est respectée. Sans historique : tableau de bord.
-- Palette Monochrome : libellé raccourci, conteneurs contraints et troncature ;
-  pastilles adaptées au thème, bleu et émeraude éclaircis en mode sombre. Les sept
-  palettes sont testées à 390 px et leur texte sur accent respecte un contraste de 4,5:1.
-- Les 15 composants contenant des imports utilisent une surface commune beUI
-  File Upload : sélection explicite, glisser-déposer, formats acceptés, validation
-  et liste de sélection pour les traitements PDF. Les imports immédiats conservent
-  la liste métier du module, sans afficher de progression de transfert fictive.
-- Le test de notification attend la réponse native et signale les erreurs. Un
-  envoi réel depuis Gather QA a été accepté par le service Windows. La présence
-  effective d’une bannière reste soumise aux réglages système et à Ne pas déranger.
-- Les commandes natives Windows sont à droite, dans l’ordre Réduire/Agrandir/Fermer,
-  avec libellés français ; leur position est vérifiée dans l’exécutable QA.
+- The language saved in settings now drives navigation, settings and the main labels that used to be hard-coded in English. Switching between French and English and keeping the choice after reload are tested.
+- Launching at the root resumes the last valid section, and opening a specific section directly is respected. With no history, the dashboard opens.
+- Monochrome palette: shorter label, constrained containers and truncation; swatches adapted to the theme, with blue and emerald lightened in dark mode. The seven palettes are tested at 390 px, and their text on accent meets a 4.5:1 contrast.
+- The 15 components with imports use a shared beUI File Upload surface: explicit selection, drag and drop, accepted formats, validation and a selection list for PDF processing. Immediate imports keep the module's own list and show no fake transfer progress.
+- The notification test waits for the native response and reports errors. A real send from Gather QA was accepted by the Windows service. Whether a banner actually appears depends on system settings and Do Not Disturb.
+- Native Windows controls are on the right, in Minimize/Maximize/Close order, with labels; their position is checked in the QA executable.
 
-Validation de ce lot : 48 tests unitaires, suite de 24 parcours E2E réussie, puis
-un parcours ciblé supplémentaire pour le refus de format en glisser-déposer.
-Build frontend et exécutable QA Windows réussis. Ces contrôles ne remplacent pas
-le parcours de signature numérique et les autres limites indiquées dans cet audit.
+Validation of this batch: 48 unit tests, a suite of 24 E2E journeys passed, then one extra targeted journey for refusing a format on drag and drop. Frontend build and Windows QA executable succeeded. These checks do not replace the digital signature journey and the other limits in this audit.
 
-| Domaine | Présent | Limites à conserver visibles |
+| Area | Present | Limits to keep visible |
 | --- | --- | --- |
-| Identité | Gather / Gather Suite ; auteur Steven KOULO ; licence propriétaire des développements originaux | Audit de provenance nécessaire avant toute distribution commerciale de code hérité |
-| Apparence | Blanc/noir par défaut, thèmes clair/sombre, palettes enregistrées | Presets de couleurs ; pas de constructeur complet de design system |
-| Persistance | SQLite via Tauri ; IndexedDB en navigateur ; catalogue atomique contenant tous les espaces et modules ; migration des anciens états ; erreurs visibles | Catalogue JSON et pièces jointes stockées à part ; recherche par index en mémoire |
-| Documents | Édition Tiptap, tailles/couleurs, alignement, liens, recherche/remplacement, sauts de page, tableaux/images ; import DOCX ; vrai export DOCX avec marges, orientation, en-têtes, pieds, pagination et sommaire | L’éditeur à l’écran reste un flux continu ; import DOCX partiel, fonctions Word avancées et fidélité des objets complexes non complètes |
-| PDF des documents | Export riche avec pagination automatique, titres, styles, listes numérotées, tableaux, images, liens, sommaire, en-têtes et pieds de page | Pas une reproduction pixel à pixel de Word ; polices et certains tableaux fusionnés complexes restent à compléter |
-| Présentations | Création de decks, thèmes, titres, listes, métriques, notes ; objets texte/formes/images déplaçables et redimensionnables ; export PPTX valide | Import PPTX partiel : masques, groupes, graphiques, animations, polices et objets complexes non conservés intégralement ; mode présentateur à une fenêtre |
-| Notes | Mémos/notes/tâches Markdown ; tags hiérarchiques avec parents ; références, rétroliens, historique ; commentaires ; pièces jointes et gestionnaire de ressources ; actions par sélection ; journal/révision ; rappels locaux persistants ; import/export | Partage public protégé, partage entre comptes, fédération, plugins et RSS serveur restent absents. Les rappels fonctionnent quand Gather et l’espace sont ouverts, et rattrapent les échéances au retour. Aucune IA intégrée |
-| Import de notes | Markdown, JSON, ZIP, `.bko` contenant `bak.json` ; remappage des références ; fichiers d'archive | Les exports atypiques et ressources absentes sont refusés ; pas d'import Memos SQLite ni de migration complète des comptes Blinko |
-| Tableau blanc | Moteur officiel : dessin, formes, flèches, images, zoom, annulation, bibliothèques ; sauvegarde ; import/export `.excalidraw`, PNG et SVG | Collaboration, chiffrement de sessions et liens de partage d'Excalidraw.com non implémentés |
-| Contenus liés | Schéma du tableau blanc et extrait de tableur intégrables dans l'éditeur de documents avec mise à jour locale | Pas encore de graphe universel complet ; pas de live embed équivalent dans tous les studios |
-| Studio PDF | 20 traitements locaux : fusion, extraction/réorganisation, suppression/inversion, rotation, filigrane, optimisation, numérotation, dimensions, recadrage, métadonnées, aplatissement, texte/surlignage figé, images vers PDF, PDF séparés en ZIP, extraction texte, OCR français/anglais hors ligne vers PDF interrogeable, PNG par page, compression JPEG rasterisée et caviardage rasterisé | Protection par mot de passe, annotations interactives, PDF/A, formulaires éditables et conversion Office fidèle restent à compléter. La signature numérique est traitée séparément ci-dessous. Rasteriser retire texte sélectionnable, liens et champs ; OCR limité à des lots de 200 pages |
-| Signature numérique PDF | Signature CMS détachée avec clé RSA et certificat PKCS#12 `.p12/.pfx`, mot de passe, motif et vérification d’intégrité par PKIjs/Web Crypto ; refus des certificats expirés, mots de passe incorrects et nouvelle signature sur PDF déjà signé | Tests unitaires et compilation réussis ; parcours interface, OpenSSL et nouvelle validation native encore à exécuter. Pas de validation de chaîne de confiance/révocation, TSA certifiée, signature qualifiée, clé EC ou signatures successives incrémentales. Le certificat et le mot de passe ne sont pas persistés par le module |
-| Kanban | Projets, statuts, priorités, échéances, sous-tâches, chronomètre ; calendrier ; données propres à chaque espace | Pas encore de collaboration entre comptes |
-| Tableur | Grille enregistrée ; références, plages, calcul arithmétique, SOMME/SUM, MOYENNE/AVERAGE, SI/IF paresseux, MIN/MAX, NB/COUNT ; tri/filtre ; CSV | 26 colonnes et 200 lignes ; pas d'import XLSX complet, graphiques avancés ou bases Airtable |
-| Facturation | Édition locale ; PDF ; conversion des heures en lignes ; protection contre la double facturation | « Envoyée » est un statut manuel, pas un envoi d'e-mail ; aucun paiement réel |
-| Sauvegarde | Tous les espaces et leurs trois modules, contrôle des formats avant restauration ; sélection de l’espace et données validées enregistrées dans un seul catalogue canonique | Les anciennes sauvegardes sans catalogue sont restaurées dans l’espace actif ; des copies de compatibilité des trois anciens magasins sont conservées |
-| Fermeture | Attente des écritures natives ; vidage de l'autosave du dessin ; confirmation sur éditeurs modifiés | Une panne matérielle avant validation d'une écriture ne peut pas être garantie sans perte |
+| Identity | Gather / Gather Suite; author Steven KOULO; proprietary license for original work | Provenance audit needed before any commercial distribution of inherited code |
+| Appearance | Black and white by default, light/dark themes, saved palettes | Color presets; no full design-system builder |
+| Persistence | SQLite through Tauri; IndexedDB in the browser; atomic catalog holding all spaces and modules; migration of old states; visible errors | JSON catalog and attachments stored separately; in-memory search index |
+| Documents | Tiptap editing, sizes/colors, alignment, links, find/replace, page breaks, tables/images; DOCX import; real DOCX export with margins, orientation, headers, footers, pagination and table of contents | The on-screen editor stays a continuous flow; partial DOCX import, advanced Word features and complex object fidelity incomplete |
+| Document PDFs | Rich export with automatic pagination, headings, styles, numbered lists, tables, images, links, table of contents, headers and footers | Not a pixel-perfect copy of Word; fonts and some complex merged tables to complete |
+| Presentations | Creating decks, themes, titles, lists, metrics, notes; movable and resizable text/shape/image objects; valid PPTX export | Partial PPTX import: masters, groups, charts, animations, fonts and complex objects not fully kept; single-window presenter mode |
+| Notes | Markdown memos/notes/tasks; hierarchical tags with parents; references, backlinks, history; comments; attachments and resource manager; bulk actions; journal/review; persistent local reminders; import/export | Protected public sharing, sharing between accounts, federation, plugins and server RSS are absent. Reminders work while Gather and the space are open, and catch up on return. No built-in AI |
+| Note import | Markdown, JSON, ZIP, `.bko` containing `bak.json`; reference remapping; archive files | Atypical exports and missing resources are refused; no Memos SQLite import or full migration of Blinko accounts |
+| Whiteboard | Official engine: drawing, shapes, arrows, images, zoom, undo, libraries; saving; `.excalidraw`, PNG and SVG import/export | Collaboration, session encryption and Excalidraw.com share links not implemented |
+| Linked content | Whiteboard diagram and spreadsheet extract embeddable in the document editor with local updates | No full universal graph yet; no equivalent live embed in all studios |
+| PDF studio | Local tools: merge, extract/reorder, remove/reverse, rotate, watermark, optimize, numbering, dimensions, crop, metadata, flatten, flattened text/highlight, images to PDF, PDFs split into a ZIP, text extraction, offline French/English OCR to searchable PDF, PNG per page, rasterized JPEG compression and rasterized redaction | Password protection, interactive annotations, PDF/A, editable forms and faithful Office conversion to complete. The digital signature is covered below. Rasterizing removes selectable text, links and fields; OCR limited to batches of 200 pages |
+| PDF digital signature | Detached CMS signature with an RSA key and a PKCS#12 `.p12/.pfx` certificate, password, reason and integrity check through PKIjs/Web Crypto; refuses expired certificates, wrong passwords and a new signature on an already signed PDF | Unit tests and build pass; interface journey, OpenSSL and new native validation still to run. No validation of trust chain/revocation, certified TSA, qualified signature, EC key or incremental successive signatures. The module does not persist the certificate or password |
+| Kanban | Projects, statuses, priorities, due dates, subtasks, timer; calendar; data specific to each space | No collaboration between accounts yet |
+| Spreadsheet | Saved grid; references, ranges, arithmetic, SUM, AVERAGE, lazy IF, MIN/MAX, COUNT; sort/filter; CSV | 26 columns and 200 rows; no full XLSX import, advanced charts or Airtable-style bases |
+| Invoicing | Local editing; PDF; turning hours into lines; protection against double billing | "Sent" is a manual status, not an email; no real payment |
+| Backup | All spaces and their three modules, format check before restore; space selection and validated data saved in a single canonical catalog | Old backups without a catalog restore into the active space; compatibility copies of the three old stores are kept |
+| Closing | Waits for native writes; flushes the drawing autosave; confirmation for modified editors | A hardware failure before a write is committed cannot be guaranteed loss-free |
 
-## Points restant avant une diffusion publique
+## Remaining before public distribution
 
-1. Essayer la synchronisation réelle sur deux ordinateurs ([CLOUD.md](./CLOUD.md)).
-2. Ajouter mot de passe oublié et suppression de compte.
-3. Signer l'application et configurer les mises à jour : nécessite un certificat et une paire de clés.
-4. Valider le build VPS, puis tester les installateurs macOS et Linux sur de vraies machines.
-5. Publier les installateurs et mettre à jour les liens de la landing, dans le dépôt `gather-landing`.
-6. Synchroniser les fichiers, avec un stockage objet plutôt que Postgres.
-7. Terminer la parité suivie dans [PARITY_NON_AI.md](./PARITY_NON_AI.md) et la traduction anglaise des modules.
-8. Vérifier la provenance du code hérité avant distribution.
+1. Try real sync on two computers ([CLOUD.md](./CLOUD.md)).
+2. Sign the app: this needs a Windows certificate and an Apple Developer account.
+3. Try an automatic update end to end, from one signed version to the next.
+4. Test the macOS installers on a real Mac, built with a licensed SDK.
+5. Deploy the landing page from the `gather-landing` repository.
+6. Sync files, with object storage rather than Postgres.
+7. Finish the parity tracked in [PARITY_NON_AI.md](./PARITY_NON_AI.md), and translate starter template content.
+8. Check the provenance of inherited code before distribution.
 
 ## Validation
 
-Les résultats datés sont consignés dans [VALIDATION.md](./VALIDATION.md).
+Dated results are recorded in [VALIDATION.md](./VALIDATION.md).

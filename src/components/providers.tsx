@@ -9,6 +9,7 @@ import { ThemePaletteProvider } from "@/components/theme-palette-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-media-query";
+import { DomTranslator } from "@/lib/i18n/dom-translator";
 import { Reminders } from "@/modules/reminders/reminders";
 import { FxRefresher } from "@/lib/fx";
 import { CloudSync } from "@/modules/cloud/cloud-sync";
@@ -29,6 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
       <StorageGate><LocaleBoundary><ThemePaletteProvider>
         <TooltipProvider delayDuration={400} skipDelayDuration={300}>
+          <DomTranslator />
           <NativePersistenceGuard />
           <Reminders />
           <FxRefresher />

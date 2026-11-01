@@ -1,32 +1,25 @@
-# Connecter un agent IA (MCP)
+# Connect an AI agent (MCP)
 
-Gather expose un serveur MCP pour que Claude, Cursor ou tout autre client MCP agisse sur vos données.
-Il s'active dans Paramètres > Données et ne fonctionne que dans l'application de bureau, tant qu'elle est ouverte.
+Gather exposes an MCP server so that Claude, Cursor or any other MCP client can act on your data. Turn it on in Settings > Data. It only works in the desktop app, while the app is open.
 
-## Sécurité
+## Security
 
-- Désactivé par défaut, puis **lecture seule** : les modifications demandent un second interrupteur.
-- Écoute uniquement sur `127.0.0.1:47821`, avec un jeton d'accès changeable à tout moment.
-- Refuse toute requête portant un en-tête `Origin`, pour qu'une page web ne puisse pas l'atteindre.
-- Ne transmet jamais le contenu des fichiers joints, seulement leurs fiches.
-- Agit sur l'espace actif. Le contenu lu peut contenir des instructions malveillantes : n'autorisez l'écriture
-  qu'aux agents de confiance.
+- Off by default, then **read-only**: changes need a second switch.
+- Listens only on `127.0.0.1:47821`, with an access token you can change at any time.
+- Refuses any request with an `Origin` header, so a web page cannot reach it.
+- Never sends the content of attached files, only their details.
+- Acts on the active space. Content it reads may contain malicious instructions, so only allow writing for agents you trust.
 
-## Connexion
+## Connecting
 
-Le bouton « Copier la configuration » fournit le bloc à coller dans le client, via `mcp-remote`.
-Les clients qui gèrent HTTP directement utilisent `http://127.0.0.1:47821/mcp` et l'en-tête
-`Authorization: Bearer JETON`.
+The **Copy configuration** button gives you the block to paste into the client, through `mcp-remote`. Clients that support HTTP directly use `http://127.0.0.1:47821/mcp` and the header `Authorization: Bearer TOKEN`.
 
-Les agents hébergés (API OpenAI, Grok) ne peuvent pas joindre un serveur local sans tunnel HTTPS. Un serveur MCP
-distant adossé au compte cloud reste à construire pour eux.
+Hosted agents (OpenAI API, Grok) cannot reach a local server without an HTTPS tunnel. A remote MCP server backed by the cloud account has yet to be built for them.
 
-## Outils
+## Tools
 
-- **Lecture** : `search`, `today`, `list`, `get`, `finance_summary`, `convert_currency`, `client_activity`,
-  `list_clients`, `list_spaces`.
-- **Écriture** : notes, tâches, événements, factures (brouillon et statut), finances, temps, chronomètre, clients,
-  documents, tableurs, présentations, changement d'espace.
-- **Absents** : traitements PDF, modification d'un document ou d'un tableur existant.
+- **Read:** `search`, `today`, `list`, `get`, `finance_summary`, `convert_currency`, `client_activity`, `list_clients`, `list_spaces`.
+- **Write:** notes, tasks, events, invoices (draft and status), finances, time, timer, clients, documents, spreadsheets, presentations, switching space.
+- **Not included:** PDF processing, editing an existing document or spreadsheet.
 
-Aucun outil n'envoie de message ni de facture à un tiers.
+No tool sends a message or an invoice to a third party.

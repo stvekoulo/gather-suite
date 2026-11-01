@@ -1,4 +1,5 @@
 import { formatLong } from "@/lib/dates";
+import { translate } from "@/lib/i18n/ui-text";
 import type { Invoice, InvoiceItem, InvoiceStatus, Profile } from "@/lib/types";
 
 export const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD", "XOF", "XAF", "INR"] as const;
@@ -107,18 +108,18 @@ export function invoiceHtml(inv: Invoice, from: Profile): string {
     </div>
   </header>
   <section class="grid">
-    <div><div class="label">Facturé à</div><strong>${esc(inv.client)}</strong></div>
-    <div><div class="label">Émise le</div>${formatLong(inv.issueDate)}</div>
-    <div><div class="label">Échéance</div>${formatLong(inv.dueDate)}</div>
+    <div><div class="label">${translate("Facturé à")}</div><strong>${esc(inv.client)}</strong></div>
+    <div><div class="label">${translate("Émise le")}</div>${formatLong(inv.issueDate)}</div>
+    <div><div class="label">${translate("Échéance")}</div>${formatLong(inv.dueDate)}</div>
   </section>
   <table>
-    <thead><tr><th>Description</th><th class="num">Qté</th><th class="num">Prix unitaire</th><th class="num">Montant</th></tr></thead>
+    <thead><tr><th>Description</th><th class="num">${translate("Qté")}</th><th class="num">${translate("Prix unitaire")}</th><th class="num">${translate("Montant")}</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
   <div class="totals">
-    <div><span class="muted">Total HT</span><span class="num">${formatMoney(invoiceSubtotal(inv), inv.currency)}</span></div>
-    ${inv.taxRate ? `<div><span class="muted">TVA ${inv.taxRate} %</span><span class="num">${formatMoney(invoiceTax(inv), inv.currency)}</span></div>` : ""}
-    <div class="grand"><span>Total à payer</span><span class="num">${formatMoney(total, inv.currency)}</span></div>
+    <div><span class="muted">${translate("Total HT")}</span><span class="num">${formatMoney(invoiceSubtotal(inv), inv.currency)}</span></div>
+    ${inv.taxRate ? `<div><span class="muted">${translate("TVA")} ${inv.taxRate} %</span><span class="num">${formatMoney(invoiceTax(inv), inv.currency)}</span></div>` : ""}
+    <div class="grand"><span>${translate("Total à payer")}</span><span class="num">${formatMoney(total, inv.currency)}</span></div>
   </div>
   ${inv.notes.trim() ? `<div class="notes"><div class="label">Notes</div>${esc(inv.notes)}</div>` : ""}
   ${legalLines(inv, from).map((line) => `<div class="muted" style="margin-top:12px;font-size:12px">${esc(line)}</div>`).join("")}
@@ -129,7 +130,7 @@ export function invoiceHtml(inv: Invoice, from: Profile): string {
 
 export async function invoicePdfBytes(inv: Invoice, from: Profile) {
   const { createTextPdf } = await import("@/modules/pdf/text-pdf");
-  const lines = [...identity(from), "", "Client : " + inv.client, "Émission : " + inv.issueDate, "Échéance : " + inv.dueDate, "", ...inv.items.map((item) => item.description + " · " + item.quantity + " × " + formatMoney(item.rate, inv.currency) + " = " + formatMoney(lineTotal(item), inv.currency)), "", "Total HT : " + formatMoney(invoiceSubtotal(inv), inv.currency), ...(inv.taxRate ? [`TVA ${inv.taxRate} % : ` + formatMoney(invoiceTax(inv), inv.currency)] : []), "Total à payer : " + formatMoney(invoiceTotal(inv), inv.currency), "", inv.notes, ...legalLines(inv, from)];
+  const lines = [...identity(from), "", translate("Client :") + " " + inv.client, translate("Émission :") + " " + inv.issueDate, translate("Échéance :") + " " + inv.dueDate, "", ...inv.items.map((item) => item.description + " · " + item.quantity + " × " + formatMoney(item.rate, inv.currency) + " = " + formatMoney(lineTotal(item), inv.currency)), "", translate("Total HT") + " : " + formatMoney(invoiceSubtotal(inv), inv.currency), ...(inv.taxRate ? [`TVA ${inv.taxRate} % : ` + formatMoney(invoiceTax(inv), inv.currency)] : []), translate("Total à payer") + " : " + formatMoney(invoiceTotal(inv), inv.currency), "", inv.notes, ...legalLines(inv, from)];
   return createTextPdf(inv.number, lines.join("\n"));
 }
 export async function downloadInvoice(inv: Invoice, from: Profile) {

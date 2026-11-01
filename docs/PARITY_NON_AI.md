@@ -1,100 +1,83 @@
-# Suivi de la parité sans IA
+# Non-AI parity tracking
 
-Cible confirmée par Steven KOULO : reproduire toutes les fonctions demandées des
-références, à l’exception de l’IA. Cette cible n’est pas encore entièrement atteinte.
-Les mentions « partiel » ne doivent pas devenir des promesses commerciales.
+Target confirmed by Steven KOULO: reproduce all the requested features of the reference products, except AI. This target is not fully reached yet. "Partial" entries must not become sales promises.
 
-## Espaces de travail
+## Workspaces
 
-Isolation locale réalisée : calendrier, documents et fichiers, factures, notes et
-leurs ressources, présentations, tableau blanc, bibliothèques, tâches, tableurs et
-snippets. Le catalogue sélectionné et les trois modules sont enregistrés dans un
-seul état canonique. Les anciens magasins restent des copies de compatibilité.
+Local isolation done: calendar, documents and files, invoices, notes and their resources, presentations, whiteboard, libraries, tasks, spreadsheets and snippets. The selected catalog and the three modules are saved in a single canonical state. The old stores remain as compatibility copies.
 
-La migration conserve les données historiques dans l’espace précédemment actif.
-Les anciennes étiquettes supplémentaires deviennent des espaces vides, car les
-données ne possédaient aucune attribution historique fiable. Aucun ancien magasin
-n’est supprimé. Annulation, composants ouverts et autosaves sont réinitialisés à
-la transition. Les imports/conversions en cours et le chronomètre bloquent le changement.
+Migration keeps historical data in the previously active space. Old extra labels become empty spaces, because the data had no reliable historical assignment. No old store is deleted. Undo, open components and autosaves are reset on switching. Running imports or conversions and the timer block a switch.
 
-Une sauvegarde inclut tous les espaces ; une ancienne sauvegarde sans catalogue
-reste importable dans l’espace actif. Ce mécanisme local ne remplace pas une
-autorisation serveur entre comptes SaaS.
+A backup includes all spaces, and an old backup without a catalog can still be imported into the active space. This local mechanism does not replace server-side authorization between SaaS accounts.
 
-## Notes, référence Blinko
+## Notes, Blinko reference
 
-| Famille | État Gather |
+| Area | Gather status |
 | --- | --- |
-| Mémos, notes longues, tâches Markdown/GFM | Présent |
-| Tags hiérarchiques, parents et sous-tags, renommage/suppression | Présent |
-| Épinglage, archives, corbeille/restauration, recherche et filtres | Présent |
-| Références, rétroliens, journal, révision | Présent |
-| Historique et restauration des versions | Présent ; historique conservé dans les imports de nos exports |
-| Pièces jointes, ordre, téléchargement audio/vidéo | Présent |
-| Gestionnaire de ressources | Présent : recherche, renommage, téléchargement, retrait de la note |
-| Actions par sélection | Présent : archivage, tags, corbeille/restauration, export ZIP |
-| Rappels | Local : quand Gather et l’espace sont ouverts, avec rattrapage au retour ; pas de planification serveur |
-| Commentaires | Locaux simples ; réponses imbriquées et collaboration restent à compléter |
-| JSON, Markdown, ZIP et `.bko` | Présent ; pas de migration complète Memos SQLite et comptes serveur |
-| Partage public protégé, entre comptes, fédération/suivi | À réaliser avec le backend et ses contrôles d’accès |
-| RSS serveur, plugins, tâches serveur/sauvegardes planifiées | À réaliser |
-| RAG, embeddings, conversation IA, génération et tâches IA | Exclus de la cible |
+| Memos, long notes, Markdown/GFM tasks | Present |
+| Hierarchical tags, parents and sub-tags, rename/delete | Present |
+| Pinning, archives, trash/restore, search and filters | Present |
+| References, backlinks, journal, review | Present |
+| Version history and restore | Present; history kept when importing our own exports |
+| Attachments, ordering, audio/video download | Present |
+| Resource manager | Present: search, rename, download, remove from note |
+| Bulk actions | Present: archive, tags, trash/restore, ZIP export |
+| Reminders | Local: while Gather and the space are open, catching up on return; no server scheduling |
+| Comments | Simple and local; nested replies and collaboration still to complete |
+| JSON, Markdown, ZIP and `.bko` | Present; no full migration of Memos SQLite and server accounts |
+| Protected public sharing, between accounts, federation/following | To build with the backend and its access controls |
+| Server RSS, plugins, server jobs/scheduled backups | To build |
+| RAG, embeddings, AI chat, generation and AI tasks | Out of scope |
 
-Références analysées dans `.reference/blinko/server/routerTrpc/` : `note`, `tag`,
-`attachment`, `comment`, `public`, `follows`, `task`, `plugin`, `notification`, `user`.
+References analyzed in `.reference/blinko/server/routerTrpc/`: `note`, `tag`, `attachment`, `comment`, `public`, `follows`, `task`, `plugin`, `notification`, `user`.
 
-## Bureautique
+## Office
 
-| Famille | État Gather |
+| Area | Gather status |
 | --- | --- |
-| Édition du texte, styles, listes, tableaux, images et liens | Présent |
-| Tailles/couleurs et alignements | Présent dans l’éditeur et les exports |
-| Recherche/remplacement, annulation, sauts de page manuels | Présent ; recherche limitée à un nœud de texte à la fois |
-| Formats A4/Letter, portrait/paysage, marges | Présent et sauvegardé |
-| En-têtes, pieds, numérotation, sommaire | Présent dans DOCX/PDF ; champs DOCX à actualiser par le lecteur Office |
-| PDF riche avec pagination automatique | Présent ; texte, styles, tableaux, images et liens |
-| Pagination visuelle en direct de l’éditeur | À réaliser : l’éditeur affiche encore un flux continu |
-| Import DOCX | Partiel : pas de fidélité intégrale des sections, styles, objets et mises en page complexes |
-| Tableaux fusionnés complexes et typographie avancée | À approfondir |
-| Création/édition de présentations, objets, notes, thèmes | Présent |
-| Import/export PPTX | Export réel ; import partiel, objets complexes et masques non conservés intégralement |
-| Animations, transitions, graphiques, présentateur à plusieurs fenêtres | À réaliser |
+| Text editing, styles, lists, tables, images and links | Present |
+| Sizes/colors and alignment | Present in the editor and exports |
+| Find/replace, undo, manual page breaks | Present; search limited to one text node at a time |
+| A4/Letter, portrait/landscape, margins | Present and saved |
+| Headers, footers, page numbers, table of contents | Present in DOCX/PDF; DOCX fields must be refreshed by the Office reader |
+| Rich PDF with automatic pagination | Present; text, styles, tables, images and links |
+| Live visual pagination in the editor | To build: the editor still shows a continuous flow |
+| DOCX import | Partial: sections, styles, objects and complex layouts are not fully faithful |
+| Complex merged tables and advanced typography | To deepen |
+| Creating/editing presentations, objects, notes, themes | Present |
+| PPTX import/export | Real export; partial import, complex objects and masters not fully kept |
+| Animations, transitions, charts, multi-window presenter view | To build |
 
-## PDF, référence Stirling-PDF
+## PDF, Stirling-PDF reference
 
-Le moteur Stirling n’est pas embarqué. Les 20 traitements Gather sont des
-implémentations locales ; leur nombre ne signifie pas la parité avec la totalité
-des outils de la référence.
+The Stirling engine is not embedded. Gather's PDF tools are local implementations; their number does not mean parity with all of the reference's tools.
 
-| Outils ou familles de la référence | État Gather |
+| Reference tools or families | Gather status |
 | --- | --- |
-| `merge`, `extractPages`, `reorganizePages`, `removePages` | Opérations de base présentes ; réorganisation et duplication par plages saisies |
-| `split` | Chaque page dans un fichier ZIP, ou sélection de plages ; découpages avancés à compléter |
-| `rotate` | Rotation de toutes les pages de 90° ; sélection/angles avancés à compléter |
-| `addPageNumbers`, `addWatermark` | Présent, options de placement/styles plus limitées |
-| `adjustPageScale`, `crop` | Redimensionnement avec ajustement, recadrage uniforme ; options avancées à compléter |
-| `changeMetadata` | Titre/auteur ; métadonnées avancées à compléter |
-| `flatten` | Aplatissement des champs de formulaire ; pas de traitement complet des annotations |
-| `ocr` | Français/anglais embarqués, hors ligne, texte et PDF interrogeable ; autres langues et modes avancés à compléter |
-| `compress` | Réécriture et rasterisation JPEG ; pas d’optimisation complète des objets/vectoriels ni de taille cible |
-| `convert` | Images PNG/JPEG vers PDF et PDF vers PNG/ZIP ; conversions Office, HTML et formats avancés à réaliser |
-| `redact` | Rectangle rasterisé, sortie sans ancienne couche texte ; interface de sélection graphique et règles avancées à compléter |
-| Texte/surlignage | Ajouts figés ; pas d’éditeur complet d’annotations interactives |
-| `addPassword`, `removePassword`, `changePermissions` | À réaliser |
-| `certSign`, `validateSignature` | Signature RSA PKCS#12/CMS et vérification d’intégrité implémentées, tests unitaires réussis ; confiance, révocation, clés EC, signatures successives et validation complète de l’interface restent à compléter |
-| `sign`, `timestampPdf`, `removeCertificateSign` | Signature dessinée, horodatage certifié et suppression de certificat à réaliser ; la signature CMS est déjà distinctement implémentée |
-| `addAttachments`, `addStamp`, `overlayPdfs`, `extractImages`, `createPortfolio` | À réaliser |
-| `editTableOfContents`, `pageLayout`, `bookletImposition`, `singleLargePage` | À réaliser |
-| `compare`, `repair`, `sanitize`, `showJS`, `removeAnnotations` | À réaliser |
-| `adjustContrast`, `replaceColor`, `removeBlanks`, `scannerImageSplit`, `autoRotate` | À réaliser |
-| `autoFormDetection`, `unlockPdfForms`, édition des formulaires | À réaliser |
-| `automate` et pipelines | À réaliser |
+| `merge`, `extractPages`, `reorganizePages`, `removePages` | Basic operations present; reordering and duplicating through typed ranges |
+| `split` | Each page in a ZIP file, or a range selection; advanced splitting to complete |
+| `rotate` | Rotates all pages by 90°; page selection and other angles to complete |
+| `addPageNumbers`, `addWatermark` | Present, with more limited placement and style options |
+| `adjustPageScale`, `crop` | Resize with fit, uniform crop; advanced options to complete |
+| `changeMetadata` | Title/author; advanced metadata to complete |
+| `flatten` | Flattens form fields; no full handling of annotations |
+| `ocr` | French/English embedded, offline, text and searchable PDF; other languages and advanced modes to complete |
+| `compress` | Rewrite and JPEG rasterization; no full optimization of objects/vectors, no target size |
+| `convert` | PNG/JPEG images to PDF and PDF to PNG/ZIP; Office, HTML and advanced formats to build |
+| `redact` | Rasterized rectangle, output without the old text layer; graphical selection and advanced rules to complete |
+| Text/highlight | Flattened additions; no full interactive annotation editor |
+| `addPassword`, `removePassword`, `changePermissions` | To build |
+| `certSign`, `validateSignature` | RSA PKCS#12/CMS signature and integrity check implemented, unit tests pass; trust, revocation, EC keys, successive signatures and full interface validation still to complete |
+| `sign`, `timestampPdf`, `removeCertificateSign` | Drawn signature, certified timestamp and certificate removal to build; the CMS signature is implemented separately |
+| `addAttachments`, `addStamp`, `overlayPdfs`, `extractImages`, `createPortfolio` | To build |
+| `editTableOfContents`, `pageLayout`, `bookletImposition`, `singleLargePage` | To build |
+| `compare`, `repair`, `sanitize`, `showJS`, `removeAnnotations` | To build |
+| `adjustContrast`, `replaceColor`, `removeBlanks`, `scannerImageSplit`, `autoRotate` | To build |
+| `autoFormDetection`, `unlockPdfForms`, form editing | To build |
+| `automate` and pipelines | To build |
 
-Catalogue inspecté : `.reference/Stirling-PDF/frontend/src/editor/core/components/tools/`.
-Les fonctions automatiques doivent être examinées individuellement pour distinguer
-les algorithmes classiques des fonctions IA effectivement exclues.
+Catalog inspected: `.reference/Stirling-PDF/frontend/src/editor/core/components/tools/`. Automatic features must be reviewed one by one to separate classic algorithms from the AI features that are excluded.
 
-## Vérifications
+## Checks
 
-Voir [VALIDATION.md](./VALIDATION.md). La compilation et les tests ne valent pas
-validation de la totalité des fonctions marquées « à réaliser » dans ce document.
+See [VALIDATION.md](./VALIDATION.md). Compiling and passing tests do not validate the features marked "to build" in this document.

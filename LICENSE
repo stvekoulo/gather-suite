@@ -1,9 +1,8 @@
-Copyright (c) 2026 Steven KOULO. Tous droits réservés.
+Copyright (c) 2026 Steven KOULO. All rights reserved.
 
-Les développements originaux de ce produit personnel ne sont pas proposés
-sous licence open source. Aucune autorisation de copie, distribution ou
-réutilisation de ces développements n'est accordée par ce fichier.
+The original work in this personal product is not offered under an open source
+license. This file grants no permission to copy, distribute or reuse that work.
 
-Les composants tiers conservent leurs propres licences. Les mentions
-héritées du socle d'interface figurent dans licenses/upstream-ui-notice.txt
-et ne définissent pas la licence des développements originaux de Steven KOULO.
+Third-party components keep their own licenses. Notices inherited from the
+interface foundation are in licenses/upstream-ui-notice.txt and do not define the
+license of Steven KOULO's original work.

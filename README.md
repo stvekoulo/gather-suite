@@ -77,10 +77,11 @@ The installers are not code-signed yet, so your system will warn you:
 ## Known limits
 
 - Imported files and attachments do not sync. Their names and details do, and so do documents you write in Gather.
-- The macOS and Linux builds have not yet been tested on real machines.
-- Part of the interface still appears in French when the language is set to English.
+- The macOS builds have not been run on a real Mac yet.
+- The Linux build has been installed and launched on a clean Ubuntu 22.04 with a virtual display, not on a physical machine.
+- In English mode, starter templates still create their content in French.
 
-Test results are in [docs/VALIDATION.md](docs/VALIDATION.md). The project documents in `docs/` are written in French.
+Test results are in [docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## Build from source
 

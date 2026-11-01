@@ -1,39 +1,34 @@
-# Compte et synchronisation
+# Account and sync
 
-Gather reste une application locale : le compte est facultatif et tout fonctionne hors ligne.
+Gather remains a local app: the account is optional and everything works offline.
 
-## Fonctionnement
+## How it works
 
-- **Compte** : Neon Auth (e-mail et mot de passe), appelé directement par l'application.
-- **Données** : une ligne par élément dans `public.gather_items`, lue et écrite via la Data API
-  de Neon avec le jeton de l'utilisateur. Schéma : [`cloud/schema.sql`](../cloud/schema.sql).
-- **Séparation des comptes** : uniquement par les règles RLS de cette table. Toute table ajoutée
-  doit avoir les siennes avant d'être exposée.
-- **Fréquence** : 10 s après une modification, au retour sur l'application, au retour du réseau, sinon
-  toutes les 5 minutes. Interroger plus souvent empêcherait la base gratuite de se mettre en veille.
+- **Account:** Neon Auth (email and password), called directly by the app.
+- **Data:** one row per item in `public.gather_items`, read and written through Neon's Data API with the user's token. Schema: [`cloud/schema.sql`](../cloud/schema.sql).
+- **Account separation:** only through this table's RLS rules. Any table added later must have its own rules before it is exposed.
+- **Frequency:** 10 seconds after a change, when returning to the app, when the network comes back, and otherwise every 5 minutes. Polling more often would stop the free database from going to sleep.
 
-## Ce qui se synchronise
+## Setup
 
-Notes, tâches, événements, finances, factures, temps, clients, tableurs, présentations, documents
-rédigés, tableau blanc, profil, préférences, catégories et espaces.
+Enable the Data API on the branch first, because it creates the `authenticated` role and refuses to run if one already exists. Then apply `cloud/schema.sql`.
 
-Restent sur l'appareil : fichiers importés et pièces jointes (leur fiche se synchronise, pas leur contenu),
-chronomètre, notifications et historique PDF. Un élément de plus de 256 Ko reste aussi local et l'écran
-Compte l'indique.
+## What syncs
 
-## Conflits
+Notes, tasks, events, finances, invoices, time, clients, spreadsheets, presentations, written documents, whiteboard, profile, preferences, categories and spaces.
 
-Le dernier enregistrement l'emporte, élément par élément, d'après l'horloge du serveur. Lors de la première
-synchronisation d'un appareil, le compte fait référence. Les autres éléments locaux y sont ajoutés.
+These stay on the device: imported files and attachments (their details sync, not their content), the timer, notifications and PDF history. An item over 256 KB also stays local, and the Account screen says so.
 
-## Règles de sécurité
+## Conflicts
 
-- `DATABASE_URL` et `DATABASE_URL_POOLED` donnent un accès total : **jamais dans l'application ni dans le
-  dépôt**. Elles ne servent qu'à appliquer `cloud/schema.sql` depuis un poste d'administration.
-- Les deux URL de `src/modules/cloud/auth.ts` sont publiques par nature.
-- Origines autorisées par Neon Auth : `http://tauri.localhost`, `https://tauri.localhost`,
-  `tauri://localhost`. `localhost` reste accepté pour le développement.
+The last save wins, item by item, based on the server clock. The first time a device syncs, the account is the reference, and the device's other local items are added to it.
 
-## Pas encore disponible
+## Security rules
 
-Connexion Google (il faut un retour depuis le navigateur système vers l'application) et synchronisation des fichiers.
+- `DATABASE_URL` and `DATABASE_URL_POOLED` give full access: **never put them in the app or the repository**. They are only used to apply `cloud/schema.sql` from an admin machine.
+- The two URLs in `src/modules/cloud/auth.ts` are public by nature.
+- Origins allowed by Neon Auth: `http://tauri.localhost`, `https://tauri.localhost`, `tauri://localhost`. `localhost` stays accepted for development.
+
+## Not available yet
+
+Google sign-in (it needs a return from the system browser to the app) and file sync.
