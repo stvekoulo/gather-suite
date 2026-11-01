@@ -116,7 +116,7 @@ le parcours de signature numérique et les autres limites indiquées dans cet au
 2. Ajouter mot de passe oublié et suppression de compte.
 3. Signer l'application et configurer les mises à jour : nécessite un certificat et une paire de clés.
 4. Valider le build VPS, puis tester les installateurs macOS et Linux sur de vraies machines.
-5. Publier les installateurs et corriger les liens de `landing-gather`, qui visent `/downloads/` encore vide.
+5. Publier les installateurs et mettre à jour les liens de la landing, dans le dépôt `gather-landing`.
 6. Synchroniser les fichiers, avec un stockage objet plutôt que Postgres.
 7. Terminer la parité suivie dans [PARITY_NON_AI.md](./PARITY_NON_AI.md) et la traduction anglaise des modules.
 8. Vérifier la provenance du code hérité avant distribution.
